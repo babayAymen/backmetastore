@@ -22,7 +22,7 @@ public class CommentDto extends BaseDto<Long> implements Serializable{
 	
 	private UserDto user;
 
-    private CompanyDto companie;
+    private CompanyDto company;
 
     private ArticleCompanyDto article;
 	

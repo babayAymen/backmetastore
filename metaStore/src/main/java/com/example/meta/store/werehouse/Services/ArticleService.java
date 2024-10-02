@@ -36,6 +36,7 @@ import com.example.meta.store.werehouse.Mappers.ArticleCompanyMapper;
 import com.example.meta.store.werehouse.Mappers.ArticleMapper;
 import com.example.meta.store.werehouse.Repositories.ArticleCompanyRepository;
 import com.example.meta.store.werehouse.Repositories.ArticleRepository;
+import com.example.meta.store.werehouse.Repositories.InvoiceRepository;
 import com.example.meta.store.werehouse.Repositories.LikeRepository;
 import com.example.meta.store.werehouse.Repositories.SubArticleRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -64,14 +65,14 @@ public class ArticleService extends BaseService<Article, Long>{
 
 	private final InventoryService inventoryService;
 
-	private final ImageService imageService;
-	
 	private final CategoryService categoryService;
 	
 	private final SubCategoryService subCategoryService;
 	
+	private final InvoiceRepository invoiceRepository;
 	
 	private final LikeRepository likeRepository;
+	
 	private final Logger logger = LoggerFactory.getLogger(ArticleService.class);
 	
 
@@ -106,7 +107,8 @@ public class ArticleService extends BaseService<Article, Long>{
 	}
 	
 	public List<ArticleCompanyDto> getAllArticleByCompanyId(Long providerId,Long myClientId,Long myCompanyId, int offset, int pageSize) {
-		
+
+		Boolean isFav = false;
 		Pageable pageable = PageRequest.of(offset, pageSize);
 		Page<ArticleCompany> articles;
 		if(providerId == myCompanyId) {
@@ -119,8 +121,14 @@ public class ArticleService extends BaseService<Article, Long>{
 		}
 		List<ArticleCompanyDto> articlesDto = new ArrayList<>();
 		for(ArticleCompany i : articles) {
+			if(myCompanyId == null) {
+				isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),myClientId);
+			}
+			else {
+				isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),myCompanyId);
+			}
 			ArticleCompanyDto articleDto = articleCompanyMapper.mapToDto(i);
-			logger.warn(" child article id 2");
+			articleDto.setIsFav(isFav);
 			articlesDto.add(articleDto);
 		}
 		return articlesDto;
@@ -171,11 +179,8 @@ public class ArticleService extends BaseService<Article, Long>{
 	}
 	
 	public List<ArticleCompanyDto> getAllProvidersArticleByProviderId(Company company, Long id, int offset, int pageSize) {
-		logger.warn("articles size 1 ");
 		List<ArticleCompanyDto> articlesDto = new ArrayList<ArticleCompanyDto>();
-		logger.warn("articles size 2 ");
 		Page<ArticleCompany> articles = null;
-		logger.warn("articles size 3 ");
 		Pageable pageable = PageRequest.of(0,20);// a return
 		if(company.getId() != id) {
 			for(Company i : company.getBranches()) {
@@ -184,10 +189,7 @@ public class ArticleService extends BaseService<Article, Long>{
 				}
 			}
 		}else {
-			logger.warn("articles size ");
 		 articles = articleCompanyRepository.findAllByCompanyIdOrderByCreatedDateDesc(company.getId(),pageable);
-		 logger.warn("articles size "+articles.getSize());
-		 logger.warn("index of : "+articles.stream().toString().indexOf(1));
 		}
 		if(articles != null) {
 			List<ArticleCompany> articlesContent = articles.getContent();
@@ -197,7 +199,6 @@ public class ArticleService extends BaseService<Article, Long>{
 			
 			}
 		}
-		logger.warn("size of rerturn : "+articlesDto.size());
 		return articlesDto;
 	}
 	
@@ -205,7 +206,6 @@ public class ArticleService extends BaseService<Article, Long>{
 		List<ArticleCompany> articles;
 		if(client != null) {
 		if( companyId == client.getId()) {
-			logger.warn("getAllArticleByCategoryId mrigel inside for loop ");
 			articles = articleCompanyRepository.findAllMyByCategoryIdAndCompanyId(categoryId, companyId);
 		}else {
 			articles = articleCompanyRepository.findAllByCategoryIdAndCompanyId(categoryId, companyId, client.getId());
@@ -218,8 +218,16 @@ public class ArticleService extends BaseService<Article, Long>{
 			throw new RecordNotFoundException("there is no article");
 		}
 		List<ArticleCompanyDto> articlesDto = new ArrayList<>();
+		Boolean isFav = false;
 		for(ArticleCompany i : articles) {
+			if(client == null) {
+				isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),user.getId());
+			}
+			else {
+				isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),client.getId());
+			}
 			ArticleCompanyDto articleDto = articleCompanyMapper.mapToDto(i);
+			articleDto.setIsFav(isFav);
 			articlesDto.add(articleDto);
 		}
 		return articlesDto;
@@ -227,6 +235,7 @@ public class ArticleService extends BaseService<Article, Long>{
 	
 	public List<ArticleCompanyDto> getAllArticleBySubCategoryIdAndCompanyId(Long subcategoryId, Long companyId,User user, Company client) {
 		List<ArticleCompany> articles;
+		Boolean isFav = false;
 		if(client != null) {
 			
 		if(companyId == client.getId()) {
@@ -242,7 +251,14 @@ public class ArticleService extends BaseService<Article, Long>{
 		}
 		List<ArticleCompanyDto> articlesDto = new ArrayList<>();
 		for(ArticleCompany i : articles) {
+			if(client == null) {
+				isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),user.getId());
+			}
+			else {
+				isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),client.getId());
+			}
 			ArticleCompanyDto articleDto = articleCompanyMapper.mapToDto(i);
+			articleDto.setIsFav(isFav);
 			articlesDto.add(articleDto);
 		}
 		return articlesDto;
@@ -378,8 +394,16 @@ public class ArticleService extends BaseService<Article, Long>{
 		
 		if(!article.isEmpty()) {
 	List<ArticleCompanyDto> articleDto = new ArrayList<>();
+	Boolean isFav = false;
 	for(ArticleCompany i : article) {
+		if(providerId == null) {
+			isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),userId);
+		}
+		else {
+			isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),providerId);
+		}
 			ArticleCompanyDto artDto =  articleCompanyMapper.mapToDto(i);
+			artDto.setIsFav(isFav);
 			articleDto.add(artDto);
 	}
 	logger.warn(articleDto.size()+" size article contain");
@@ -582,7 +606,6 @@ public class ArticleService extends BaseService<Article, Long>{
 	}
 
 	public List<ArticleDto> getArticlesByCategory(Long id, CompanyCategory category) {
-		logger.warn("category company "+category);
 		List<Article> articles = articleRepository.finAllByCategoryAndCompanyId(category, id);
 		if(articles.isEmpty()) {
 			throw new RecordNotFoundException("you have added all articles");
@@ -608,13 +631,35 @@ public class ArticleService extends BaseService<Article, Long>{
 			throw new RecordNotFoundException("there is no article with this category"+categname);
 		}
 		List<ArticleCompanyDto> articlesCompanyDto = new ArrayList<>();
+		Boolean isFav = false;
+		Boolean isEnabledToComment = false;
 		for(ArticleCompany i : articlesCompany) {
+			if(company == null) {
+				isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),user.getId());
+				isEnabledToComment = isEnabledToComment(user.getId(), null, i.getCompany().getId());
+			}
+			else {
+				isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),company.getId());
+				isEnabledToComment = isEnabledToComment(null,company.getId(), i.getCompany().getId());
+			}
 			ArticleCompanyDto articleCompanyDto = articleCompanyMapper.mapToDto(i);
+			articleCompanyDto.setIsFav(isFav);
+			articleCompanyDto.setIsEnabledToComment(isEnabledToComment);
 			articlesCompanyDto.add(articleCompanyDto);
 		}
 		return articlesCompanyDto;
 	}
 
+	private Boolean isEnabledToComment(Long myUserId, Long myCompanyId, Long providerId) {
+		Boolean exists = false;
+		if(myCompanyId == null) {
+			exists = invoiceRepository.existsByPersonIdAndProviderIdAndIsEnabledToComment(myUserId, providerId, true);
+		}else {
+			exists = invoiceRepository.existsByClientIdAndProviderIdAndIsEnabledToComment(myCompanyId, providerId, true);	
+		}
+		return exists;
+	}
+	
 	public void addButcherArticles() {
 		List<Article> articles = new ArrayList<>();
 		Article beuf = new Article();

@@ -47,6 +47,14 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	Boolean existsByPersonIdAndProviderIdAndIsEnabledToComment(Long myUserId, Long providerId, boolean b);
+
+	Boolean existsByClientIdAndProviderIdAndIsEnabledToComment(Long myCompanyId, Long providerId, boolean b);
+
+	List<Invoice> findAllByPersonIdAndStatus(Long userId, Status status);
+
+	List<Invoice> findAllByClientIdAndStatus(Long companyId, Status b);
+
 
 
 

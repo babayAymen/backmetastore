@@ -36,6 +36,8 @@ public class ArticleCompanyDto extends BaseDto<Long> implements Serializable{
 	
 	private PrivacySetting isVisible;
 	
+	private Boolean isEnabledToComment;
+	
 	private Set<SubArticleRelationDto> subArticle;
 
 	private Boolean isFav;

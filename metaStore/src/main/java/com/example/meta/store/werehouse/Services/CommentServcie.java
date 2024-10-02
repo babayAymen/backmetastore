@@ -38,7 +38,7 @@ public class CommentServcie extends BaseService<Comment, Long> {
 		commentaire.setArticle(article);
 		commentaire.setContent(comment);
 		if(company != null) {			
-		commentaire.setCompanie(company);
+		commentaire.setCompany(company);
 		}else {			
 		commentaire.setUser(user);
 		}
@@ -52,12 +52,9 @@ public class CommentServcie extends BaseService<Comment, Long> {
 		}
 		List<CommentDto> commentsDto = new ArrayList<>();
 		for(Comment i : comments) {
-
-			logger.warn("get comment service comment id : "+i.getId());
 			CommentDto commentDto = commentMapper.mapToDto(i);
 			commentsDto.add(commentDto);
 		}
-		logger.warn("get comment service just before rturn ");
 		return commentsDto;
 	}
 }

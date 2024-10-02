@@ -47,6 +47,7 @@ public class Invoice extends BaseEntity<Long> implements Serializable {
 	
 	private Double rest;
 	
+	private Boolean isEnabledToComment;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "personId")

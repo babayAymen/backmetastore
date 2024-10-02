@@ -176,6 +176,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		invoice.setPaid(PaymentStatus.NOT_PAID);
 		invoice.setRest(0.0);
 		invoice.setType(InvoiceDetailsType.COMMAND_LINE);
+		invoice.setIsEnabledToComment(true);
 		invoiceRepository.save(invoice);
 		return invoice;
 	}
@@ -215,6 +216,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		invoice.setPerson(purchaseOrderLine.getPurchaseorder().getPerson());
 		invoice.setProvider(company);
 		invoice.setType(InvoiceDetailsType.ORDER_LINE);
+		invoice.setIsEnabledToComment(true);
 		Double priceArticleTot = multipleWithTwoValue(purchaseOrderLine.getArticle().getSellingPrice(), purchaseOrderLine.getQuantity());
 		Double totTvaInvoice = multipleWithTwoValue(
 				multipleWithTwoValue(purchaseOrderLine.getArticle().getSellingPrice(),purchaseOrderLine.getArticle().getArticle().getTva()/100),
@@ -240,6 +242,27 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		BigDecimal val4 = val.add(val3);
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
-	
+
+	public List<InvoiceDto> getAllMyInvoicesNotAccepted(Long userId , Long companyId) {
+		List<Invoice> invoices = new ArrayList<>();
+		if(userId != null) {
+			invoices = invoiceRepository.findAllByPersonIdAndStatus(userId,Status.INWAITING);
+		}
+		if(companyId != null) {
+			invoices = invoiceRepository.findAllByClientIdAndStatus(companyId, Status.INWAITING);
+		}
+		if(invoices.isEmpty()) {
+			throw new RecordNotFoundException("threre is no invoice not accepted");
+		}
+		List<InvoiceDto> invoicesDto = new ArrayList<>();
+		for(Invoice i : invoices) {
+			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
+			invoicesDto.add(invoiceDto);
+		}
+		logger.warn("response size: "+invoicesDto.size());
+		return invoicesDto;
+	}
+
+
 
 }

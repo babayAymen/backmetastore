@@ -88,6 +88,20 @@ public class InvoiceController {
 		
 	}
 	
+	@GetMapping("get_all_my_invoices_not_accepted")
+	public List<InvoiceDto> getAllMyInvoicesNotAccepted() {
+		List<InvoiceDto> invoicesDto = new ArrayList<>();
+		if(authenticationFilter.accountType == AccountType.USER) {
+			User user = userService.getUser();
+			invoicesDto = invoiceService.getAllMyInvoicesNotAccepted(user.getId(),null);
+		}
+		if(authenticationFilter.accountType == AccountType.COMPANY) {
+			Company company = companyService.getCompany();
+			invoicesDto = invoiceService.getAllMyInvoicesNotAccepted(null,company.getId());
+		}
+		return invoicesDto;
+	}
+	
 	@GetMapping("getMyInvoiceAsClient/{id}")
 	public List<InvoiceDto> getInvoicesAsClient(@PathVariable Long id){
 		logger.warn("id is: "+id);

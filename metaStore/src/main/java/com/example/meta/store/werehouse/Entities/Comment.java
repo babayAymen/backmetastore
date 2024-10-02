@@ -34,7 +34,7 @@ public class Comment extends BaseEntity<Long> implements Serializable {
 	    
 	    @ManyToOne
 	    @JoinColumn(name = "companyId")
-	    private Company companie;
+	    private Company company;
 	    
 	    @ManyToOne
 	    @JoinColumn(name = "articleId")

@@ -46,6 +46,8 @@ public class InvoiceDto extends BaseDto<Long> implements Serializable {
 	private PaymentStatus paid;
 
 	private InvoiceDetailsType type;
+	
+	private Boolean isEnabledToComment;
 		
 	private String CreatedBy;
 	
