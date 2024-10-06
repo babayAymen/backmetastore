@@ -58,7 +58,18 @@ public class RateController {
 			}
 		}
 	
-
+	@GetMapping("enable_to_comment_company/{companyId}")
+	public Boolean enableToCommetCompany(@PathVariable Long companyId) {
+		if(authenticationFilter.accountType == AccountType.COMPANY) {
+			Company company = companyService.getCompany();
+			return rateService.enableToCommentCompany(company.getId(),null,  companyId);
+		}
+		if(authenticationFilter.accountType == AccountType.USER) {
+			User user = userService.getUser();
+			return rateService.enableToCommentCompany(null,user.getId(), companyId);
+		}
+		return null;
+	}
 	
 	@GetMapping("get_rate/{id}/{type}")
 	public List<RatersDto> getAllRates(@PathVariable Long id, @PathVariable AccountType type){

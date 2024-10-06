@@ -64,7 +64,9 @@ public class RateService extends BaseService<Raters, Long> {
 			Company company = companyService.getById(ratesDto.getRateeCompany().getId()).getBody();
 			raters.setRateeCompany(company);
 			raters.setRaterCompany(myCompany);
-			rateCompany(company, ratesDto.getRateValue());
+			Double rat = calculRate((double)company.getRaters(), company.getRate(), ratesDto.getRateValue());
+			company.setRate(rat);
+			company.setRaters(company.getRaters()+1);
 			break;
 		}
 		case COMPANY_RATE_USER: {
@@ -72,13 +74,7 @@ public class RateService extends BaseService<Raters, Long> {
 			logger.warn(user.getRate()+" rate "+user.getRater()+" rater");
 			raters.setRateeUser(user);
 			raters.setRaterCompany(myCompany);
-			Double rat = divideWithTwoValue(
-					sumWithTwoValue(
-					multipleWithTwoValue(
-							(double)user.getRater(), user.getRate()) 
-					,ratesDto.getRateValue()
-					),
-					sumWithTwoValue((double)user.getRater(),1.0));
+			Double rat = calculRate((double)user.getRater(), user.getRate(), ratesDto.getRateValue());
 			user.setRate(rat);
 			user.setRater(user.getRater()+1);
 			break;
@@ -87,7 +83,9 @@ public class RateService extends BaseService<Raters, Long> {
 			Company company = companyService.getById(ratesDto.getRateeCompany().getId()).getBody();
 			raters.setRateeCompany(company);
 			raters.setRaterUser(myUser);
-			rateCompany(company,  ratesDto.getRateValue());
+			Double rat = calculRate((double)company.getRaters(), company.getRate(), ratesDto.getRateValue());
+			company.setRate(rat);
+			company.setRaters(company.getRaters()+1);
 			break;
 		}
 		default:
@@ -95,6 +93,16 @@ public class RateService extends BaseService<Raters, Long> {
 		}
 		rateresRepository.save(raters);
 		
+	}
+	
+	private double calculRate(Double rater, Double rate, Double value  ) {
+		return divideWithTwoValue(
+				sumWithTwoValue(
+				multipleWithTwoValue(
+						rater, rate) 
+				,value
+				),
+				sumWithTwoValue(rater,1.0));
 	}
 
 	public List<RatersDto> getAllById(Long id, AccountType type) {
@@ -141,6 +149,11 @@ public class RateService extends BaseService<Raters, Long> {
 		BigDecimal val3 = new BigDecimal(val2);
 		BigDecimal val4 = val.add(val3);
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
+	}
+
+	public Boolean enableToCommentCompany(Long mycompanyId, Long userId, Long companyId) {
+		
+		return null;
 	}
 
 }
