@@ -145,7 +145,7 @@ public class SubCategoryService extends BaseService<SubCategory, Long>{
 	private List<SubCategoryDto> getByCompanyIdAndCategoryId(Long id, Long categoryId) {
 		List<SubCategory> subCategory = subCategoryRepository.findAllByCompanyIdAndCategoryId(id,categoryId);
 		if(subCategory.isEmpty()) {
-			throw new RecordNotFoundException("there is no sub category inside this category");
+			throw new RecordNotFoundException("there is no sub category inside this category"+ id +" categ id :"+categoryId);
 		}
 		List<SubCategoryDto> listSubCategoryDto = new ArrayList<>();
 		for(SubCategory i: subCategory) {

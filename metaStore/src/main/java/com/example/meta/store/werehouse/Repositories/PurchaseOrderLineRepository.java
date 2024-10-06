@@ -22,6 +22,9 @@ public interface PurchaseOrderLineRepository extends BaseRepository<PurchaseOrde
 	@Query("SELECT p FROM PurchaseOrderLine p WHERE p.invoice.id = :invoiceId AND p.purchaseorder.company.id = :companyId")
 	List<PurchaseOrderLine> findAllByInvoiceIdAndCompanyId(Long invoiceId, Long companyId);
 
+	@Query("SELECT p FROM PurchaseOrderLine p WHERE p.invoice.id = :invoiceId AND p.purchaseorder.person.id = :userId")
+	List<PurchaseOrderLine> findByInvoiceIdAndPersonId(Long invoiceId, Long userId);
+
 
 
 }

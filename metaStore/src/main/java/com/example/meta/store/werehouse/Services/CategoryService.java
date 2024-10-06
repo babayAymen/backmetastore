@@ -128,6 +128,7 @@ public class CategoryService extends BaseService<Category, Long>{
 	}
 	
 	private List<Category> getAllByCompanyId(Long companyId) {
+		logger.warn(companyId+ "company id in get all by company category");
 		return categoryRepository.findAllByCompanyId(companyId);
 	}
 	

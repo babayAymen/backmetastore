@@ -106,7 +106,7 @@ public class InvoiceController {
 	public List<InvoiceDto> getInvoicesAsClient(@PathVariable Long id){
 		logger.warn("id is: "+id);
 		AccountType type = authenticationFilter.accountType;
-		if(type == AccountType.COMPANY) {		
+		if(type == AccountType.COMPANY) {	
 			Company company= new Company();
 			company = companyService.getCompany();
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {

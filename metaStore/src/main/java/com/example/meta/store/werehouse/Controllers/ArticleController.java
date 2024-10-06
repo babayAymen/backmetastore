@@ -110,7 +110,7 @@ public class ArticleController {
 		return articleService.getAllArticleByCategoryId(categoryId, companyId, user,null);					
 	}
 	
-	@GetMapping("sub_category/{subcategoryId}/{companyId}")
+	@GetMapping("subcategory/{subcategoryId}/{companyId}")
 	public List<ArticleCompanyDto> getAllArticleBySubCategoryIdAnd( @PathVariable Long subcategoryId, @PathVariable Long companyId) {
 		if(authenticationFilter.accountType == AccountType.COMPANY) {		
 			Company company = companyService.getCompany();

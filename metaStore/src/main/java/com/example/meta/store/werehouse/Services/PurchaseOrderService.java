@@ -109,8 +109,9 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 
 
 
-	public List<PurchaseOrderDto> getAllMyPurchaseOrder(Company client, Long userId) {
-		List<PurchaseOrder>	purchaseOrderLine = purchaseOrderRepository.findAllByCompanyIdOrClientIdOrUserId(client.getId(), userId);
+	public List<PurchaseOrderDto> getAllMyPerchaseOrdersNotAccepted(Company client, Long userId) {
+		logger.warn(client.getId()+" client id and person id : "+userId);
+		List<PurchaseOrder>	purchaseOrderLine = purchaseOrderRepository.findAllByCompanyIdOrClientIdOrUserId(client.getId(), userId, Status.INWAITING);
 		
 		if(purchaseOrderLine.isEmpty()) {
 			throw new RecordNotFoundException("there is no order");
@@ -310,9 +311,15 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 
 
 
-	public List<PurchaseOrderLineDto> getAllPurchaseOrderLinesByInvoice(Long invoiceId, Long id) {
-		logger.warn("invoice id : "+invoiceId +" companyuid "+id);
-		List<PurchaseOrderLine> purchaseOrdersLine = purchaseOrderLineRepository.findAllByInvoiceIdAndCompanyId(invoiceId, id);
+	public List<PurchaseOrderLineDto> getAllPurchaseOrderLinesByInvoice(Long invoiceId, Long companyId, Long userId) {
+		
+		List<PurchaseOrderLine> purchaseOrdersLine = new ArrayList<>();
+		if(companyId != null) {
+			purchaseOrdersLine =	purchaseOrderLineRepository.findAllByInvoiceIdAndCompanyId(invoiceId, companyId);
+		}
+		if(userId != null) {
+			purchaseOrdersLine = purchaseOrderLineRepository.findByInvoiceIdAndPersonId(invoiceId, userId);
+		}
 		if(purchaseOrdersLine.isEmpty()) {
 			throw new RecordNotFoundException("there is no order with this invoice");
 		}

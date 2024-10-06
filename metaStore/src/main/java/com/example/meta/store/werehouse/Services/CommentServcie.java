@@ -30,6 +30,8 @@ public class CommentServcie extends BaseService<Comment, Long> {
 	private final CommentRepository commentRepository;
 	
 	private final CommentMapper commentMapper;
+	
+	private final InvoiceService invoiceService;
 
 	private final Logger logger = LoggerFactory.getLogger(CommentServcie.class);
 	
@@ -37,12 +39,13 @@ public class CommentServcie extends BaseService<Comment, Long> {
 		Comment commentaire = new Comment();
 		commentaire.setArticle(article);
 		commentaire.setContent(comment);
-		if(company != null) {			
+		if(company != null) {
 		commentaire.setCompany(company);
 		}else {			
 		commentaire.setUser(user);
 		}
 		commentRepository.save(commentaire);
+		invoiceService.disabledComment(company, user, article.getCompany());
 	}
 
 	public List<CommentDto> getAllCommentsByArticleId(Long articleId) {

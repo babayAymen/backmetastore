@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
 import com.example.meta.store.Base.Security.Entity.User;
 import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
@@ -37,19 +39,23 @@ public class RateController {
 	private final UserService userService;
 	
 	private final CompanyService companyService;
+	
+	private final JwtAuthenticationFilter authenticationFilter;
 
 	private final Logger logger = LoggerFactory.getLogger(RateController.class);
 	@PostMapping("do_rate")
 	public void rate(@RequestParam ("ratingDto") String rating, 
 			 @RequestParam(value ="image", required = false) MultipartFile image) 
 	throws Exception{
-		logger.warn(" comment and type ");
-		User user = userService.getUser();
-		Company myCompany = null;
-		if(user.getRoles().stream().anyMatch(role -> role.getName().equals(RoleEnum.ADMIN))) {
-				myCompany = companyService.findByUserId(user.getId());
-		}
-		rateService.rate(rating,user, myCompany,image);			
+			logger.warn(" comment and type "+ rating);
+			if(authenticationFilter.accountType == AccountType.USER) {			
+			User user = userService.getUser();
+			rateService.rate(rating,user, null,image);			
+			}
+			if(authenticationFilter.accountType == AccountType.COMPANY) {			
+			Company myCompany = companyService.getCompany();
+			rateService.rate(rating,null, myCompany,image);	
+			}
 		}
 	
 

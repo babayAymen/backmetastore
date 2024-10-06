@@ -118,6 +118,7 @@ public class UserService {
 				.balance(0.0)
 				.latitude(0.0)
 				.longitude(0.0)
+				.rate(0.0)
 				.build();
 		userRepository.save(user);
 		return user;

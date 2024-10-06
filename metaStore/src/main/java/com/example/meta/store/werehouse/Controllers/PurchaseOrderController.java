@@ -46,7 +46,7 @@ public class PurchaseOrderController {
 	private final Logger logger = LoggerFactory.getLogger(PurchaseOrderController.class);
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	@GetMapping("get_all_my_orders/{id}")
-	public List<PurchaseOrderDto> getAllMyPerchaseOrder(@PathVariable Long id){
+	public List<PurchaseOrderDto> getAllMyPerchaseOrdersNotAccepted(@PathVariable Long id){
 		Company company = new Company();
 		User user = userService.getUser();
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
@@ -56,7 +56,7 @@ public class PurchaseOrderController {
 		}
 		}
 		logger.warn(company.getId()+ "company id in get all my orders");
-		return purchaseOrderService.getAllMyPurchaseOrder(company, user.getId());
+		return purchaseOrderService.getAllMyPerchaseOrdersNotAccepted(company, user.getId());
 	}
 	
 	
@@ -125,11 +125,11 @@ public class PurchaseOrderController {
 		logger.warn("getAllPurchaseOrderLinesByInvoice");
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
-		return purchaseOrderService.getAllPurchaseOrderLinesByInvoice(invoiceId, company.getId());
+		return purchaseOrderService.getAllPurchaseOrderLinesByInvoice(invoiceId, company.getId(), null);
 		}
 		if(authenticationFilter.accountType == AccountType.USER) {
 			User user = userService.getUser();
-			logger.warn("a determine ulterieurment");
+			return purchaseOrderService.getAllPurchaseOrderLinesByInvoice(invoiceId, null, user.getId());
 		}
 		return null;
 	}

@@ -1,5 +1,7 @@
 package com.example.meta.store.werehouse.Services;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +49,7 @@ public class RateService extends BaseService<Raters, Long> {
 	private final Logger logger = LoggerFactory.getLogger(RateService.class);
 	
 	public void rate( String rates, User myUser, Company myCompany, MultipartFile image) throws JsonMappingException, JsonProcessingException {
+		logger.warn(rates);
 		Raters ratesDto = objectMapper.readValue(rates, Raters.class);
 		Raters raters = new Raters();
 		raters.setComment(ratesDto.getComment());
@@ -66,9 +69,16 @@ public class RateService extends BaseService<Raters, Long> {
 		}
 		case COMPANY_RATE_USER: {
 			User user = userService.findById(ratesDto.getRateeUser().getId()).get();
+			logger.warn(user.getRate()+" rate "+user.getRater()+" rater");
 			raters.setRateeUser(user);
 			raters.setRaterCompany(myCompany);
-			Double rat = round((user.getRate()*user.getRate()+ ratesDto.getRateValue())/(user.getRate()+1));
+			Double rat = divideWithTwoValue(
+					sumWithTwoValue(
+					multipleWithTwoValue(
+							(double)user.getRater(), user.getRate()) 
+					,ratesDto.getRateValue()
+					),
+					sumWithTwoValue((double)user.getRater(),1.0));
 			user.setRate(rat);
 			user.setRater(user.getRater()+1);
 			break;
@@ -109,13 +119,28 @@ public class RateService extends BaseService<Raters, Long> {
 		return ratersDto;
 	}
 	private void rateCompany(Company company, double rate) {
-		Double rates = round((company.getRate()*company.getRaters()+rate)/(company.getRaters()+1));
+		Double rates = divideWithTwoValue(multipleWithTwoValue(company.getRate(),company.getRaters()+rate),sumWithTwoValue((double)company.getRaters(),1.0));
 		company.setRate(rates);
 		company.setRaters(company.getRaters()+1);
 	}
 	
-	private double round(double value) {
-	    return Math.round(value * 10.0) / 10.0;
+	private Double multipleWithTwoValue(Double val1 , Double val2) {
+		BigDecimal val = new BigDecimal(val1);
+		BigDecimal val3 = new BigDecimal(val2);
+		BigDecimal val4 = val.multiply(val3);//gf
+	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
+	}
+	private Double divideWithTwoValue(Double val1 , Double val2) {
+		BigDecimal val = new BigDecimal(val1);
+		BigDecimal val3 = new BigDecimal(val2);
+		 BigDecimal val4 = val.divide(val3, 2, RoundingMode.HALF_UP);  // Specify scale and rounding mode during division
+		    return val4.doubleValue();
+	}
+	private Double sumWithTwoValue(Double val1 , Double val2) {
+		BigDecimal val = new BigDecimal(val1);
+		BigDecimal val3 = new BigDecimal(val2);
+		BigDecimal val4 = val.add(val3);
+	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 
 }

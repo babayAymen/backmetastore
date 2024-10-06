@@ -53,7 +53,11 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 
 	List<Invoice> findAllByPersonIdAndStatus(Long userId, Status status);
 
-	List<Invoice> findAllByClientIdAndStatus(Long companyId, Status b);
+	List<Invoice> findAllByClientIdAndStatus(Long companyId, Status status);
+
+	List<Invoice> findByProviderIdAndClientIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
+
+	List<Invoice> findByProviderIdAndPersonIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
 
 
 

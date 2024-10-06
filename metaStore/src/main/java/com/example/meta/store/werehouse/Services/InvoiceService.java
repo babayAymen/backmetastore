@@ -116,7 +116,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		 invoices = invoiceRepository.findAllByClientId(id);
 		}
 		else {
-			 invoices = invoiceRepository.findAllByPersonId(id);
+			 invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED);
 		}
 		if(invoices.isEmpty()) {
 			throw new RecordNotFoundException("there is no invoice");
@@ -125,6 +125,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
 			invoicesDto.add(invoiceDto);
 		}
+		logger.warn("return size of invoice as client"+invoicesDto.size());
 		return invoicesDto;
 	}
 	
@@ -233,7 +234,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	private Double multipleWithTwoValue(Double val1 , Double val2) {
 		BigDecimal val = new BigDecimal(val1);
 		BigDecimal val3 = new BigDecimal(val2);
-		BigDecimal val4 = val.multiply(val3);
+		BigDecimal val4 = val.multiply(val3);//gf
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 	private Double sumWithTwoValue(Double val1 , Double val2) {
@@ -261,6 +262,21 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		}
 		logger.warn("response size: "+invoicesDto.size());
 		return invoicesDto;
+	}
+
+	public void disabledComment(Company company, User user, Company company2) {
+		List<Invoice> invoice = new ArrayList<>();
+		if(company != null) {
+			invoice = invoiceRepository.findByProviderIdAndClientIdAndIsEnabledToComment(company2.getId(), company.getId(), true);
+		}
+		if(user != null) {
+			invoice = invoiceRepository.findByProviderIdAndPersonIdAndIsEnabledToComment(company2.getId(), user.getId(), true);
+		}
+		if(!invoice.isEmpty()) {
+		invoice.get(0).setIsEnabledToComment(false);
+		invoiceRepository.save(invoice.get(0));
+		}
+		
 	}
 
 

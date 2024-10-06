@@ -230,6 +230,7 @@ public class ArticleService extends BaseService<Article, Long>{
 			articleDto.setIsFav(isFav);
 			articlesDto.add(articleDto);
 		}
+		logger.warn("article dto size"+articlesDto.size());
 		return articlesDto;
 	}
 	

@@ -1,12 +1,14 @@
 package com.example.meta.store.werehouse.Entities;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.example.meta.store.Base.Entity.BaseEntity;
 import com.example.meta.store.Base.Security.Entity.User;
 import com.example.meta.store.werehouse.Enums.Status;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
@@ -37,4 +39,7 @@ public class PurchaseOrder extends BaseEntity<Long> implements Serializable {
 	private User person;
 	
 	private Long orderNumber;
+	
+
+	
 }
