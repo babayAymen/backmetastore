@@ -58,6 +58,8 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	
 	private final UserService userService;
 	
+	private final EnableToCommentService enableToCommentService;
+	
 	private final Logger logger = LoggerFactory.getLogger(InvoiceService.class);
 	
 	///////////////////////////////////////////////////////////////////////// real work ////////////////////////////////////////////////////////
@@ -69,6 +71,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		}
 		invoice.setStatus(Status.ACCEPTED);
 		invoiceRepository.save(invoice);
+		enableToCommentService.makeEnableToComment(invoice.getProvider(), invoice.getPerson(), invoice.getClient());
 	}
 	
 	public Long getLastInvoice(Long companyId) {
@@ -179,6 +182,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		invoice.setType(InvoiceDetailsType.COMMAND_LINE);
 		invoice.setIsEnabledToComment(true);
 		invoiceRepository.save(invoice);
+		enableToCommentService.makeEnableToComment(company, invoice.getPerson(), company);
 		return invoice;
 	}
 	
@@ -217,7 +221,6 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		invoice.setPerson(purchaseOrderLine.getPurchaseorder().getPerson());
 		invoice.setProvider(company);
 		invoice.setType(InvoiceDetailsType.ORDER_LINE);
-		invoice.setIsEnabledToComment(true);
 		Double priceArticleTot = multipleWithTwoValue(purchaseOrderLine.getArticle().getSellingPrice(), purchaseOrderLine.getQuantity());
 		Double totTvaInvoice = multipleWithTwoValue(
 				multipleWithTwoValue(purchaseOrderLine.getArticle().getSellingPrice(),purchaseOrderLine.getArticle().getArticle().getTva()/100),
@@ -228,6 +231,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		invoice.setPrix_invoice_tot(priceInvoiceTot);
 		invoiceRepository.save(invoice);
 		inventoryService.impactAcceptingOrderOnInventory(purchaseOrderLine);
+		enableToCommentService.makeEnableToComment(company,purchaseOrderLine.getPurchaseorder().getPerson(),purchaseOrderLine.getPurchaseorder().getClient());
 		return invoice;
 	}
 
@@ -264,20 +268,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		return invoicesDto;
 	}
 
-	public void disabledComment(Company company, User user, Company company2) {
-		List<Invoice> invoice = new ArrayList<>();
-		if(company != null) {
-			invoice = invoiceRepository.findByProviderIdAndClientIdAndIsEnabledToComment(company2.getId(), company.getId(), true);
-		}
-		if(user != null) {
-			invoice = invoiceRepository.findByProviderIdAndPersonIdAndIsEnabledToComment(company2.getId(), user.getId(), true);
-		}
-		if(!invoice.isEmpty()) {
-		invoice.get(0).setIsEnabledToComment(false);
-		invoiceRepository.save(invoice.get(0));
-		}
-		
-	}
+
 
 
 

@@ -41,11 +41,15 @@ public class RateService extends BaseService<Raters, Long> {
 	
 	private final UserService userService;
 	
+	private final EnableToCommentService enableToCommentService;
+	
 	private final RatersMapper ratersMapper;
 	
 	private final ObjectMapper objectMapper;
 
 	private final ImageService imageService;
+
+	
 	private final Logger logger = LoggerFactory.getLogger(RateService.class);
 	
 	public void rate( String rates, User myUser, Company myCompany, MultipartFile image) throws JsonMappingException, JsonProcessingException {
@@ -67,6 +71,7 @@ public class RateService extends BaseService<Raters, Long> {
 			Double rat = calculRate((double)company.getRaters(), company.getRate(), ratesDto.getRateValue());
 			company.setRate(rat);
 			company.setRaters(company.getRaters()+1);
+			enableToCommentService.makeDisableToCommentCompany(company.getId(),myCompany.getId(), null);
 			break;
 		}
 		case COMPANY_RATE_USER: {
@@ -86,6 +91,7 @@ public class RateService extends BaseService<Raters, Long> {
 			Double rat = calculRate((double)company.getRaters(), company.getRate(), ratesDto.getRateValue());
 			company.setRate(rat);
 			company.setRaters(company.getRaters()+1);
+			enableToCommentService.makeDisableToCommentCompany(company.getId(),null, myUser.getId());
 			break;
 		}
 		default:
@@ -126,16 +132,11 @@ public class RateService extends BaseService<Raters, Long> {
 		logger.warn(ratersDto.size()+" size raters "+id);
 		return ratersDto;
 	}
-	private void rateCompany(Company company, double rate) {
-		Double rates = divideWithTwoValue(multipleWithTwoValue(company.getRate(),company.getRaters()+rate),sumWithTwoValue((double)company.getRaters(),1.0));
-		company.setRate(rates);
-		company.setRaters(company.getRaters()+1);
-	}
-	
+
 	private Double multipleWithTwoValue(Double val1 , Double val2) {
 		BigDecimal val = new BigDecimal(val1);
 		BigDecimal val3 = new BigDecimal(val2);
-		BigDecimal val4 = val.multiply(val3);//gf
+		BigDecimal val4 = val.multiply(val3);
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 	private Double divideWithTwoValue(Double val1 , Double val2) {
@@ -151,9 +152,21 @@ public class RateService extends BaseService<Raters, Long> {
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 
-	public Boolean enableToCommentCompany(Long mycompanyId, Long userId, Long companyId) {
+	public Boolean enableToCommentCompany(Long myCompanyId, Long userId, Long companyId) {
+		Boolean exists = enableToCommentService.existByUserIdAndCompanyId(myCompanyId , userId, companyId);
+		logger.warn("return is : "+exists);
+		return exists;
+	}
+
+	public Boolean enableToCommentUser(Long id, Long userId) {
+		Boolean exists = enableToCommentService.existsByUserIdAndCompanyId(id , userId);
+		logger.warn("return is : "+exists);
+		return exists;
+	}
+
+	public Boolean enableToCommentArticle(Long companyId, Long myUserId, Long myCompanyId) {
 		
-		return null;
+		return enableToCommentService.enableToCommentArticle(companyId,myUserId,myCompanyId);
 	}
 
 }

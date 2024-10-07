@@ -32,6 +32,8 @@ public class CommentServcie extends BaseService<Comment, Long> {
 	private final CommentMapper commentMapper;
 	
 	private final InvoiceService invoiceService;
+	
+	private final EnableToCommentService enableToCommentService;
 
 	private final Logger logger = LoggerFactory.getLogger(CommentServcie.class);
 	
@@ -39,13 +41,15 @@ public class CommentServcie extends BaseService<Comment, Long> {
 		Comment commentaire = new Comment();
 		commentaire.setArticle(article);
 		commentaire.setContent(comment);
-		if(company != null) {
 		commentaire.setCompany(company);
-		}else {			
 		commentaire.setUser(user);
-		}
 		commentRepository.save(commentaire);
-		invoiceService.disabledComment(company, user, article.getCompany());
+		if(user == null) {
+			enableToCommentService.makeDisableToCommentArticle(article.getCompany().getId(), company.getId(), null);			
+		}
+		if(company == null) {
+			enableToCommentService.makeDisableToCommentArticle(article.getCompany().getId(), null, user.getId());			
+		}
 	}
 
 	public List<CommentDto> getAllCommentsByArticleId(Long articleId) {

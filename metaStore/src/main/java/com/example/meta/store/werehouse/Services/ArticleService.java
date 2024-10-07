@@ -183,12 +183,14 @@ public class ArticleService extends BaseService<Article, Long>{
 		Page<ArticleCompany> articles = null;
 		Pageable pageable = PageRequest.of(0,20);// a return
 		if(company.getId() != id) {
+			logger.warn("if");
 			for(Company i : company.getBranches()) {
 				if(i.getId() == id) {
 					articles = articleCompanyRepository.findAllByCompanyIdOrderByCreatedDateDesc(id,pageable);		
 				}
 			}
 		}else {
+			logger.warn("else ");
 		 articles = articleCompanyRepository.findAllByCompanyIdOrderByCreatedDateDesc(company.getId(),pageable);
 		}
 		if(articles != null) {
@@ -199,6 +201,7 @@ public class ArticleService extends BaseService<Article, Long>{
 			
 			}
 		}
+		logger.warn("articledto size : "+articlesDto.size());
 		return articlesDto;
 	}
 	

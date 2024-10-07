@@ -143,10 +143,11 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 
 
 
-	public void OrderResponse(Long id, Status status, Company company, Boolean isAll) {
+	public double OrderResponse(Long id, Status status, Company company, Boolean isAll) {
 		Double companyPoints = 0.0;
 		Integer arraySize = 0;
 		Integer count = 0;
+		Double balance = company.getBalance();
 		if(isAll) {
 			List<PurchaseOrderLine> purchaseOrdersLine = purchaseOrderLineRepository.findAllByPurchaseorderId(id);
 			if(purchaseOrdersLine.isEmpty()) {
@@ -159,7 +160,7 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 					i.setStatus(status);
 		    	 companyPoints += pointForProvider(i);
 		    	if(count == arraySize - 1) {
-		    		Double balance = doubleWithTwoValue(company.getBalance(),companyPoints);// if i can remove this line
+		    		 balance = doubleWithTwoValue(company.getBalance(),companyPoints);// if can i remove this line
 		    		  company.setBalance(balance);
 		    	}
 			    paymentForProvidersSevice.insertPaymentForProvider(i); 
@@ -173,11 +174,11 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 					i.setStatus(status);
 					Double val = priceArticleTotal(i);
 			    	if(i.getPurchaseorder().getClient() != null) {
-				    	Double balance = doubleWithTwoValue(i.getPurchaseorder().getClient().getBalance(),val);
-			    		i.getPurchaseorder().getClient().setBalance(balance);
+				    	 Double clientbalance = doubleWithTwoValue(i.getPurchaseorder().getClient().getBalance(),val);
+			    		i.getPurchaseorder().getClient().setBalance(clientbalance);
 			    	}else {
-				    	Double balance = doubleWithTwoValue(i.getPurchaseorder().getPerson().getBalance(),val);
-			    		i.getPurchaseorder().getPerson().setBalance(balance);
+			    		Double clientbalance = doubleWithTwoValue(i.getPurchaseorder().getPerson().getBalance(),val);
+			    		i.getPurchaseorder().getPerson().setBalance(clientbalance);
 			    	}
 				}
 			}
@@ -190,7 +191,7 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	    // add invoice for only one
 	    	Invoice invoice = invoiceService.invoiceFromAcceptOrder(company , purchaseOrderLine);
 	    	 companyPoints = pointForProvider(purchaseOrderLine);
-	    	Double balance = doubleWithTwoValue(company.getBalance(),companyPoints);
+	    	 balance = doubleWithTwoValue(company.getBalance(),companyPoints);
 	    company.setBalance(balance);
 	    purchaseOrderLine.setInvoice(invoice);
 	    paymentForProvidersSevice.insertPaymentForProvider(purchaseOrderLine);
@@ -201,14 +202,15 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	    else {
 	    	Double val = priceArticleTotal(purchaseOrderLine);
 	    	if(purchaseOrderLine.getPurchaseorder().getClient() != null) {
-		    	Double balance = doubleWithTwoValue(purchaseOrderLine.getPurchaseorder().getClient().getBalance(),val);
-	    		purchaseOrderLine.getPurchaseorder().getClient().setBalance(balance);
+		    	Double clientbalance = doubleWithTwoValue(purchaseOrderLine.getPurchaseorder().getClient().getBalance(),val);
+	    		purchaseOrderLine.getPurchaseorder().getClient().setBalance(clientbalance);
 	    	}else {
-		    	Double balance = doubleWithTwoValue(purchaseOrderLine.getPurchaseorder().getPerson().getBalance(),val);
-	    		purchaseOrderLine.getPurchaseorder().getPerson().setBalance(balance);
+	    		Double clientbalance = doubleWithTwoValue(purchaseOrderLine.getPurchaseorder().getPerson().getBalance(),val);
+	    		purchaseOrderLine.getPurchaseorder().getPerson().setBalance(clientbalance);
 	    	}
 	    }
 		}
+		return balance;
 	}
 	
 	/*

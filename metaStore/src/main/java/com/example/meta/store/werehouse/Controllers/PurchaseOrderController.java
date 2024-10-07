@@ -1,5 +1,6 @@
 package com.example.meta.store.werehouse.Controllers;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,13 +101,12 @@ public class PurchaseOrderController {
 	}
 	
 	@GetMapping("{id}/{status}/{isall}")
-	public void OrderResponse(@PathVariable Long id, @PathVariable Status status, @PathVariable Boolean isall) {
+	public Double OrderResponse(@PathVariable Long id, @PathVariable Status status, @PathVariable Boolean isall) {
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
-			purchaseOrderService.OrderResponse(id,status,company, isall);
-			 return;
+			return purchaseOrderService.OrderResponse(id,status,company, isall);
 		}
-		purchaseOrderService.OrderResponse(id,status,null, isall);
+		return purchaseOrderService.OrderResponse(id,status,null, isall);
 	}
 	
 	
