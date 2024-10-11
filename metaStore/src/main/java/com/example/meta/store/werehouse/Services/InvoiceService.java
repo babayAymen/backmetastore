@@ -60,12 +60,14 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	
 	private final EnableToCommentService enableToCommentService;
 	
+	private final PaymentService paymentService;
+	
 	private final Logger logger = LoggerFactory.getLogger(InvoiceService.class);
 	
 	///////////////////////////////////////////////////////////////////////// real work ////////////////////////////////////////////////////////
-	public void accepted(Long code, Long clientId, AccountType type) {
-		Invoice invoice = getInvoice(code,clientId);
-		List<CommandLine> commandLines = commandLineRepository.findAllByInvoiceId(invoice.getId());
+	public void accepted(Long invoiceId, Long clientId, AccountType type) {
+		Invoice invoice = super.getById(invoiceId).getBody();
+		List<CommandLine> commandLines = commandLineRepository.findAllByInvoiceId(invoiceId);
 		if(type == AccountType.COMPANY) {
 		articleService.impactInvoice(commandLines);
 		}
@@ -82,18 +84,14 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		return (long) (invoice.get().getCode()+1);
 	}
 	
-	public void refused(Long code, Long clientId) {
-		Invoice invoice = getInvoice(code,clientId);
+	public void refused(Long invoiceId, Long clientId) {
+		Invoice invoice = super.getById(invoiceId).getBody();
 		List<CommandLine> commandLines = commandLineRepository.findAllByInvoiceId(invoice.getId());
 		inventoryService.rejectInvoice(commandLines, invoice.getProvider().getId());
 		invoice.setStatus(Status.REFUSED);
 		invoiceRepository.save(invoice);
 	}
 	
-	private Invoice getInvoice(Long code, Long clientId) {
-		Optional<Invoice> invoice = invoiceRepository.findByCodeAndClientId(code,clientId);
-		return invoice.get();
-	}
 	public List<InvoiceDto> getMyInvoiceAsProvider(Long companyId, Long userId) {
 		List<Invoice> invoices = new ArrayList<Invoice>();
 		if(userId == null) {
@@ -160,7 +158,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		return response;
 	}
 
-	public Invoice addInvoice(Company company, Long clientId, AccountType clientType) {
+	public Invoice addInvoice(Company company, Long clientId, AccountType clientType, InvoiceDto inv) {
 		Long invoiceCode = getLastInvoice(company.getId());
 		Invoice invoice = new Invoice();
 		if(clientType == AccountType.COMPANY) {
@@ -177,12 +175,16 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		}
 		invoice.setCode(invoiceCode);
 		invoice.setProvider(company);
-		invoice.setPaid(PaymentStatus.NOT_PAID);
-		invoice.setRest(0.0);
+		invoice.setPaid(inv.getPaid());
 		invoice.setType(InvoiceDetailsType.COMMAND_LINE);
 		invoice.setIsEnabledToComment(true);
+		invoice.setRest(inv.getRest());
 		invoiceRepository.save(invoice);
-		enableToCommentService.makeEnableToComment(company, invoice.getPerson(), company);
+		enableToCommentService.makeEnableToComment(company, invoice.getPerson(), invoice.getProvider());
+		paymentService.addCashMode(invoice,company);
+		if(inv.getPaid() == PaymentStatus.PAID) {
+			invoice.setRest(0.0);			
+		}
 		return invoice;
 	}
 	

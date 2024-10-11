@@ -15,7 +15,9 @@ import com.example.meta.store.PointsPayment.Repository.PaymentForProvidersReposi
 import com.example.meta.store.werehouse.Controllers.PaymentController;
 import com.example.meta.store.werehouse.Dtos.PaymentDto;
 import com.example.meta.store.werehouse.Entities.Company;
+import com.example.meta.store.werehouse.Entities.Invoice;
 import com.example.meta.store.werehouse.Entities.Payment;
+import com.example.meta.store.werehouse.Enums.PaymentMode;
 import com.example.meta.store.werehouse.Enums.Status;
 import com.example.meta.store.werehouse.Mappers.PaymentMapper;
 import com.example.meta.store.werehouse.Repositories.PaymentRepository;
@@ -85,6 +87,16 @@ public class PaymentService extends BaseService<Payment, Long>{
 			paymentsDto.add(paymentDto);
 		}
 		return paymentsDto;
+	}
+
+
+	public void addCashMode(Invoice invoice, Company company) {
+		Payment payment = new Payment();
+		payment.setInvoice(invoice);
+		payment.setAmount(invoice.getRest());
+		payment.setStatus(Status.ACCEPTED);
+		payment.setType(PaymentMode.CASH);
+		paymentRepository.save(payment);
 	}
 
 

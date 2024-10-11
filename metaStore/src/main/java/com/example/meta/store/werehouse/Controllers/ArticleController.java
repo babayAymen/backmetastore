@@ -159,7 +159,7 @@ public class ArticleController {
 	@GetMapping("my_article/{id}")
 	public ArticleDto getMyArticleById(@PathVariable Long id) {
 		Company company = companyService.getCompany();
-		return articleService.getMyArticleById(id, company);
+		return articleService.getArticleById(id, company);
 		
 	}
 	

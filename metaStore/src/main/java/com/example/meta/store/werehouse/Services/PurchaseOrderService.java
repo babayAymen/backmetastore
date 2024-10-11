@@ -54,6 +54,8 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	private final InvoiceService invoiceService;
 	
 	private final PaymentForProvidersSevice paymentForProvidersSevice;
+	
+	private final ArticleService articleService;
 
 	private final Logger logger = LoggerFactory.getLogger(PurchaseOrderService.class);
 
@@ -191,6 +193,7 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	    // add invoice for only one
 	    	Invoice invoice = invoiceService.invoiceFromAcceptOrder(company , purchaseOrderLine);
 	    	 companyPoints = pointForProvider(purchaseOrderLine);
+	    	 articleService.impactFromOrder(purchaseOrderLine);
 	    	 balance = doubleWithTwoValue(company.getBalance(),companyPoints);
 	    company.setBalance(balance);
 	    purchaseOrderLine.setInvoice(invoice);

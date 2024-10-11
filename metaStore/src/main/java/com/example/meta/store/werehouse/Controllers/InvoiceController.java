@@ -23,6 +23,8 @@ import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.InvoiceDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.AccountType;
+import com.example.meta.store.werehouse.Enums.PaymentStatus;
+import com.example.meta.store.werehouse.Enums.Status;
 import com.example.meta.store.werehouse.Services.ClientService;
 import com.example.meta.store.werehouse.Services.CompanyService;
 import com.example.meta.store.werehouse.Services.InvoiceService;
@@ -57,8 +59,6 @@ public class InvoiceController {
 	
 	@GetMapping("getMyInvoiceAsProvider/{id}")
 	public List<InvoiceDto> getMyInvoiceAsProvider(@PathVariable Long id){
-
-		logger.warn("id is: "+id);
 		Company company = null;
 		List<InvoiceDto> invoiceList = new ArrayList<>();
 		switch (authenticationFilter.accountType) {
@@ -83,9 +83,17 @@ public class InvoiceController {
 			throw new IllegalArgumentException("Unexpected value: " + authenticationFilter.accountType);
 		}
 
-		logger.warn(invoiceList.size()+" size from getMyInvoiceAsProvider controller");
+		logger.warn(invoiceList.size()+" size from getMyInvoiceAsProvider controller"+id);
 		return invoiceList;
 		
+	}
+	
+
+	@GetMapping("get_by_status/{companyId}/{status}")
+	public List<InvoiceDto> getAllMyInvoiceAsProviderAndStatus(@PathVariable Long companyId , @PathVariable PaymentStatus status){
+		Company company = companyService.getCompany();
+//		return invoiceService.getAllMyInvoicesAsProviderAndStatus(companyId , status);
+		return null;
 	}
 	
 	@GetMapping("get_all_my_invoices_not_accepted")
@@ -148,8 +156,8 @@ public class InvoiceController {
 	
 	
 
-	@GetMapping("response/{type}/{invoice}")
-	public void statusInvoice(@PathVariable String status, @PathVariable Long invoice) {
+	@GetMapping("response/{invoice}/{status}")
+	public void statusInvoice(@PathVariable Status status, @PathVariable Long invoice) {
 		Long clientId = 0L ;
 		AccountType type = authenticationFilter.accountType;
 		if(type == AccountType.USER) {
@@ -159,11 +167,11 @@ public class InvoiceController {
 		 clientId = companyService.getCompany().getId();
 		}
 		switch (status) {
-		case "ACCEPT": {
+		case ACCEPTED: {
 			invoiceService.accepted(invoice,clientId, type);
 			break;
 		}
-		case "REFUSE":{
+		case REFUSED:{
 			invoiceService.refused(invoice,clientId);
 			break;
 		}

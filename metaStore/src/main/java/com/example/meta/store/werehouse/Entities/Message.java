@@ -23,21 +23,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name="message")
-@Builder
 public class Message extends BaseEntity<Long> implements Serializable {
 
     private static final long serialVersionUID = 12345678110L;
-    
-//    @ManyToOne
-//    private User senderUser;
-//    @ManyToOne
-//    private User receiverUser;
-//    
-//    @ManyToOne
-//    private Company senderCompany;
-//    
-//    @ManyToOne
-//    private Company receiverCompany;
+   
     
     private String content;
     

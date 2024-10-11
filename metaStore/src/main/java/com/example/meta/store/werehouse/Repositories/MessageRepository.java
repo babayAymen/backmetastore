@@ -45,7 +45,7 @@ public interface MessageRepository extends BaseRepository<Message, Long>{
 	
 	@Query("SELECT m FROM Message m WHERE"
 			+ " (m.conversation.company1.id = :id AND m.conversation.company2.id = :companyId)"
-			+ " OR (m.conversation.company2.id = :companyId AND m.conversation.company1.id = :id)")
+			+ " OR (m.conversation.company2.id = :id AND m.conversation.company1.id = :companyId)")
 	List<Message> findAllByReceiverCompanyIdAndSenderCompanyId(Long id, Long companyId);
 
 	@Query("SELECT m FROM Message m WHERE"

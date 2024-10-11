@@ -26,6 +26,7 @@ import com.example.meta.store.werehouse.Entities.Category;
 import com.example.meta.store.werehouse.Entities.CommandLine;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Entities.Inventory;
+import com.example.meta.store.werehouse.Entities.PurchaseOrderLine;
 import com.example.meta.store.werehouse.Entities.SubArticle;
 import com.example.meta.store.werehouse.Entities.SubCategory;
 import com.example.meta.store.werehouse.Enums.CompanyCategory;
@@ -49,7 +50,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class ArticleService extends BaseService<Article, Long>{
+public class ArticleService extends BaseService<ArticleCompany, Long>{
 
 	private final ArticleRepository articleRepository;
 	
@@ -417,11 +418,11 @@ public class ArticleService extends BaseService<Article, Long>{
 
 	}
 
-	public ArticleDto getMyArticleById(Long id, Company company) {
-		Article article = getById(id).getBody();
-		ArticleDto articleDto = articleMapper.mapToDto(article);
-		return articleDto;
-	}
+//	public ArticleDto getMyArticleById(Long id, Company company) {
+//		Article article = getById(id).getBody();
+//		ArticleDto articleDto = articleMapper.mapToDto(article);
+//		return articleDto;
+//	} because change of article to article company class
 
 	public void addChilToParentArticle(Company company, Long parentId, Long childId, double quantity) {
 		ArticleCompany parentArticle = findByArticleCompanyId(parentId);
@@ -669,7 +670,7 @@ public class ArticleService extends BaseService<Article, Long>{
 		Article beuf = new Article();
 		beuf.setCode("Beuf");
 		beuf.setLibelle("viande beuf");
-		beuf.setImage("spiga1.jpg");
+		beuf.setImage("habre-boeuf.jpg");
 		beuf.setTva(0.0);
 		beuf.setDiscription("the best of beuf");
 		beuf.setIsDiscounted(true);
@@ -679,7 +680,7 @@ public class ArticleService extends BaseService<Article, Long>{
 		Article anne = new Article();
 		anne.setCode("Anne");
 		anne.setLibelle("viande Anne :)");
-		anne.setImage("spiga1.jpg");
+		anne.setImage("kotlet-boeuf.jpg");
 		anne.setTva(0.0);
 		anne.setDiscription("the best of anne");
 		anne.setIsDiscounted(true);
@@ -695,7 +696,7 @@ public class ArticleService extends BaseService<Article, Long>{
 		Article tomate = new Article();
 		tomate.setCode("Toamte");
 		tomate.setLibelle("Tomate");
-		tomate.setImage("spiga1.jpg");
+		tomate.setImage("tomate.jpg");
 		tomate.setTva(0.0);
 		tomate.setDiscription("the best of tomate");
 		tomate.setIsDiscounted(true);
@@ -705,7 +706,7 @@ public class ArticleService extends BaseService<Article, Long>{
 		Article felfel = new Article();
 		felfel.setCode("Felfel");
 		felfel.setLibelle("Felfel");
-		felfel.setImage("spiga1.jpg");
+		felfel.setImage("felfel-baklouti.jpg");
 		felfel.setTva(0.0);
 		felfel.setDiscription("the best of felfel");
 		felfel.setIsDiscounted(true);
@@ -714,6 +715,18 @@ public class ArticleService extends BaseService<Article, Long>{
 		
 
 		articleRepository.saveAll(articles);
+	}
+
+	public void impactFromOrder(PurchaseOrderLine purchaseOrderLine) {
+		ArticleCompany article = super.getById(purchaseOrderLine.getArticle().getId()).getBody();
+		article.setQuantity(article.getQuantity()-purchaseOrderLine.getQuantity());
+		articleCompanyRepository.save(article);
+	}
+
+	public ArticleDto getArticleById(Long id, Company company) {
+		Article article = articleRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("there is no article with id :"+id));
+		ArticleDto articleDto = articleMapper.mapToDto(article);
+		return articleDto;
 	}
 
 

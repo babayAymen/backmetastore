@@ -41,7 +41,6 @@ public class EnableToCommentService extends BaseService<EnableToComment, Long>{
 
 	public void makeEnableToComment(Company company, User person, Company client) {
 		EnableToComment enableToComment = new EnableToComment();
-		Boolean exists = false;
 		if(client != null) {
 			enableToComment = enableToCommentRepository.findByRaterCompanyIdAndRateeCompanyId(client.getId(), company.getId());
 		}

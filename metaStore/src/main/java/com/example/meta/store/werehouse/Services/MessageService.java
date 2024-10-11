@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Mappers.UserMapper;
 import com.example.meta.store.Base.Service.BaseService;
 import com.example.meta.store.werehouse.Controllers.ArticleController;
 import com.example.meta.store.werehouse.Dtos.ConversationDto;
@@ -25,6 +26,7 @@ import com.example.meta.store.werehouse.Entities.Conversation;
 import com.example.meta.store.werehouse.Entities.Message;
 import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.MessageType;
+import com.example.meta.store.werehouse.Mappers.CompanyMapper;
 import com.example.meta.store.werehouse.Mappers.ConversationMapper;
 import com.example.meta.store.werehouse.Mappers.MessageMapper;
 import com.example.meta.store.werehouse.Repositories.ConversationRepository;
@@ -46,6 +48,10 @@ public class MessageService extends BaseService<Message, Long> {
 	
 	private final ConversationMapper conversationMapper;
 	
+	private final UserMapper userMapper;
+	
+	private final CompanyMapper companyMapper;
+	
 	private final SimpMessagingTemplate messagingTemplate;
 
 	private final Logger logger = LoggerFactory.getLogger(MessageService.class);
@@ -57,13 +63,11 @@ public class MessageService extends BaseService<Message, Long> {
 	
 	public void sendMessage(String message, User receiver, User me, MessageType type) {
 		Optional<Conversation> response = conversationRepository.findAllByUser1AndUser2(receiver,me);
-		sendWSMessage(receiver.getUsername(), Message.builder().content(message).build());
 		saveNewMessage(response, message, receiver, me, null, null,type);
 	}
 	
 	public void sendMessageCompanyCompany(String message, Company receiver, Company me, MessageType type) {
 		Optional<Conversation> response = conversationRepository.findAllByCompany1AndCompany2(receiver,me);
-		sendWSMessage(receiver.getName(), Message.builder().content(message).build());
 		saveNewMessage(response, message, null, null, receiver, me, type);
 	}
 	
@@ -78,7 +82,7 @@ public class MessageService extends BaseService<Message, Long> {
 	private void saveNewMessage(Optional<Conversation> response,String message, User user, User me, Company company, Company myCompany , MessageType type ) {
 		Message mess = new Message();
 		mess.setContent(message);
-		sendWSMessage(user.getUsername(), mess);
+//		sendWSMessage(user.getUsername(), mess);
 		if(response.isEmpty()) {	
 			Conversation conversation  = new Conversation();
 			conversation.setUser1(me);
@@ -105,9 +109,14 @@ public class MessageService extends BaseService<Message, Long> {
 			messages = messageRepository.findAllByMeAsCompanyAndConversationId(me,conversationId);	
 		}
 		List<MessageDto> messagesDto = new ArrayList<>();
+		if(!messages.isEmpty()) {
 		for(Message i : messages) {
+			logger.warn(i.getId()+"id from for loop origin");
 			MessageDto dto = messageMapper.mapToDto(i);
+			logger.warn(dto.getId()+"id from for loop dto");
 			messagesDto.add(dto);
+		}
+		logger.warn(messagesDto.get(0).getId()+"id size message");
 		}
 		return messagesDto;
 	}
@@ -210,5 +219,31 @@ public class MessageService extends BaseService<Message, Long> {
 		logger.warn("return messages dto");
 		return messagesDto;
 	}
+
+	public void sendMessageWithConversation(ConversationDto conversation, AccountType type, User user) {
+	    Optional<Conversation> conv = conversationRepository.findById(conversation.getId());
+
+	    if (conv.isPresent()) {
+	        Conversation conversationEntity = conv.get();
+
+	        boolean isUserPartOfConversation = 
+	            (type == AccountType.USER && (
+	                (conversationEntity.getUser1() != null && conversationEntity.getUser1().getId() == user.getId()) ||
+	                (conversationEntity.getUser2() != null && conversationEntity.getUser2().getId() == user.getId())
+	            ));
+
+	        boolean isCompanyPartOfConversation = 
+	            (type == AccountType.COMPANY && (
+	                (conversationEntity.getCompany1() != null && conversationEntity.getCompany1().getUser().getId() == user.getId()) ||
+	                (conversationEntity.getCompany2() != null && conversationEntity.getCompany2().getUser().getId() == user.getId())
+	            ));
+
+	        if (isUserPartOfConversation || isCompanyPartOfConversation) {
+	            saveNewMessage(conv, conversation.getMessage(), null, null, null, null, null);
+	        }
+	    }
+	}
+
+
 
 }

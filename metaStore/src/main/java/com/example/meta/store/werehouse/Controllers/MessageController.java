@@ -1,6 +1,7 @@
 package com.example.meta.store.werehouse.Controllers;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,25 +44,27 @@ public class MessageController {
 	
 	@PostMapping("send")
 	public void sendMessage(@RequestBody ConversationDto conversation) {
+		if(conversation.getId() != null) {
+			User user = userService.getUser();
+			messageService.sendMessageWithConversation(conversation, authenticationFilter.accountType, user);
+		}else {
+		logger.warn(conversation.getId()+"conv id ");
 		MessageType type = conversation.getType();
+		logger.warn(type+" type is ");
 		switch (type) {
 		case COMPANY_SEND_COMPANY: {
-			logger.warn("conversation id :"+type);
 			Company company = companyService.getCompany();
-			logger.warn(conversation.getCompany2().getId()+" id company 2 and company 1 : ");
 			Company company1 = companyService.getById(conversation.getCompany2().getId()).getBody();
 			messageService.sendMessageCompanyCompany(conversation.getMessage(), company1,company,type);
 			break;
 		}
 		case COMPANY_SEND_USER: {
-			logger.warn("conversation id :"+type);
 			User receiver = userService.findById(conversation.getUser2().getId()).orElseThrow(() -> new RecordNotFoundException("this user does not exist"));
 			Company company = companyService.getCompany();
 			messageService.sendMessageCompanyUser(conversation.getMessage(), company, receiver,true,type);
 			break;
 		}
 		case USER_SEND_COMPANY: {
-			logger.warn("conversation id :"+type);
 			User user = userService.getUser();
 			Company company = companyService.getById(conversation.getCompany2().getId()).getBody();
 			messageService.sendMessageCompanyUser(conversation.getMessage(), company, user, false,type);
@@ -78,6 +81,7 @@ public class MessageController {
 			throw new IllegalArgumentException("Unexpected value: " + type);
 		}
 	} 
+	}
 	
 	@GetMapping("get_message/{conversationId}")
 	public List<MessageDto> getAllMyMessage(@PathVariable Long conversationId){
@@ -99,7 +103,7 @@ public class MessageController {
 	
 	@GetMapping("getmessage/{id}/{type}")
 	public List<MessageDto> getAllMessageByCaleeId(@PathVariable Long id , @PathVariable AccountType type){
-		logger.warn("getAllMessageByCaleeId fun");
+		logger.warn("getAllMessageByCaleeId fun calee id "+id +" calee type : "+ type);
 		AccountType myAccount = authenticationFilter.accountType;
 		Long userId = 0L , companyId = 0L;
 		if(myAccount == AccountType.COMPANY) {

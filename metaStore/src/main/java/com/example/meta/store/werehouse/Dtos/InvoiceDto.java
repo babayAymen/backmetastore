@@ -37,11 +37,11 @@ public class InvoiceDto extends BaseDto<Long> implements Serializable {
 	
 	private Status status;
 	
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-		private LocalDateTime createdDate;
+//	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+//		private LocalDateTime createdDate;
 	  
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-		private LocalDateTime lastModifiedDate;
+//	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+//		private LocalDateTime lastModifiedDate;
 	
 	private PaymentStatus paid;
 
@@ -49,7 +49,7 @@ public class InvoiceDto extends BaseDto<Long> implements Serializable {
 	
 	private Boolean isEnabledToComment;
 		
-	private String CreatedBy;
+//	private String CreatedBy;
 	
 	private UserDto person;
 	
@@ -57,7 +57,7 @@ public class InvoiceDto extends BaseDto<Long> implements Serializable {
 	
 	private CompanyDto provider;
 
-	private String LastModifiedBy;
+//	private String LastModifiedBy;
 	
 	private Double rest;
 	

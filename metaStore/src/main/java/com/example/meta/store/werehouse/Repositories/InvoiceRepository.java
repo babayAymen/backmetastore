@@ -18,6 +18,8 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 
 	Optional<Invoice> findByCodeAndClientId(Long code, Long clientId);
 
+	Optional<Invoice> findByCodeAndPersonId(Long code, Long clientId);
+
 	List<Invoice> findAllByProviderId(Long providerId);
 	
 	List<Invoice> findAllByClientId(Long clientId);

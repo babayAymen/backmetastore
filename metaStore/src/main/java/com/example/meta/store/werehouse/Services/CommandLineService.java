@@ -61,7 +61,7 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 		List<CommandLine> commandLines = new ArrayList<>();
 		Invoice invoice = new Invoice() ;
 		if(invoiceMode == InvoiceMode.CREATE) {
-			invoice = invoiceService.addInvoice(company,clientId,clientType);
+			invoice = invoiceService.addInvoice(company,clientId,clientType, commandLinesDto.get(0).getInvoice());
 		}
 		if(invoiceMode == InvoiceMode.UPDATE){
 			invoice = invoiceService.getById(commandLinesDto.get(0).getInvoice().getId()).getBody();

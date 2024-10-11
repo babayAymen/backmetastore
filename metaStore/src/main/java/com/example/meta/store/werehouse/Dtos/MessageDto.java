@@ -15,21 +15,20 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
 public class MessageDto extends BaseDto<Long> implements Serializable {
 
     private static final long serialVersionUID = 12345678111L;
     
 	
-	  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-		private LocalDateTime createdDate;
-	  
-	  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-		private LocalDateTime lastModifiedDate;
+//	  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+//		private LocalDateTime createdDate;
+//	  
+//	  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+//		private LocalDateTime lastModifiedDate;
     
     private String content;
 
-    private Long createdBy;
+//    private Long createdBy;
   
     private ConversationDto conversation;
 }
