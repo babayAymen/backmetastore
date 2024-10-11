@@ -250,7 +250,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 
-	public List<InvoiceDto> getAllMyInvoicesNotAccepted(Long userId , Long companyId) {
+	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsClient(Long userId , Long companyId) {
 		List<Invoice> invoices = new ArrayList<>();
 		if(userId != null) {
 			invoices = invoiceRepository.findAllByPersonIdAndStatus(userId,Status.INWAITING);
@@ -267,6 +267,32 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 			invoicesDto.add(invoiceDto);
 		}
 		logger.warn("response size: "+invoicesDto.size());
+		return invoicesDto;
+	}
+
+	public List<InvoiceDto> getAllMyInvoicesAsProviderAndStatus(Long companyId, PaymentStatus status) {
+		List<Invoice> invoices = invoiceRepository.findByProviderIdAndPaid(companyId , status);
+		if(invoices.isEmpty()) {
+			throw new RecordNotFoundException("there is no invocie "+status);
+		}
+		List<InvoiceDto> invoicesDto = new ArrayList<>();
+		for(Invoice i : invoices) {
+			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
+			invoicesDto.add(invoiceDto);
+		}
+		return invoicesDto;
+	}
+
+	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsProvider(Long userId, Long companyId) {
+		List<Invoice> invoices = invoiceRepository.findByProviderIdAndStatus(companyId , Status.INWAITING);
+		if(invoices.isEmpty()) {
+			throw new RecordNotFoundException("there is no invoice not accepted as provider");
+		}
+		List<InvoiceDto> invoicesDto = new ArrayList<>();
+		for(Invoice i : invoices) {
+			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
+			invoicesDto.add(invoiceDto);
+		}
 		return invoicesDto;
 	}
 

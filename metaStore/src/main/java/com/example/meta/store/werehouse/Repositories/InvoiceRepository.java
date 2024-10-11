@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.meta.store.Base.Repository.BaseRepository;
 import com.example.meta.store.werehouse.Entities.Invoice;
+import com.example.meta.store.werehouse.Enums.PaymentStatus;
 import com.example.meta.store.werehouse.Enums.Status;
 
 public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
@@ -60,6 +61,10 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 	List<Invoice> findByProviderIdAndClientIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
 
 	List<Invoice> findByProviderIdAndPersonIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
+
+	List<Invoice> findByProviderIdAndPaid(Long companyId, PaymentStatus status);
+
+	List<Invoice> findByProviderIdAndStatus(Long companyId, Status status);
 
 
 

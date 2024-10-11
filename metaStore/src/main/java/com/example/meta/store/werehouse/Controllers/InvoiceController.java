@@ -92,8 +92,7 @@ public class InvoiceController {
 	@GetMapping("get_by_status/{companyId}/{status}")
 	public List<InvoiceDto> getAllMyInvoiceAsProviderAndStatus(@PathVariable Long companyId , @PathVariable PaymentStatus status){
 		Company company = companyService.getCompany();
-//		return invoiceService.getAllMyInvoicesAsProviderAndStatus(companyId , status);
-		return null;
+		return invoiceService.getAllMyInvoicesAsProviderAndStatus(companyId , status);
 	}
 	
 	@GetMapping("get_all_my_invoices_not_accepted")
@@ -101,11 +100,11 @@ public class InvoiceController {
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		if(authenticationFilter.accountType == AccountType.USER) {
 			User user = userService.getUser();
-			invoicesDto = invoiceService.getAllMyInvoicesNotAccepted(user.getId(),null);
+			invoicesDto = invoiceService.getAllMyInvoicesNotAcceptedAsClient(user.getId(),null);
 		}
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
-			invoicesDto = invoiceService.getAllMyInvoicesNotAccepted(null,company.getId());
+			invoicesDto = invoiceService.getAllMyInvoicesNotAcceptedAsClient(null,company.getId());
 		}
 		return invoicesDto;
 	}
@@ -152,10 +151,6 @@ public class InvoiceController {
 	}
 	
 
-	
-	
-	
-
 	@GetMapping("response/{invoice}/{status}")
 	public void statusInvoice(@PathVariable Status status, @PathVariable Long invoice) {
 		Long clientId = 0L ;
@@ -181,5 +176,26 @@ public class InvoiceController {
 		}
 	}
 	
+	@GetMapping("get_all_my_invoices_notaccepted/{companyId}")
+	public List<InvoiceDto> getAllMyInvoicesNotAccepted(@PathVariable Long companyId){
+		Long companyID = null;
+		Long userId = null;
+		if(authenticationFilter.accountType == AccountType.COMPANY) {
+			Company company = companyService.getCompany();
+		if(company.getId() == companyId || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(companyId))) {
+			companyID = companyId;
+		}
+		}
+		if(authenticationFilter.accountType == AccountType.USER) {
+			User user = userService.getUser();
+			userId = user.getId();
+		}
+		return invoiceService.getAllMyInvoicesNotAcceptedAsProvider(userId , companyID);
+	}
 	
 }
+
+
+
+
+
