@@ -118,6 +118,7 @@ public class CompanyService extends BaseService<Company, Long> {
 		company.setBalance(0.0);
 		company.setUser(user);
 		company.setIsPointsSeller(false);
+		company.setMetaSeller(false);
 		company.setLongitude(0.0);
 		company.setLatitude(0.0);
 		company.setInvoiceType(InvoiceType.NOT_SAVED);

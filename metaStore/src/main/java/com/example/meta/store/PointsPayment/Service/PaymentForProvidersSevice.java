@@ -60,39 +60,44 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	private final Logger logger = LoggerFactory.getLogger(PaymentForProvidersSevice.class);
 	
 	public void insertPaymentForProvider(PurchaseOrderLine purchaseOrder) {
-		BigDecimal giveenespece = calculateGiveneEspece(purchaseOrder);
+		Double giveenespece = calculateGiveneEspece(purchaseOrder);
 		PaymentForProviders paymentForProviders = new PaymentForProviders();
 		paymentForProviders.setPurchaseOrderLine(purchaseOrder);
 		paymentForProviders.setGiveenespece(giveenespece.doubleValue());
 		paymentForProviders.setStatus(false);
 		paymentForProvidersRepository.save(paymentForProviders);
-		Optional<PaymentForProviderPerDay> perday = paymentForProviderPerDayRepository.findByProviderIdAndCreatedDate(purchaseOrder.getPurchaseorder().getCompany().getId(),LocalDate.now());
+		Optional<PaymentForProviderPerDay> perday =
+				paymentForProviderPerDayRepository.findByProviderIdAndCreatedDate(purchaseOrder.getPurchaseorder().getCompany().getId(),LocalDate.now());
 		if(perday.isEmpty()) {			
 		PaymentForProviderPerDay paymentForProviderPerDay = new PaymentForProviderPerDay();
 		paymentForProviderPerDay.setProvider(purchaseOrder.getPurchaseorder().getCompany());
 		paymentForProviderPerDay.setPayed(false);
-		paymentForProviderPerDay.setAmount(Double.parseDouble(giveenespece.toString()));
+		paymentForProviderPerDay.setAmount(giveenespece);
 		paymentForProviderPerDayRepository.save(paymentForProviderPerDay);
 		}else {
 			PaymentForProviderPerDay per = perday.get();
-			BigDecimal sum = new BigDecimal(perday.get().getAmount()).add(giveenespece);
-			per.setAmount(Double.parseDouble(sum.toString()));
+			Double sum = sumWithTwoValue(perday.get().getAmount(), giveenespece);
+			per.setAmount(sum);
 		}
 		
 	}
 	
 	
-	public BigDecimal calculateGiveneEspece(PurchaseOrderLine purchaseOrder) {
+	public Double calculateGiveneEspece(PurchaseOrderLine purchaseOrder) {
 	    BigDecimal sellingPrice = new BigDecimal(purchaseOrder.getArticle().getSellingPrice());
 	    BigDecimal quantity = new BigDecimal(purchaseOrder.getQuantity());
-
-	    // Perform the calculation using BigDecimal
 	    BigDecimal giveneEspece = sellingPrice.multiply(new BigDecimal("0.9"))
 	                                          .multiply(new BigDecimal("0.8"))
 	                                          .multiply(quantity);
 
-	    // Round the result to two decimal places and convert to Double
-	    return giveneEspece.setScale(2, RoundingMode.HALF_UP);
+	    return giveneEspece.setScale(2, RoundingMode.HALF_UP).doubleValue();
+	}
+	
+	private Double sumWithTwoValue(Double val1 , Double val2) {
+		BigDecimal val = new BigDecimal(val1);
+		BigDecimal val3 = new BigDecimal(val2);
+		BigDecimal val4 = val.add(val3);
+	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 	
 	public List<PaymentForProvidersDto> getAllMyPayments(){
@@ -157,7 +162,6 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 
 	public List<PaymentForProviderPerDayDto> getAllMyProfits(Long id) {
 		List<PaymentForProviderPerDay> paymentPerDay = paymentForProviderPerDayRepository.findByProviderId(id);
-		logger.warn(paymentPerDay.size()+" size per day");
 		if(paymentPerDay.isEmpty()) {
 			throw new RecordNotFoundException("there is no profit yet");
 		}

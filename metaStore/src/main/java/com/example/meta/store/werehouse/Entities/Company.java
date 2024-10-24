@@ -99,6 +99,8 @@ public class Company extends BaseEntity<Long> implements Serializable{
 	
 	private Boolean isPointsSeller;
 	
+	private Boolean metaSeller;
+	
 	private Double longitude;
 	
 	private Double latitude;

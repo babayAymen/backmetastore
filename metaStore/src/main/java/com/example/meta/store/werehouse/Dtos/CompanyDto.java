@@ -69,6 +69,8 @@ public class CompanyDto extends BaseDto<Long> implements Serializable {
 	
 	private Boolean isPointsSeller;
 
+	private Boolean metaSeller;
+	
 	private Double longitude;
 	
 	private Double latitude;
