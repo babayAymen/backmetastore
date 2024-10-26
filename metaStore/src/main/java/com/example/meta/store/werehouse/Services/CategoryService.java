@@ -99,14 +99,9 @@ public class CategoryService extends BaseService<Category, Long>{
 			
 	}
 	
-	public List<CategoryDto> getCategoryByCompany(Company company, Long id) {
-		logger.warn(id+" <== id ");
-		List<Category> categorys;
-		if(id == 0) {			
-			categorys = getAllByCompanyId(company.getId());
-		}else {
-			categorys = getAllByCompanyId(id);
-		}
+	public List<CategoryDto> getCategoryByCompany( Long id) {
+		List<Category> categorys = getAllByCompanyId(id);
+		
 		if(categorys.isEmpty()) {
 			throw new RecordNotFoundException("there is no category");
 		}
@@ -115,7 +110,6 @@ public class CategoryService extends BaseService<Category, Long>{
 			CategoryDto categoryDto = categoryMapper.mapToDto(i);
 			categorysDto.add(categoryDto);
 		}
-		logger.warn("size of category : "+ categorysDto.size());
 		return categorysDto;
 	}
 

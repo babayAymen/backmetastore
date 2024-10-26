@@ -39,6 +39,7 @@ public class ImageController {
 		
 	@GetMapping(path = "{lien}/{service}/{id}")
 	public byte[] getImage( @PathVariable String lien, @PathVariable String service, @PathVariable Long id)throws Exception {
+		logger.warn(lien+" "+service+" "+id);
 		return imageService.getImage( lien,service,id);
 				}
 	

@@ -53,13 +53,9 @@ public class CategoryController {
 		return categoryService.insertCategory(categoryDto,company,file);
 	}
 	
-	@GetMapping("/getbycompany/{companyId}/{id}")
-	public List<CategoryDto> getCategoryByCompany(@PathVariable Long companyId, @PathVariable Long id){
-		Company company = companyService.getCompany();
-		if(company.getId() != companyId && company.getBranches().stream().anyMatch(branche -> branche.getId().equals(companyId))) {
-			company = companyService.getById(companyId).getBody();
-		}
-		return categoryService.getCategoryByCompany(company, id);
+	@GetMapping("/getbycompany/{companyId}")
+	public List<CategoryDto> getCategoryByCompany(@PathVariable Long companyId){
+		return categoryService.getCategoryByCompany(companyId);
 	}
 
 	@PutMapping("/update")
