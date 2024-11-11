@@ -95,8 +95,8 @@ public class InvoiceController {
 		return invoiceService.getAllMyInvoicesAsProviderAndStatus(companyId , status);
 	}
 	
-	@GetMapping("get_all_my_invoices_not_accepted")
-	public List<InvoiceDto> getAllMyInvoicesNotAccepted() {
+	@GetMapping("get_all_my_invoices_not_accepted/{id}/{status}")
+	public List<InvoiceDto> getAllMyInvoicesNotAccepted(@PathVariable Long id , @PathVariable Status status) {
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		if(authenticationFilter.accountType == AccountType.USER) {
 			User user = userService.getUser();
@@ -106,6 +106,7 @@ public class InvoiceController {
 			Company company = companyService.getCompany();
 			invoicesDto = invoiceService.getAllMyInvoicesNotAcceptedAsClient(null,company.getId());
 		}
+		logger.warn("not accepted size :"+ invoicesDto.size());
 		return invoicesDto;
 	}
 	

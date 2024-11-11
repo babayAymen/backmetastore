@@ -43,6 +43,7 @@ public class RateController {
 	private final JwtAuthenticationFilter authenticationFilter;
 
 	private final Logger logger = LoggerFactory.getLogger(RateController.class);
+	
 	@PostMapping("do_rate")
 	public void rate(@RequestParam ("ratingDto") String rating, 
 			 @RequestParam(value ="image", required = false) MultipartFile image) 

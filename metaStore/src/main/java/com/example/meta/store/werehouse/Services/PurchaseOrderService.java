@@ -123,7 +123,7 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 			PurchaseOrderDto purchaseOrderLineDto = purchaseOrderMapper.mapToDto(i);
 			purchaseOrdersDto.add(purchaseOrderLineDto);
 		}
-		logger.warn("purchase size :"+purchaseOrdersDto.get(0).getCreatedDate());
+		logger.warn("purchase size :"+purchaseOrdersDto.size());
 		return purchaseOrdersDto;
 	}
 

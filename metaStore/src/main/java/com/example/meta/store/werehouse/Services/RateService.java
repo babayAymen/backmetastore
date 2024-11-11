@@ -113,7 +113,6 @@ public class RateService extends BaseService<Raters, Long> {
 
 	public List<RatersDto> getAllById(Long id, AccountType type) {
 		List<Raters> raters = new ArrayList<>();
-		logger.warn(" id raters "+id);
 		if(type.equals(AccountType.COMPANY)) {			
 		 raters = rateresRepository.findAllByRateeCompanyId(id);
 			logger.warn("size "+raters.size()+" size raters "+id);

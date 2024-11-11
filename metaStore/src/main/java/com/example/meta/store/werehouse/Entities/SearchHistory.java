@@ -31,7 +31,7 @@ public class SearchHistory extends BaseEntity<Long> implements Serializable {
 	@ManyToOne
 	private Company company;
 	@ManyToOne
-	private Article article;
+	private ArticleCompany article;
 	@ManyToOne
 	private User user;
 	

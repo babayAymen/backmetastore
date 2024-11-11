@@ -18,6 +18,7 @@ import com.example.meta.store.werehouse.Dtos.ClientProviderRelationDto;
 import com.example.meta.store.werehouse.Dtos.CompanyDto;
 import com.example.meta.store.werehouse.Dtos.SearchHistoryDto;
 import com.example.meta.store.werehouse.Entities.Article;
+import com.example.meta.store.werehouse.Entities.ArticleCompany;
 import com.example.meta.store.werehouse.Entities.ClientProviderRelation;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Entities.SearchHistory;
@@ -124,7 +125,7 @@ public class SearchService extends BaseService<SearchHistory, Long> {
 				history = hist.get();
 				break;
 			}
-			Article article = articleService.findById(itemId);
+			ArticleCompany article = articleService.findArticleCompanyById(itemId);
 			history.setArticle(article);
 			break;
 		}

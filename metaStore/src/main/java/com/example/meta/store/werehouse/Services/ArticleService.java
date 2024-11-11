@@ -360,6 +360,11 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 			return article.get();
 		}
 		
+		public ArticleCompany findArticleCompanyById(Long id) {
+			ArticleCompany article = articleCompanyRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("this article does not exist"));
+			return article;
+		}
+		
 		public ResponseEntity<String> deleteByCompanyArticleId(Long articleId, Company provider) {
 			Article article = articleRepository.findById(articleId).orElseThrow(() -> new RecordNotFoundException("This Article Does Not Exist"));							
 //				if(article.getProvider().getId() == provider.getId() ||
