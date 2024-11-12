@@ -6,6 +6,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -141,6 +144,23 @@ public class CategoryService extends BaseService<Category, Long>{
 		categoryRepository.save(category);
 		return category;
 		
+	}
+
+	public List<CategoryDto> getCategoriesByPage(int page, int pageSize, Long id) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Category> categories = categoryRepository.findAllByCompanyId(id,pageable);
+		logger.warn(categories.getSize()+" entity size");
+		List<CategoryDto> categoriesDto = new ArrayList<>();
+		if(categories.isEmpty()) {
+			return categoriesDto;
+		}else
+		{
+		for(Category i : categories) {
+			CategoryDto categoryDto = categoryMapper.mapToDto(i);
+			categoriesDto.add(categoryDto);
+		}
+		return categoriesDto;
+		}
 	}
 	
 	

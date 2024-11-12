@@ -3,6 +3,8 @@ package com.example.meta.store.werehouse.Repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,6 +21,8 @@ public interface CategoryRepository extends BaseRepository<Category, Long> {
 	///////////////////////////////////////////////////////////////////////////// not work ///////////////////////////////////////////////////////////////
 	@Query("SELECT a FROM Category a WHERE a.company.id = :companyId")
 	List<Category> findAllByCompanyId(@Param("companyId") Long companyId);
+	
+	Page<Category> findAllByCompanyId(Long id, Pageable pageable);
 
 	///////////////////////////////////////////////////////////////////////////// ///////////////////////////////////////////////////////////////
 

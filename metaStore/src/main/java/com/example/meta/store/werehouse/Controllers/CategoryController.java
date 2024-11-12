@@ -43,6 +43,10 @@ public class CategoryController {
 
 	private final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
+	  @GetMapping("/get")
+	    public List<CategoryDto> getPagingCategoryByCompany(@RequestParam int pageSize, @RequestParam int page) {
+	        return categoryService.getCategoriesByPage(page, pageSize, 1L);
+	    }
 
 	@PostMapping("/add")
 	public ResponseEntity<CategoryDto> insertCategory(
