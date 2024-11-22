@@ -14,9 +14,10 @@ import com.example.meta.store.werehouse.Enums.CompanyCategory;
 public interface ArticleRepository extends BaseRepository<Article, Long>{
 
 	
-	@Query("SELECT a FROM Article a WHERE a.category = :category AND NOT EXISTS "
-			+ "(SELECT ac FROM ArticleCompany ac WHERE ac.article = a AND ac.company.id = :companyId) ")
-	List<Article> finAllByCategoryAndCompanyId(CompanyCategory category, Long companyId);
+	@Query("SELECT a FROM Article a WHERE a.category = :category"
+			+ " AND NOT EXISTS (SELECT ac FROM ArticleCompany ac WHERE ac.article = a AND ac.company.id = :companyId)"
+			)
+	Page<Article> finAllByCategoryAndCompanyId(CompanyCategory category, Long companyId, Pageable pageable );
 	
 
 

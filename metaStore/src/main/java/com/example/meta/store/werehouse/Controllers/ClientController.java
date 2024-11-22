@@ -54,12 +54,12 @@ public class ClientController {
 	}
 	
 	@GetMapping("get_all_my/{id}")
-	public List<ClientProviderRelationDto> getAllMyClient(@PathVariable Long id){
+	public List<ClientProviderRelationDto> getAllMyClient(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
 		Company company = companyService.getCompany();
 		if(company.getId() != id && company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 			company = companyService.getById(id).getBody();
 		}
-		return clientService.getAllMyClient(company);
+		return clientService.getAllMyClient(company, page, pageSize);
 	}
 
 	@PostMapping("add")

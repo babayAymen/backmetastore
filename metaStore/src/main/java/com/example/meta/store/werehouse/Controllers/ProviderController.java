@@ -55,19 +55,19 @@ public class ProviderController {
 	
 
 	@GetMapping("/get_all_my/{id}")
-	public List<ClientProviderRelationDto> getAllMy(@PathVariable Long id){
+	public List<ClientProviderRelationDto> getAllMy(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
 		logger.warn("c bon je lil provider");
 		Company company = companyService.getCompany();
 		Long companyId = company.getId();
 		if(company.getId() != id && company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 			companyId = id;
 		}
-		return providerService.getAllMyProvider(companyId);
+		return providerService.getAllMyProvider(companyId, page, pageSize);
 	}
 	
 	
 	
-	@GetMapping("get_all_my_provider_containing/{search}/{id}")
+	@GetMapping("/get_all_my_provider_containing/{search}/{id}")
 	public List<CompanyDto> getAllProviderContaining(@PathVariable String search, @PathVariable Long id){
 		Company company = companyService.getCompany();
 		Long companyId = company.getId();

@@ -7,6 +7,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -152,10 +155,10 @@ public class ClientService extends BaseService<Company, Long>{
 //		invetationClientProviderRepository.save(invetationClientCompany);
 //	}
 //	
-	public List<ClientProviderRelationDto> getAllMyClient(Company company) {
-		
-		List<ClientProviderRelation> clients = clientCompanyRRepository.getAllByProviderIdAndIsDeletedFalse(company.getId());
-		if(clients == null) {
+	public List<ClientProviderRelationDto> getAllMyClient(Company company, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);;
+		Page<ClientProviderRelation> clients = clientCompanyRRepository.getAllByProviderIdAndIsDeletedFalse(company.getId(), pageable);
+		if(clients.isEmpty()) {
 			throw new RecordNotFoundException("There Is No Client Yet");
 		}
 		List<ClientProviderRelationDto> clientsDto = new ArrayList<>();
@@ -167,6 +170,7 @@ public class ClientService extends BaseService<Company, Long>{
 			}
 			clientsDto.add(clientDto);
 		}
+		logger.warn("size client dto " +clientsDto.size());
 		return clientsDto;
 	}
 	

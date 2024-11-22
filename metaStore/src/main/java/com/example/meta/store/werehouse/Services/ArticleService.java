@@ -25,7 +25,6 @@ import com.example.meta.store.werehouse.Entities.ArticleCompany;
 import com.example.meta.store.werehouse.Entities.Category;
 import com.example.meta.store.werehouse.Entities.CommandLine;
 import com.example.meta.store.werehouse.Entities.Company;
-import com.example.meta.store.werehouse.Entities.Inventory;
 import com.example.meta.store.werehouse.Entities.PurchaseOrderLine;
 import com.example.meta.store.werehouse.Entities.SubArticle;
 import com.example.meta.store.werehouse.Entities.SubCategory;
@@ -72,26 +71,25 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 	
 	private final InvoiceRepository invoiceRepository;
 	
-	private final LikeRepository likeRepository;
-	
 	private final Logger logger = LoggerFactory.getLogger(ArticleService.class);
 	
 
 	/////////////////////////////////////// real work ////////////////////////////////////////////////////////
-	public List<ArticleCompanyDto> findRandomArticlesPub( Company myCompany, User user) {
-		List<ArticleCompany> article = new ArrayList<>();
+	public List<ArticleCompanyDto> findRandomArticlesPub( Company myCompany, User user, int offset, int pageSize) {
+		Pageable pageable = PageRequest.of(offset, pageSize);
+		Page<ArticleCompany> articles;
 		Boolean isFav = false;
 		if(myCompany == null) {
-		 article = articleCompanyRepository.findRandomArticles(user.getId(),user.getLongitude(), user.getLatitude());
+			articles = articleCompanyRepository.findRandomArticles(user.getId(),user.getLongitude(), user.getLatitude(), pageable);
 		}
 		else {
-			article = articleCompanyRepository.findRandomArticlesPro(myCompany.getId(), myCompany.getLongitude(), myCompany.getLatitude());	 
+			articles = articleCompanyRepository.findRandomArticlesPro(myCompany.getId(), myCompany.getLongitude(), myCompany.getLatitude(), pageable);	 
 		}
-		if(article.isEmpty()) {
+		if(articles.isEmpty()) {
 			throw new RecordNotFoundException("No Article");
 		}
 			List<ArticleCompanyDto> articlesDto = new ArrayList<>();
-			for(ArticleCompany i:article) {
+			for(ArticleCompany i:articles) {
 				if(myCompany == null) {
 					isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),user.getId());
 				}
@@ -104,6 +102,7 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 				dto.setIsFav(isFav);
 			articlesDto.add(dto);
 	}
+			logger.warn("size article return "+articlesDto.size());
 			return articlesDto;
 	}
 	
@@ -612,11 +611,103 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		sicam2.setCategory(CompanyCategory.DAIRY);
 		articles.add(sicam2);
 		
+		
+
+		Article spegetti7 = new Article();
+		spegetti7.setLibelle("spageti N2");
+		spegetti7.setBarcode("barcode spageti2");
+		spegetti7.setCode("spn2");
+		spegetti7.setImage("spagetti2.png");
+		spegetti7.setTva(0.0);
+		spegetti7.setDiscription("the best of");
+		spegetti7.setIsDiscounted(true);
+		spegetti7.setCategory(CompanyCategory.DAIRY);
+		articles.add(spegetti7);
+
+		Article spegetti8 = new Article();
+		spegetti8.setLibelle("spageti N3");
+		spegetti8.setBarcode("barcode spageti3");
+		spegetti8.setCode("spn3");
+		spegetti8.setImage("spaghetti3-flottant.png");
+		spegetti8.setTva(0.0);
+		spegetti8.setDiscription("the best of");
+		spegetti8.setIsDiscounted(true);
+		spegetti8.setCategory(CompanyCategory.DAIRY);
+		articles.add(spegetti8);
+
+		Article sicam9 = new Article();
+		sicam9.setLibelle("sicam 1kg");
+		sicam9.setBarcode("barcode sicam1kg");
+		sicam9.setCode("s1kg");
+		sicam9.setImage("sicam-800g.jpg");
+		sicam9.setTva(0.0);
+		sicam9.setDiscription("the best of");
+		sicam9.setIsDiscounted(true);
+		sicam9.setCategory(CompanyCategory.DAIRY);
+		articles.add(sicam9);
+
+		Article sicam10 = new Article();
+		sicam10.setLibelle("sicam 0.5kg");
+		sicam10.setBarcode("barcode sicam0.5kg");
+		sicam10.setCode("s0.5kg");
+		sicam10.setImage("sicam-800g.jpg");
+		sicam10.setTva(0.0);
+		sicam10.setDiscription("the best of");
+		sicam10.setIsDiscounted(true);
+		sicam10.setCategory(CompanyCategory.DAIRY);
+		articles.add(sicam10);
+
+		Article spegetti11 = new Article();
+		spegetti11.setLibelle("spageti N2");
+		spegetti11.setBarcode("barcode spageti2");
+		spegetti11.setCode("spn2");
+		spegetti11.setImage("spagetti2.png");
+		spegetti11.setTva(0.0);
+		spegetti11.setDiscription("the best of");
+		spegetti11.setIsDiscounted(true);
+		spegetti11.setCategory(CompanyCategory.DAIRY);
+		articles.add(spegetti11);
+
+		Article spegetti12 = new Article();
+		spegetti12.setLibelle("spageti N3");
+		spegetti12.setBarcode("barcode spageti3");
+		spegetti12.setCode("spn3");
+		spegetti12.setImage("spaghetti3-flottant.png");
+		spegetti12.setTva(0.0);
+		spegetti12.setDiscription("the best of");
+		spegetti12.setIsDiscounted(true);
+		spegetti12.setCategory(CompanyCategory.DAIRY);
+		articles.add(spegetti12);
+
+		Article sicam13 = new Article();
+		sicam13.setLibelle("sicam 1kg");
+		sicam13.setBarcode("barcode sicam1kg");
+		sicam13.setCode("s1kg");
+		sicam13.setImage("sicam-800g.jpg");
+		sicam13.setTva(0.0);
+		sicam13.setDiscription("the best of");
+		sicam13.setIsDiscounted(true);
+		sicam13.setCategory(CompanyCategory.DAIRY);
+		articles.add(sicam13);
+
+		Article sicam14 = new Article();
+		sicam14.setLibelle("sicam 0.5kg");
+		sicam14.setBarcode("barcode sicam0.5kg");
+		sicam14.setCode("s0.5kg");
+		sicam14.setImage("sicam-800g.jpg");
+		sicam14.setTva(0.0);
+		sicam14.setDiscription("the best of");
+		sicam14.setIsDiscounted(true);
+		sicam14.setCategory(CompanyCategory.DAIRY);
+		articles.add(sicam14);
+		
 		articleRepository.saveAll(articles);
 	}
 
-	public List<ArticleDto> getArticlesByCategory(Long id, CompanyCategory category) {
-		List<Article> articles = articleRepository.finAllByCategoryAndCompanyId(category, id);
+	public List<ArticleDto> getArticlesByCategory(Long id, CompanyCategory category, int offset , int pageSize) {
+			
+		Pageable pageable = PageRequest.of(offset, pageSize);
+		Page<Article> articles = articleRepository.finAllByCategoryAndCompanyId(category,id,  pageable );
 		if(articles.isEmpty()) {
 			throw new RecordNotFoundException("you have added all articles");
 		}

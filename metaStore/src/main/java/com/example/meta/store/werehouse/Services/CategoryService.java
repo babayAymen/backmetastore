@@ -149,7 +149,6 @@ public class CategoryService extends BaseService<Category, Long>{
 	public List<CategoryDto> getCategoriesByPage(int page, int pageSize, Long id) {
 		Pageable pageable = PageRequest.of(page, pageSize);
 		Page<Category> categories = categoryRepository.findAllByCompanyId(id,pageable);
-		logger.warn(categories.getSize()+" entity size");
 		List<CategoryDto> categoriesDto = new ArrayList<>();
 		if(categories.isEmpty()) {
 			return categoriesDto;
@@ -159,6 +158,7 @@ public class CategoryService extends BaseService<Category, Long>{
 			CategoryDto categoryDto = categoryMapper.mapToDto(i);
 			categoriesDto.add(categoryDto);
 		}
+		logger.warn(categoriesDto.size()+" entity size");
 		return categoriesDto;
 		}
 	}

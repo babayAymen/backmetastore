@@ -3,6 +3,8 @@ package com.example.meta.store.werehouse.Repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -27,7 +29,7 @@ public interface ClientProviderRelationRepository extends BaseRepository<ClientP
 
 	void deleteByProviderIdAndClientId(Long id, Long id2);
 
-	List<ClientProviderRelation> findAllByClientIdAndIsDeletedFalseAndIsDeletedFalse(Long companyId);
+	Page<ClientProviderRelation> findAllByClientIdAndIsDeletedFalseAndIsDeletedFalse(Long companyId, Pageable pageable);
 
 	@Query("SELECT p FROM ClientProviderRelation p WHERE (p.client.id = :companyId OR p.person.id = :userId) AND p.isDeleted = false AND "
 			+ "(p.provider.name LIKE %:search% OR p.provider.code LIKE %:search%)")
@@ -47,7 +49,7 @@ public interface ClientProviderRelationRepository extends BaseRepository<ClientP
 
 	void deleteByPersonIdAndProviderId(Long id, Long id2);
 
-	List<ClientProviderRelation> getAllByProviderIdAndIsDeletedFalse(Long id);
+	Page<ClientProviderRelation> getAllByProviderIdAndIsDeletedFalse(Long id, Pageable pageable);
 
 
 	@Query("SELECT p FROM ClientProviderRelation p WHERE (p.provider.id = :companyId) AND (p.isDeleted = false) AND "
@@ -88,6 +90,7 @@ public interface ClientProviderRelationRepository extends BaseRepository<ClientP
 		List<User> findByMyUserContaining(@Param("search") String search, @Param("id") Long id);
 	
 	Optional<ClientProviderRelation> findByPersonIdAndProviderId(Long clientId, Long id);
+	
 
 	
 }

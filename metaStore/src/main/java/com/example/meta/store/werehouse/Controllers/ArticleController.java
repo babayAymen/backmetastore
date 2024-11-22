@@ -58,13 +58,13 @@ public class ArticleController {
 	
 	/////////////////////////////////////// real work ////////////////////////////////////////////////////////
 	@GetMapping("getrandom")
-	public List<ArticleCompanyDto> findRandomArticles(){
+	public List<ArticleCompanyDto> findRandomArticles( @RequestParam int offset, @RequestParam int pageSize){
 		User user = userService.getUser();
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company myCompany = companyService.getCompany();
-			return articleService.findRandomArticlesPub(myCompany, user);
+			return articleService.findRandomArticlesPub(myCompany, user,offset, pageSize);
 		}
-		return articleService.findRandomArticlesPub(null, user);
+		return articleService.findRandomArticlesPub(null, user,offset, pageSize);
 	}
 	
 	@GetMapping("getrandom/{categname}")
@@ -81,8 +81,8 @@ public class ArticleController {
 		return articlesCompanyDto;
 	}
 	
-	@GetMapping("get_all_articles/{id}/{offset}/{pageSize}")
-	public List<ArticleCompanyDto> getAllArticleByProviderId(@PathVariable Long id, @PathVariable int offset, @PathVariable int pageSize){
+	@GetMapping("get_all_articles/{id}")
+	public List<ArticleCompanyDto> getAllArticleByProviderId(@PathVariable Long id, @RequestParam int offset, @RequestParam int pageSize){
 			if(authenticationFilter.accountType == AccountType.COMPANY) {				 
 				Company client = companyService.getCompany();
 				return articleService.getAllArticleByCompanyId(id,null,client.getId() ,offset, pageSize);
@@ -195,7 +195,6 @@ public class ArticleController {
 	
 	@GetMapping("search/{articlenamecontaining}/{type}")
 	public List<ArticleCompanyDto> getByNameContaining(@PathVariable String articlenamecontaining , @PathVariable SearchType type){
-		logger.warn("search article");
 		User user = userService.getUser();
 		Long companyId = null;
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
@@ -204,10 +203,10 @@ public class ArticleController {
 		return articleService.getByNameContaining(articlenamecontaining,companyId, user.getId(), type);
 	}
 	
-	@GetMapping("get_articles_by_category")
-	public List<ArticleDto> getArticlesByCategory(){
+	@GetMapping("get_articles_by_category/{id}")
+	public List<ArticleDto> getArticlesByCategory(@PathVariable Long id, @RequestParam int page, @RequestParam int pageSize  ){
 		Company company = companyService.getCompany();
-		return articleService.getArticlesByCategory(company.getId(),company.getCategory());
+		return articleService.getArticlesByCategory(company.getId(),company.getCategory(), page, pageSize);
 	}
 
 }

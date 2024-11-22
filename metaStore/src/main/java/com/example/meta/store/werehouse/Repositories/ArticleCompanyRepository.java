@@ -29,8 +29,8 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 			+ "  cc.person.id = :userId AND cc.provider.id = a.company.id))))"
 			+ " AND (a.company.longitude BETWEEN :longitude - 0.057615 AND :longitude + 0.057615) "
 		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907) "
-		   	+ " ORDER BY random() LIMIT 10 ")
-    List<ArticleCompany> findRandomArticles(Long userId, Double longitude, Double latitude );
+		   	)
+	Page<ArticleCompany> findRandomArticles(Long userId, Double longitude, Double latitude, Pageable pageable );
 
 	@Query(value = "SELECT a FROM ArticleCompany a WHERE"
 			+ " (a.company.id = :myCompanyId) "
@@ -39,8 +39,8 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 			+ "  cc.client.id = :myCompanyId AND cc.provider.id = a.company.id))))"
 			+ " AND (a.company.longitude BETWEEN :longitude - 0.057615 AND :longitude + 0.057615) "
 		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907) "
-		   	+ " ORDER BY random() LIMIT 10 ")
-		List<ArticleCompany> findRandomArticlesPro( Long myCompanyId, Double longitude, Double latitude);
+		   	)
+	Page<ArticleCompany> findRandomArticlesPro( Long myCompanyId, Double longitude, Double latitude, Pageable pageable);
 	
 	@Query("SELECT a FROM ArticleCompany a WHERE ((a.isVisible = 2) "
 			+ " OR (a.isVisible = 1 AND ((EXISTS (SELECT 1 FROM ClientProviderRelation cc WHERE"

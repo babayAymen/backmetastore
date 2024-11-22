@@ -7,6 +7,9 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -91,10 +94,11 @@ public class ProviderService extends BaseService<Company, Long> {
 	} 
 
 	
-	public List<ClientProviderRelationDto> getAllMyProvider(Long companyId) {
+	public List<ClientProviderRelationDto> getAllMyProvider(Long companyId, int page , int pageSize) {
 
-		List<ClientProviderRelation> providers = companycRepository.findAllByClientIdAndIsDeletedFalseAndIsDeletedFalse(companyId);
-		if(providers == null) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<ClientProviderRelation> providers = companycRepository.findAllByClientIdAndIsDeletedFalseAndIsDeletedFalse(companyId, pageable);
+		if(providers.isEmpty()) {
 			throw new RecordNotFoundException("There Is No Provider Yet");
 		}
 		List<ClientProviderRelationDto> providersDto = new ArrayList<>();

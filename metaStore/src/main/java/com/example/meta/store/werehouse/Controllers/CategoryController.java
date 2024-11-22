@@ -43,9 +43,10 @@ public class CategoryController {
 
 	private final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
-	  @GetMapping("/get")
-	    public List<CategoryDto> getPagingCategoryByCompany(@RequestParam int pageSize, @RequestParam int page) {
-	        return categoryService.getCategoriesByPage(page, pageSize, 1L);
+	  @GetMapping("/get/{companyId}")
+	    public List<CategoryDto> getPagingCategoryByCompany(@PathVariable Long companyId,@RequestParam int pageSize, @RequestParam int page) {
+		  logger.warn("get page category ");
+	        return categoryService.getCategoriesByPage(page, pageSize, companyId);
 	    }
 
 	@PostMapping("/add")

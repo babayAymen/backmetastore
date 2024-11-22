@@ -10,6 +10,8 @@ public enum CompanyCategory {
 	
 	FISH,
 
-	GROCER
+	GROCER,
+	
+	NULL
 	
 }
