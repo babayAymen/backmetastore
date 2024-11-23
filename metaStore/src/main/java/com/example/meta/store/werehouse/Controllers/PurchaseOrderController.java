@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.meta.store.Base.ErrorHandler.NotPermissonException;
@@ -134,6 +135,27 @@ public class PurchaseOrderController {
 		return null;
 	}
 
+	@GetMapping("get_all_my_orders_not_accepted/{id}")
+	public List<PurchaseOrderLineDto> getAllMyOrdersNotAccepted(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
+		if(authenticationFilter.accountType == AccountType.COMPANY) {
+			Company company = companyService.getCompany();
+
+			if(company.getId() != id &&  company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {	
+				return purchaseOrderService.getAllMyOrdersNotAcceptedAsProvider(company.getId(),page, pageSize);			
+			}else {
+				return purchaseOrderService.getAllMyOrdersNotAcceptedAsProvider(id,page, pageSize);
+			}
+		}
+		if(authenticationFilter.accountType == AccountType.USER) {
+			User user = userService.getUser();
+			return purchaseOrderService.getAllMyOrdersNotAcceptedAsClient(user.getId(), page,pageSize);
+		}
+		return null;
+	}
 	
+	@GetMapping("get_by_order_id/{id}")
+	public List<PurchaseOrderLineDto> getAllPurchaseOrdersLineByOrderId(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
+		return purchaseOrderService.getAllPurchaseOrdersLineByOrderId(id,page , pageSize);
+	}
 	
 }

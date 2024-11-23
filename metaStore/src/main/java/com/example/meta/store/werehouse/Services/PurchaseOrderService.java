@@ -10,6 +10,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordIsAlreadyExist;
@@ -332,6 +335,55 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 		for(PurchaseOrderLine i : purchaseOrdersLine) {
 			PurchaseOrderLineDto purchaseOrderLineDto = purchaseOrderLineMapper.mapToDto(i);
 			purchaseOrderLineDtos.add(purchaseOrderLineDto);
+		}
+		return purchaseOrderLineDtos;
+	}
+
+
+
+	public List<PurchaseOrderLineDto> getAllMyOrdersNotAcceptedAsProvider(Long id, int page, int pageSize) {
+		Pageable pageable  = PageRequest.of(page, pageSize);
+		Page<PurchaseOrderLine> purchaseOrderLines = purchaseOrderLineRepository.findAllNotAcceptedAsProvider(id, Status.INWAITING, pageable);
+		if(purchaseOrderLines.isEmpty()) {
+			throw new RecordNotFoundException("there is no order not accepted");
+		}
+		List<PurchaseOrderLineDto> purchaseOrderLinesDto = new ArrayList<>();
+		
+		for(PurchaseOrderLine i : purchaseOrderLines) {
+			PurchaseOrderLineDto dto = purchaseOrderLineMapper.mapToDto(i);
+			purchaseOrderLinesDto.add(dto);
+		}
+		return purchaseOrderLinesDto;
+	}
+
+
+
+	public List<PurchaseOrderLineDto> getAllMyOrdersNotAcceptedAsClient(Long id, int page, int pageSize) {
+		Pageable pageable  = PageRequest.of(page, pageSize);
+		Page<PurchaseOrderLine> purchaseOrderLines = purchaseOrderLineRepository.findAllNotAcceptedAsClient(id, Status.INWAITING, pageable);
+		if(purchaseOrderLines.isEmpty()) {
+			throw new RecordNotFoundException("there is no order not accepted");
+		}
+		List<PurchaseOrderLineDto> purchaseOrderLinesDto = new ArrayList<>();
+		
+		for(PurchaseOrderLine i : purchaseOrderLines) {
+			PurchaseOrderLineDto dto = purchaseOrderLineMapper.mapToDto(i);
+			purchaseOrderLinesDto.add(dto);
+		}
+		return purchaseOrderLinesDto;
+	}
+
+
+
+	public List<PurchaseOrderLineDto> getAllPurchaseOrdersLineByOrderId(Long id, int page , int pageSize) {
+		List<PurchaseOrderLine> purchaseOrderLine = purchaseOrderLineRepository.findAllByPurchaseorderId(id);
+		if(purchaseOrderLine.isEmpty()) {
+			throw new RecordNotFoundException("there is no purchase order line with order id : "+id);
+		}
+		List<PurchaseOrderLineDto> purchaseOrderLineDtos = new ArrayList<>();
+		for(PurchaseOrderLine i : purchaseOrderLine) {
+			PurchaseOrderLineDto dto = purchaseOrderLineMapper.mapToDto(i);
+			purchaseOrderLineDtos.add(dto);
 		}
 		return purchaseOrderLineDtos;
 	}
