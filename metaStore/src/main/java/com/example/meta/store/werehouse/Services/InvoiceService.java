@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -92,15 +95,9 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		invoiceRepository.save(invoice);
 	}
 	
-	public List<InvoiceDto> getMyInvoiceAsProvider(Long companyId, Long userId) {
-		List<Invoice> invoices = new ArrayList<Invoice>();
-		if(userId == null) {
-			logger.warn(companyId+" company id from getMyInvoiceAsProvider service");
-			invoices =  invoiceRepository.findAllByProviderId(companyId);
-		}
-		else {
-			invoices = invoiceRepository.findAllByPersonId(userId);
-		}
+	public List<InvoiceDto> getMyInvoiceAsProvider(Long companyId, Long userId, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Invoice> invoices =  invoiceRepository.findAllByProviderId(companyId, pageable);
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		for(Invoice i : invoices) {
 			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
@@ -111,13 +108,14 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	}
 	
 	public List<InvoiceDto> getInvoicesAsClient(Long id, AccountType type) {
+		Pageable pageable = PageRequest.of(0, 1);
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
-		List<Invoice> invoices = new ArrayList<>();
+		Page<Invoice> invoices = null;
 		if(type == AccountType.COMPANY) {
-		 invoices = invoiceRepository.findAllByClientId(id);
+		 invoices = invoiceRepository.findAllByClientId(id, pageable);
 		}
 		else {
-			 invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED);
+			 invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED, pageable);
 		}
 		if(invoices.isEmpty()) {
 			throw new RecordNotFoundException("there is no invoice");
@@ -135,7 +133,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	public List<InvoiceDto> getInvoiceNotifications( Company company,Long userId) {
 		List<Invoice> invoices = new ArrayList<>();
 		if(company == null) {
-			invoices = invoiceRepository.findAllByPersonId(userId);
+//			invoices = invoiceRepository.findAllByPersonId(userId);
 		}else {			
 			invoices = invoiceRepository.findAllByClientIdOrProviderId(company.getId());
 		}
@@ -250,13 +248,14 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 
-	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsClient(Long userId , Long companyId) {
-		List<Invoice> invoices = new ArrayList<>();
+	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsClient(Long userId , Long companyId, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Invoice> invoices = null;
 		if(userId != null) {
-			invoices = invoiceRepository.findAllByPersonIdAndStatus(userId,Status.INWAITING);
+			invoices = invoiceRepository.findAllByPersonIdAndStatus(userId,Status.INWAITING, pageable);
 		}
 		if(companyId != null) {
-			invoices = invoiceRepository.findAllByClientIdAndStatus(companyId, Status.INWAITING);
+			invoices = invoiceRepository.findAllByClientIdAndStatus(companyId, Status.INWAITING, pageable);
 		}
 		if(invoices.isEmpty()) {
 			throw new RecordNotFoundException("threre is no invoice not accepted");
@@ -270,8 +269,9 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		return invoicesDto;
 	}
 
-	public List<InvoiceDto> getAllMyInvoicesAsProviderAndStatus(Long companyId, PaymentStatus status) {
-		List<Invoice> invoices = invoiceRepository.findByProviderIdAndPaid(companyId , status);
+	public List<InvoiceDto> getAllMyInvoicesAsProviderAndStatus(Long companyId, PaymentStatus status, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Invoice> invoices = invoiceRepository.findByProviderIdAndPaid(companyId , status, pageable);
 		if(invoices.isEmpty()) {
 			throw new RecordNotFoundException("there is no invocie "+status);
 		}
@@ -283,8 +283,9 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		return invoicesDto;
 	}
 
-	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsProvider(Long userId, Long companyId) {
-		List<Invoice> invoices = invoiceRepository.findByProviderIdAndStatus(companyId , Status.INWAITING);
+	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsProvider( Long companyId, Status status , int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Invoice> invoices = invoiceRepository.findByProviderIdAndStatus(companyId , status, pageable);
 		if(invoices.isEmpty()) {
 			throw new RecordNotFoundException("there is no invoice not accepted as provider");
 		}

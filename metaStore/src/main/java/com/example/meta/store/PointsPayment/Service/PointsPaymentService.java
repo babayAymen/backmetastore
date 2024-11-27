@@ -7,6 +7,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -62,10 +65,11 @@ public class PointsPaymentService extends BaseService<PointsPayment, Long> {
 		
 	}
 
-	public List<PointsPaymentDto> getAllMyPointsPayment(Long companyId, Long userId) {
+	public List<PointsPaymentDto> getAllMyPointsPayment(Long companyId, Long userId, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
 		List<PointsPaymentDto> pointsPaymentDto = new ArrayList<>();
 		logger.warn("company id : "+companyId + " user id : "+userId);
-		List<PointsPayment> pointsPayment = pointPaymentRepository.findAllByCompanyIdOrUserId(companyId, userId);
+		Page<PointsPayment> pointsPayment = pointPaymentRepository.findAllByCompanyIdOrUserId(companyId, userId, pageable);
 		if(pointsPayment.isEmpty()) {
 			throw new RecordNotFoundException("there is no payment");
 		}

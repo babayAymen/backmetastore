@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -64,17 +65,17 @@ public class PointsPaymentController {
 	}
 	
 	@GetMapping("get_all_my/{companyId}")
-	public List<PointsPaymentDto> getAllMyPointsPayment(@PathVariable Long companyId){
+	public List<PointsPaymentDto> getAllMyPointsPayment(@PathVariable Long companyId, @RequestParam int page , @RequestParam int pageSize){
 		AccountType type  = authenticationFilter.accountType;
 		List<PointsPaymentDto> points = new ArrayList<>();
 		User user = userService.getUser();
 		if(type == AccountType.USER) {			
-			points = pointsPaymentService.getAllMyPointsPayment(0L, user.getId());
+			points = pointsPaymentService.getAllMyPointsPayment(0L, user.getId(), page, pageSize);
 		}
 		if(type == AccountType.COMPANY) {
 		Company company = companyService.getCompany();
 		if(company.getId() == companyId || company.getBranches().stream().anyMatch(compani ->compani.getId().equals(companyId) )) {
-			points = pointsPaymentService.getAllMyPointsPayment(companyId, user.getId());
+			points = pointsPaymentService.getAllMyPointsPayment(companyId, user.getId(), page , pageSize);
 		}
 		}
 		return points;
@@ -82,17 +83,24 @@ public class PointsPaymentController {
 	}
 	
 	@GetMapping("get_all_my_payment/{companyId}")
-	public List<PaymentForProvidersDto> getAllMyPayments(@PathVariable Long companyId) {
-		return paymentForProvidersSevice.getAllMyPayments();
+	public List<PaymentForProvidersDto> getAllMyPayments(@PathVariable Long companyId, @RequestParam int page , @RequestParam int pageSize) {
+		logger.warn("dhrab id  : "+companyId);
+		Company company = companyService.getCompany();
+		if(company.getId() == companyId || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(companyId))) {
+		return paymentForProvidersSevice.getAllMyPayments(companyId, page, pageSize);
+		}
+		return null;
 	}
 
 	
-	@GetMapping("get_all_my_as_company/{date}/{findate}")
-	public List<PaymentForProvidersDto> getAllMyAsCompanyByDate(@PathVariable  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-			@PathVariable  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate findate){
+	@GetMapping("get_all_my_as_company/{id}")
+	public List<PaymentForProvidersDto> getAllMyAsCompanyByDate(@PathVariable Long id,@RequestParam  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+			@RequestParam  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate findate, @RequestParam int page , @RequestParam int pageSize ){
 		Company company = companyService.getCompany();
-		return  paymentForProvidersSevice.getAllMyAsCompanyByDate(date, findate,company.getId());
-		
+		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
+		return  paymentForProvidersSevice.getAllMyAsCompanyByDate(date, findate,id , page , pageSize);
+		}
+			return null;
 	}
 	
 	@GetMapping("get_my_profit_by_date/{date}/{findate}")
@@ -102,17 +110,23 @@ public class PointsPaymentController {
 		return paymentForProvidersSevice.getSumAmountByDate(date,findate,company.getId());
 	}
 	
-	@GetMapping("get_all_my_profits")
-	public List<PaymentForProviderPerDayDto> getAllMyProfits(){
+	@GetMapping("get_all_my_profits/{id}")
+	public List<PaymentForProviderPerDayDto> getAllMyProfits(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
 		Company company = companyService.getCompany();
-		return paymentForProvidersSevice.getAllMyProfits(company.getId());
+		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
+		return paymentForProvidersSevice.getAllMyProfits(id, page , pageSize);
+		}
+		return null;
 	}
 
-	@GetMapping("get_all_my_profits_per_day/{date}/{findate}")
-	public List<PaymentForProviderPerDayDto> getAllMyProfitsPerDay(@PathVariable  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-			@PathVariable  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate findate){
+	@GetMapping("get_all_my_profits_per_day/{id}")
+	public List<PaymentForProviderPerDayDto> getAllMyProfitsPerDay(@PathVariable Long id ,@RequestParam  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate beginDay,
+			@RequestParam  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate finalDay,@RequestParam int page , @RequestParam int pageSize ){
 		Company company = companyService.getCompany();
-		return paymentForProvidersSevice.getAllMyProfitsPerDay(date, findate, company.getId());
+		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
+			return paymentForProvidersSevice.getAllMyProfitsPerDay(beginDay, finalDay, id, page , pageSize);			
+		}
+		return null;
 	}
 
 

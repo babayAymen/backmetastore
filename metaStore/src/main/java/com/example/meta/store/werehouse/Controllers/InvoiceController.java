@@ -7,11 +7,13 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.BeanDefinitionDsl.Role;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.meta.store.Base.ErrorHandler.NotPermissonException;
@@ -58,15 +60,14 @@ public class InvoiceController {
 	}
 	
 	@GetMapping("getMyInvoiceAsProvider/{id}")
-	public List<InvoiceDto> getMyInvoiceAsProvider(@PathVariable Long id){
+	public List<InvoiceDto> getMyInvoiceAsProvider(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
 		Company company = null;
 		List<InvoiceDto> invoiceList = new ArrayList<>();
 		switch (authenticationFilter.accountType) {
 		case COMPANY: {
 			 company = companyService.getCompany();
 				if(company.getId() == id ||  company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-					logger.warn(id+" company id from getMyInvoiceAsProvider controller");
-					invoiceList = invoiceService.getMyInvoiceAsProvider(id, null);
+					invoiceList = invoiceService.getMyInvoiceAsProvider(id, null, page, pageSize);
 				}
 			break;
 		}
@@ -76,7 +77,7 @@ public class InvoiceController {
 		case WORKER :{
 			company = getHisCompany().get();
 			User user = userService.getUser();
-			invoiceList = invoiceService.getMyInvoiceAsProvider(company.getId(),user.getId());
+			invoiceList = invoiceService.getMyInvoiceAsProvider(company.getId(),user.getId(), page , pageSize);
 			break;
 		}
 		default:
@@ -89,25 +90,37 @@ public class InvoiceController {
 	}
 	
 
-	@GetMapping("get_by_status/{companyId}/{status}")
-	public List<InvoiceDto> getAllMyInvoiceAsProviderAndStatus(@PathVariable Long companyId , @PathVariable PaymentStatus status){
+	@GetMapping("get_by_payment_paid_status/{companyId}")
+	public List<InvoiceDto> getAllMyInvoiceAsProviderAndStatus(@PathVariable Long companyId , @RequestParam PaymentStatus status, @RequestParam int page , @RequestParam int pageSize){
 		Company company = companyService.getCompany();
-		return invoiceService.getAllMyInvoicesAsProviderAndStatus(companyId , status);
+		if(company.getId() == companyId || company.getBranches().stream().anyMatch(branch -> branch.getId().equals(companyId))) {			
+			return invoiceService.getAllMyInvoicesAsProviderAndStatus(companyId , status, page , pageSize);
+		}
+		return null;
 	}
 	
-	@GetMapping("get_all_my_invoices_not_accepted/{id}/{status}")
-	public List<InvoiceDto> getAllMyInvoicesNotAccepted(@PathVariable Long id , @PathVariable Status status) {
+	@GetMapping("get_all_my_invoices_not_accepted_as_client/{id}")
+	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsClient(@PathVariable Long id , @RequestParam Status status, @RequestParam int page , @RequestParam int pageSize) {
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		if(authenticationFilter.accountType == AccountType.USER) {
 			User user = userService.getUser();
-			invoicesDto = invoiceService.getAllMyInvoicesNotAcceptedAsClient(user.getId(),null);
+			invoicesDto = invoiceService.getAllMyInvoicesNotAcceptedAsClient(user.getId(),null, page , pageSize);
 		}
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
-			invoicesDto = invoiceService.getAllMyInvoicesNotAcceptedAsClient(null,company.getId());
+			invoicesDto = invoiceService.getAllMyInvoicesNotAcceptedAsClient(null,company.getId(), page , pageSize);
 		}
 		logger.warn("not accepted size :"+ invoicesDto.size());
 		return invoicesDto;
+	}
+	
+	@GetMapping("get_all_my_invoices_not_accepted_as_provider/{id}")
+	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsProvider(@PathVariable Long id , @RequestParam Status status, @RequestParam int page , @RequestParam int pageSize){
+		Company company  = companyService.getCompany();
+		if(company.getId() == id || company.getBranches().stream().anyMatch(branch -> branch.getId().equals(id))) {
+			return invoiceService.getAllMyInvoicesNotAcceptedAsProvider(id , status , page , pageSize);			
+		}
+		return null;
 	}
 	
 	@GetMapping("getMyInvoiceAsClient/{id}")
@@ -177,22 +190,7 @@ public class InvoiceController {
 		}
 	}
 	
-	@GetMapping("get_all_my_invoices_notaccepted/{companyId}")
-	public List<InvoiceDto> getAllMyInvoicesNotAccepted(@PathVariable Long companyId){
-		Long companyID = null;
-		Long userId = null;
-		if(authenticationFilter.accountType == AccountType.COMPANY) {
-			Company company = companyService.getCompany();
-		if(company.getId() == companyId || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(companyId))) {
-			companyID = companyId;
-		}
-		}
-		if(authenticationFilter.accountType == AccountType.USER) {
-			User user = userService.getUser();
-			userId = user.getId();
-		}
-		return invoiceService.getAllMyInvoicesNotAcceptedAsProvider(userId , companyID);
-	}
+
 	
 }
 

@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.meta.store.Base.Repository.BaseRepository;
@@ -17,17 +19,17 @@ public interface PaymentForProvidersRepository extends BaseRepository<PaymentFor
 			+ "JOIN p.purchaseOrderLine l "
 			+ "JOIN l.purchaseorder o  "
 			+ "WHERE o.client.id = :me OR o.company.id = :me")
-	List<PaymentForProviders> getPaymentForProvidersAsCompany(Long me);
+	Page<PaymentForProviders> getPaymentForProvidersAsCompany(Long me, Pageable pagebale);
 	
 	@Query("SELECT p FROM PaymentForProviders p "
 			+ "JOIN p.purchaseOrderLine l "
 			+ "JOIN l.purchaseorder o  "
 			+ "WHERE o.person.id = :me"
 			)
-	List<PaymentForProviders> getPaymentForProvidersAsUser(Long me);
+	Page<PaymentForProviders> getPaymentForProvidersAsUser(Long me, Pageable pageable);
 
 	@Query("SELECT p FROM PaymentForProviders p WHERE p.purchaseOrderLine.purchaseorder.company.id = :id AND (p.createdDate BETWEEN :date AND :date2)")
-	List<PaymentForProviders> findByCreatedDate(LocalDateTime date, LocalDateTime date2, Long id);
+	Page<PaymentForProviders> findByCreatedDate(LocalDateTime date, LocalDateTime date2, Long id, Pageable pageable);
 
 	
 }

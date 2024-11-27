@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -23,10 +25,10 @@ public interface PaymentForProviderPerDayRepository extends BaseRepository<Payme
     BigDecimal getSumAmountByDate(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Long id);
 
 
-	List<PaymentForProviderPerDay> findByProviderId(Long id);
+	Page<PaymentForProviderPerDay> findByProviderId(Long id, Pageable pageable);
 
 
 	@Query("SELECT p FROM PaymentForProviderPerDay p WHERE p.provider.id = :id AND p.lastModifiedDate BETWEEN :date AND :findate")
-	List<PaymentForProviderPerDay> findByProviderIdAndDate(LocalDateTime date, LocalDateTime findate, Long id);
+	Page<PaymentForProviderPerDay> findByProviderIdAndDate(LocalDateTime date, LocalDateTime findate, Long id, Pageable pageable);
 }
 

@@ -6,6 +6,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -171,37 +174,34 @@ public class SearchService extends BaseService<SearchHistory, Long> {
 		
 		
 	}
-
 	
-	
-	
-	
-	
-	
-	public List<SearchHistoryDto> getSearchHistory(Long id, AccountType type) {
-		List<SearchHistory> histories = new ArrayList<>();
+	public List<SearchHistoryDto> getSearchHistory(Long id, AccountType type, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
 		switch (type) {
 		case USER: {
-			histories = searchHistoryRepository.findAllByMeUserId(id);			
-			break;
+			Page<SearchHistory> histories = searchHistoryRepository.findAllByMeUserId(id, pageable);
+			List<SearchHistoryDto> dtos = new ArrayList<>();
+			for(SearchHistory i : histories) {
+				SearchHistoryDto searchDto = searchHistoryMapper.mapToDto(i);
+				dtos.add(searchDto);
+			}
+			logger.warn(dtos.size()+" size");
+			return dtos;
 		}
 		case COMPANY: {
-			histories = searchHistoryRepository.findAllByMeCompanyId(id);
-			break;
+			Page<SearchHistory>  histories = searchHistoryRepository.findAllByMeCompanyId(id, pageable);
+			List<SearchHistoryDto> dtos = new ArrayList<>();
+			for(SearchHistory i : histories) {
+				SearchHistoryDto searchDto = searchHistoryMapper.mapToDto(i);
+				dtos.add(searchDto);
+			}
+			logger.warn(dtos.size()+" size");
+			return dtos;
 		}
 		default:
 			throw new IllegalArgumentException("Unexpected value: " + type);
 		}
-		if(histories.isEmpty()) {
-			throw new RecordNotFoundException(null);
-		}
-		List<SearchHistoryDto> dtos = new ArrayList<>();
-		for(SearchHistory i : histories) {
-			SearchHistoryDto searchDto = searchHistoryMapper.mapToDto(i);
-			dtos.add(searchDto);
-		}
-		logger.warn(dtos.size()+" size");
-		return dtos;
+		
 	}
 
 	

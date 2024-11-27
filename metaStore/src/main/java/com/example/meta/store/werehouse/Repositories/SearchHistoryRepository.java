@@ -3,6 +3,8 @@ package com.example.meta.store.werehouse.Repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.meta.store.Base.Repository.BaseRepository;
@@ -22,8 +24,8 @@ public interface SearchHistoryRepository extends BaseRepository<SearchHistory, L
 
 	List<SearchHistory> findAllByCreatedBy(Long id);
 
-	List<SearchHistory> findAllByMeUserId(Long id);
+	Page<SearchHistory> findAllByMeUserId(Long id, Pageable pageable);
 
-	List<SearchHistory> findAllByMeCompanyId(Long id);
+	Page<SearchHistory> findAllByMeCompanyId(Long id, Pageable pageable);
 
 }

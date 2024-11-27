@@ -11,6 +11,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -100,16 +103,9 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 	
-	public List<PaymentForProvidersDto> getAllMyPayments(){
-		List<PaymentForProviders> paymentForProviders = new ArrayList<>();
-		if(authenticationFilter.accountType == AccountType.COMPANY) {
-			Company company = companyService.getCompany();
-			paymentForProviders = paymentForProvidersRepository.getPaymentForProvidersAsCompany(company.getId());
-		}
-		if(authenticationFilter.accountType == AccountType.USER) {
-			User user = userService.getUser();
-			paymentForProviders = paymentForProvidersRepository.getPaymentForProvidersAsUser(user.getId());
-		}
+	public List<PaymentForProvidersDto> getAllMyPayments(Long id , int page , int pageSize){
+		Pageable pageable = PageRequest.of(page, pageSize);
+			Page<PaymentForProviders>paymentForProviders = paymentForProvidersRepository.getPaymentForProvidersAsCompany(id, pageable);
 		if(paymentForProviders.isEmpty()) {
 			throw new RecordNotFoundException("there is no payment");
 		}
@@ -123,15 +119,15 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	}
 	
 
-	 public List<PaymentForProvidersDto> getAllMyAsCompanyByDate(LocalDate date, LocalDate date2, Long id) {
+	 public List<PaymentForProvidersDto> getAllMyAsCompanyByDate(LocalDate date, LocalDate date2, Long id, int page , int pageSize) {
 		 LocalDateTime startOfDay = date.atStartOfDay();
 		 LocalDateTime endOfDay = date2.atTime(LocalTime.MAX) ;
 		 if(date.isAfter(date2)) {
 			  endOfDay = date.atStartOfDay(); // 2024-09-07T00:00:00
 			  startOfDay = date2.atTime(LocalTime.MAX);
 		 }
-		  List<PaymentForProviders> payments = paymentForProvidersRepository.findByCreatedDate(startOfDay, endOfDay, id);
-		logger.warn(payments.size()+" size payment" +startOfDay+"  "+endOfDay+" "+id);
+		 Pageable pageable = PageRequest.of(page, pageSize);
+		  Page<PaymentForProviders> payments = paymentForProvidersRepository.findByCreatedDate(startOfDay, endOfDay, id, pageable);
 		if(payments.isEmpty()) {
 			throw new RecordNotFoundException(null);
 		}
@@ -160,8 +156,9 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	 }
 
 
-	public List<PaymentForProviderPerDayDto> getAllMyProfits(Long id) {
-		List<PaymentForProviderPerDay> paymentPerDay = paymentForProviderPerDayRepository.findByProviderId(id);
+	public List<PaymentForProviderPerDayDto> getAllMyProfits(Long id, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<PaymentForProviderPerDay> paymentPerDay = paymentForProviderPerDayRepository.findByProviderId(id, pageable);
 		if(paymentPerDay.isEmpty()) {
 			throw new RecordNotFoundException("there is no profit yet");
 		}
@@ -174,14 +171,15 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	}
 
 
-	public List<PaymentForProviderPerDayDto> getAllMyProfitsPerDay(LocalDate date, LocalDate findate, Long id) {
+	public List<PaymentForProviderPerDayDto> getAllMyProfitsPerDay(LocalDate date, LocalDate findate, Long id, int page , int pageSize) {
 		 LocalDateTime startOfDay = date.atStartOfDay();
 		 LocalDateTime endOfDay = findate.atTime(LocalTime.MAX) ;
+		 Pageable pageable = PageRequest.of(page, pageSize);
  if(date.isAfter(findate)) {
 	  endOfDay = date.atStartOfDay(); // 2024-09-07T00:00:00
 	  startOfDay = findate.atTime(LocalTime.MAX);
  }
-		List<PaymentForProviderPerDay> paymentPerDay = paymentForProviderPerDayRepository.findByProviderIdAndDate(startOfDay, endOfDay,id);
+		Page<PaymentForProviderPerDay> paymentPerDay = paymentForProviderPerDayRepository.findByProviderIdAndDate(startOfDay, endOfDay,id, pageable);
 		if(paymentPerDay.isEmpty()) {
 			throw new RecordNotFoundException("there is no profit yet between those dates");
 		}

@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -85,19 +86,20 @@ public class SearchController {
 		}
 	}
 	
-	@GetMapping("get_search_history")
-	public List<SearchHistoryDto> getSearchHistory(){
+	@GetMapping("get_search_history/{id}")
+	public List<SearchHistoryDto> getSearchHistory(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
 		AccountType type = authenticationFilter.accountType;
-		List<SearchHistoryDto> search = new ArrayList<>();
 		if(type == AccountType.USER) {			
 		User user = userService.getUser();
-		search = searchService.getSearchHistory(user.getId(), type);
+		return searchService.getSearchHistory(user.getId(), type, page , pageSize);
 		}
 		if(type == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
-			search = searchService.getSearchHistory(company.getId(),type);
+			if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {				
+			return searchService.getSearchHistory(id,type, page , pageSize );
+			}
 		}
-		return search;
+		return null;
 	}
 
 }
