@@ -227,15 +227,16 @@ public class ClientService extends BaseService<Company, Long>{
 	}
 		
 
-	public List<ClientProviderRelationDto> getAllMyContaining(String search,Company company, SearchCategory category) {
+	public List<ClientProviderRelationDto> getAllMyContaining(String search,Company company, SearchCategory category, int page , int pageSize) {
 		logger.warn("id company from service "+company.getId());
-		List<ClientProviderRelation> clientProviderRelation = clientCompanyRRepository.findByMyCompanyAndUserContaining(search, company.getId());
-		clientProviderRelation.addAll(clientCompanyRRepository.findByMyCompanyAndClientContaining(search, company.getId()));
-		if(clientProviderRelation.isEmpty()) {
-			throw new RecordNotFoundException("there is no client with name or code contain "+search);
-		}
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<ClientProviderRelation> clientProviderRelation = clientCompanyRRepository.findByMyCompanyAndUserContaining(search, company.getId(), pageable);
+		Page<ClientProviderRelation> peronProviderRelation = clientCompanyRRepository.findByMyCompanyAndClientContaining(search, company.getId(), pageable);
+		List<ClientProviderRelation> response = new ArrayList<>();
+		response.addAll(clientProviderRelation.getContent());
+		response.addAll(peronProviderRelation.getContent());
 		List<ClientProviderRelationDto> clientProviderDto = new ArrayList<>();
-		for(ClientProviderRelation i : clientProviderRelation) {
+		for(ClientProviderRelation i : response) {
 			ClientProviderRelationDto dto = clientCompanyMapper.mapToDto(i);
 			clientProviderDto.add(dto);
 			logger.warn(clientProviderDto.size()+" size of return client provider relation "+i.getId());

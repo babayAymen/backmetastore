@@ -40,14 +40,15 @@ public class EnableToCommentService extends BaseService<EnableToComment, Long>{
 	}
 
 	public void makeEnableToComment(Company company, User person, Company client) {
-		EnableToComment enableToComment = new EnableToComment();
+		EnableToComment enableToComment = null;
 		if(client != null) {
 			enableToComment = enableToCommentRepository.findByRaterCompanyIdAndRateeCompanyId(client.getId(), company.getId());
 		}
 		if(person != null) {
 			enableToComment = enableToCommentRepository.findByUserIdAndRateeCompanyId(person.getId(), company.getId());
 		}
-		if(enableToComment.getId() == null) {
+		if(enableToComment == null) {
+			enableToComment = new EnableToComment();
 			enableToComment.setRateeCompany(company);
 			enableToComment.setRaterCompany(client);
 			enableToComment.setUser(person);

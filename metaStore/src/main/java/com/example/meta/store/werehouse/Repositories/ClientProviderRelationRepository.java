@@ -71,7 +71,7 @@ public interface ClientProviderRelationRepository extends BaseRepository<ClientP
 		       "(" +
 		       "(r.client IS NOT NULL AND LOWER(r.client.name) LIKE LOWER(CONCAT('%', :search, '%')))" +
 		       ")")
-		List<ClientProviderRelation> findByMyCompanyAndClientContaining(@Param("search") String search, @Param("id") Long id);
+		Page<ClientProviderRelation> findByMyCompanyAndClientContaining(@Param("search") String search, @Param("id") Long id, Pageable pageable);
 
 
 	@Query("SELECT r FROM ClientProviderRelation r " +
@@ -79,7 +79,7 @@ public interface ClientProviderRelationRepository extends BaseRepository<ClientP
 		       "(" +
 		       "(r.person IS NOT NULL AND LOWER(r.person.username) LIKE LOWER(CONCAT('%', :search, '%')))  " +
 		       ")")
-		List<ClientProviderRelation> findByMyCompanyAndUserContaining(@Param("search") String search, @Param("id") Long id);
+		Page<ClientProviderRelation> findByMyCompanyAndUserContaining(@Param("search") String search, @Param("id") Long id, Pageable pageable);
 
 	
 	@Query("SELECT r.person FROM ClientProviderRelation r " +

@@ -526,7 +526,7 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		Article spiga1 = new Article();
 		spiga1.setCode("sn1");
 		spiga1.setLibelle("spiga N1");
-		spiga1.setBarcode("barcode1");
+		spiga1.setBarcode("6192011803696");
 		spiga1.setImage("spiga1.jpg");
 		spiga1.setTva(0.0);
 		spiga1.setDiscription("the best of");
@@ -536,7 +536,7 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		
 		Article spiga2 = new Article();
 		spiga2.setLibelle("spiga N2");
-		spiga2.setBarcode("barcode2");
+		spiga2.setBarcode("6192011803672");
 		spiga2.setCode("sn2");
 		spiga2.setImage("spiga2-g.jpg");
 		spiga2.setTva(0.0);
@@ -610,97 +610,9 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		sicam2.setIsDiscounted(true);
 		sicam2.setCategory(CompanyCategory.DAIRY);
 		articles.add(sicam2);
+	
 		
-		
-
-		Article spegetti7 = new Article();
-		spegetti7.setLibelle("spageti N2");
-		spegetti7.setBarcode("barcode spageti2");
-		spegetti7.setCode("spn2");
-		spegetti7.setImage("spagetti2.png");
-		spegetti7.setTva(0.0);
-		spegetti7.setDiscription("the best of");
-		spegetti7.setIsDiscounted(true);
-		spegetti7.setCategory(CompanyCategory.DAIRY);
-		articles.add(spegetti7);
-
-		Article spegetti8 = new Article();
-		spegetti8.setLibelle("spageti N3");
-		spegetti8.setBarcode("barcode spageti3");
-		spegetti8.setCode("spn3");
-		spegetti8.setImage("spaghetti3-flottant.png");
-		spegetti8.setTva(0.0);
-		spegetti8.setDiscription("the best of");
-		spegetti8.setIsDiscounted(true);
-		spegetti8.setCategory(CompanyCategory.DAIRY);
-		articles.add(spegetti8);
-
-		Article sicam9 = new Article();
-		sicam9.setLibelle("sicam 1kg");
-		sicam9.setBarcode("barcode sicam1kg");
-		sicam9.setCode("s1kg");
-		sicam9.setImage("sicam-800g.jpg");
-		sicam9.setTva(0.0);
-		sicam9.setDiscription("the best of");
-		sicam9.setIsDiscounted(true);
-		sicam9.setCategory(CompanyCategory.DAIRY);
-		articles.add(sicam9);
-
-		Article sicam10 = new Article();
-		sicam10.setLibelle("sicam 0.5kg");
-		sicam10.setBarcode("barcode sicam0.5kg");
-		sicam10.setCode("s0.5kg");
-		sicam10.setImage("sicam-800g.jpg");
-		sicam10.setTva(0.0);
-		sicam10.setDiscription("the best of");
-		sicam10.setIsDiscounted(true);
-		sicam10.setCategory(CompanyCategory.DAIRY);
-		articles.add(sicam10);
-
-		Article spegetti11 = new Article();
-		spegetti11.setLibelle("spageti N2");
-		spegetti11.setBarcode("barcode spageti2");
-		spegetti11.setCode("spn2");
-		spegetti11.setImage("spagetti2.png");
-		spegetti11.setTva(0.0);
-		spegetti11.setDiscription("the best of");
-		spegetti11.setIsDiscounted(true);
-		spegetti11.setCategory(CompanyCategory.DAIRY);
-		articles.add(spegetti11);
-
-		Article spegetti12 = new Article();
-		spegetti12.setLibelle("spageti N3");
-		spegetti12.setBarcode("barcode spageti3");
-		spegetti12.setCode("spn3");
-		spegetti12.setImage("spaghetti3-flottant.png");
-		spegetti12.setTva(0.0);
-		spegetti12.setDiscription("the best of");
-		spegetti12.setIsDiscounted(true);
-		spegetti12.setCategory(CompanyCategory.DAIRY);
-		articles.add(spegetti12);
-
-		Article sicam13 = new Article();
-		sicam13.setLibelle("sicam 1kg");
-		sicam13.setBarcode("barcode sicam1kg");
-		sicam13.setCode("s1kg");
-		sicam13.setImage("sicam-800g.jpg");
-		sicam13.setTva(0.0);
-		sicam13.setDiscription("the best of");
-		sicam13.setIsDiscounted(true);
-		sicam13.setCategory(CompanyCategory.DAIRY);
-		articles.add(sicam13);
-
-		Article sicam14 = new Article();
-		sicam14.setLibelle("sicam 0.5kg");
-		sicam14.setBarcode("barcode sicam0.5kg");
-		sicam14.setCode("s0.5kg");
-		sicam14.setImage("sicam-800g.jpg");
-		sicam14.setTva(0.0);
-		sicam14.setDiscription("the best of");
-		sicam14.setIsDiscounted(true);
-		sicam14.setCategory(CompanyCategory.DAIRY);
-		articles.add(sicam14);
-		
+			
 		articleRepository.saveAll(articles);
 	}
 
@@ -737,11 +649,11 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		for(ArticleCompany i : articlesCompany) {
 			if(company == null) {
 				isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),user.getId());
-				isEnabledToComment = isEnabledToComment(user.getId(), null, i.getCompany().getId());
+			//	isEnabledToComment = isEnabledToComment(user.getId(), null, i.getCompany().getId());
 			}
 			else {
 				isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),company.getId());
-				isEnabledToComment = isEnabledToComment(null,company.getId(), i.getCompany().getId());
+			//	isEnabledToComment = isEnabledToComment(null,company.getId(), i.getCompany().getId());
 			}
 			ArticleCompanyDto articleCompanyDto = articleCompanyMapper.mapToDto(i);
 			articleCompanyDto.setIsFav(isFav);
@@ -751,12 +663,12 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		return articlesCompanyDto;
 	}
 
-	private Boolean isEnabledToComment(Long myUserId, Long myCompanyId, Long providerId) {
+	private Boolean isEnabledToCommen(Long myUserId, Long myCompanyId, Long providerId) {
 		Boolean exists = false;
 		if(myCompanyId == null) {
-			exists = invoiceRepository.existsByPersonIdAndProviderIdAndIsEnabledToComment(myUserId, providerId, true);
+		//	exists = invoiceRepository.existsByPersonIdAndProviderIdAndIsEnabledToComment(myUserId, providerId, true);
 		}else {
-			exists = invoiceRepository.existsByClientIdAndProviderIdAndIsEnabledToComment(myCompanyId, providerId, true);	
+		//	exists = invoiceRepository.existsByClientIdAndProviderIdAndIsEnabledToComment(myCompanyId, providerId, true);	
 		}
 		return exists;
 	}
@@ -823,6 +735,15 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		Article article = articleRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("there is no article with id :"+id));
 		ArticleDto articleDto = articleMapper.mapToDto(article);
 		return articleDto;
+	}
+
+	public ArticleCompanyDto getArticleByBarcode(Long id, String barcode) {
+		ArticleCompany article = articleCompanyRepository.findByBarcodeAndCompanyId(barcode, id);
+		if(article == null) {
+			throw new RecordNotFoundException("there is no 	article with barcode : "+barcode+" company id "+id);
+		}
+		ArticleCompanyDto articleCompanyDto = articleCompanyMapper.mapToDto(article);
+		return articleCompanyDto;
 	}
 
 

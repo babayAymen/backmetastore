@@ -127,6 +127,9 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907) "
 		   	+ " ORDER BY random() LIMIT 10 ")	
 	List<ArticleCompany> findAllByCompanyCategoryAndUserId(CompanyCategory categname, Long userId, Double latitude , Double longitude);
+
+	@Query("SELECT a FROM ArticleCompany a WHERE a.company.id = :id AND a.article.barcode = :barcode")
+	ArticleCompany findByBarcodeAndCompanyId(String barcode, Long id);
 	
 
 	

@@ -52,17 +52,23 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Boolean existsByPersonIdAndProviderIdAndIsEnabledToComment(Long myUserId, Long providerId, boolean b);
+//	Boolean existsByPersonIdAndProviderIdAndIsEnabledToComment(Long myUserId, Long providerId, boolean b);
+//
+//	Boolean existsByClientIdAndProviderIdAndIsEnabledToComment(Long myCompanyId, Long providerId, boolean b);
 
-	Boolean existsByClientIdAndProviderIdAndIsEnabledToComment(Long myCompanyId, Long providerId, boolean b);
+	Boolean existsByPersonIdAndProviderId(Long myUserId, Long providerId);
 
+	Boolean existsByClientIdAndProviderId(Long myCompanyId, Long providerId);
 	Page<Invoice> findAllByPersonIdAndStatus(Long userId, Status status, Pageable pageable);
 
 	Page<Invoice> findAllByClientIdAndStatus(Long companyId, Status status, Pageable pageable);
 
-	List<Invoice> findByProviderIdAndClientIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
+//	List<Invoice> findByProviderIdAndClientIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
 
-	List<Invoice> findByProviderIdAndPersonIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
+	List<Invoice> findByProviderIdAndClientId(Long id, Long id2);
+
+//	List<Invoice> findByProviderIdAndPersonIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
+	List<Invoice> findByProviderIdAndPersonId(Long id, Long id2);
 
 	Page<Invoice> findByProviderIdAndPaid(Long companyId, PaymentStatus status, Pageable pageable);
 

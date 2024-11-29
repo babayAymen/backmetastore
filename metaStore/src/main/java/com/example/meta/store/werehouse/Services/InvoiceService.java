@@ -117,9 +117,6 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		else {
 			 invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED, pageable);
 		}
-		if(invoices.isEmpty()) {
-			throw new RecordNotFoundException("there is no invoice");
-		}
 		for(Invoice i : invoices) {
 			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
 			invoicesDto.add(invoiceDto);
@@ -175,7 +172,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		invoice.setProvider(company);
 		invoice.setPaid(inv.getPaid());
 		invoice.setType(InvoiceDetailsType.COMMAND_LINE);
-		invoice.setIsEnabledToComment(true);
+//		invoice.setIsEnabledToComment(true);
 		invoice.setRest(inv.getRest());
 		invoiceRepository.save(invoice);
 		enableToCommentService.makeEnableToComment(company, invoice.getPerson(), invoice.getProvider());

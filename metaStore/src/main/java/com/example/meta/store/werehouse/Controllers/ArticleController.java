@@ -208,6 +208,12 @@ public class ArticleController {
 		Company company = companyService.getCompany();
 		return articleService.getArticlesByCategory(company.getId(),company.getCategory(), page, pageSize);
 	}
+	
+	@GetMapping("get_by_barcode")
+	public ArticleCompanyDto getArticleByBarcode(@RequestParam String barcode){
+		Company company = companyService.getCompany();
+		return articleService.getArticleByBarcode(company.getId(), barcode);
+	}
 
 }
 

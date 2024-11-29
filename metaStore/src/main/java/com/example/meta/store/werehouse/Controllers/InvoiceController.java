@@ -127,11 +127,9 @@ public class InvoiceController {
 	public List<InvoiceDto> getInvoicesAsClient(@PathVariable Long id){
 		logger.warn("id is: "+id);
 		AccountType type = authenticationFilter.accountType;
-		if(type == AccountType.COMPANY) {	
-			Company company= new Company();
-			company = companyService.getCompany();
+		if(type == AccountType.COMPANY) {
+			Company company = companyService.getCompany();
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-			logger.warn("inside if");
 			return invoiceService.getInvoicesAsClient(id,type);			
 		}else {
 			throw new NotPermissonException("you don't have permission for that");

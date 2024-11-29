@@ -51,8 +51,6 @@ public class CategoryService extends BaseService<Category, Long>{
 	///////////////////////////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////////////////
 	public ResponseEntity<CategoryDto> insertCategory( String catDto, Company company, MultipartFile file)
 			throws JsonMappingException, JsonProcessingException {
-
-		System.out.println("insert service"+catDto);
 		CategoryDto categoryDto = objectMapper.readValue(catDto, CategoryDto.class);
 		Optional<Category> category1 = categoryRepository.findByLibelleAndCompanyId(categoryDto.getLibelle(),company.getId());
 		if(category1.isPresent())  {

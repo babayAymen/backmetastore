@@ -26,6 +26,7 @@ import com.example.meta.store.werehouse.Dtos.ClientProviderRelationDto;
 import com.example.meta.store.werehouse.Dtos.CompanyDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.SearchCategory;
+import com.example.meta.store.werehouse.Enums.SearchType;
 import com.example.meta.store.werehouse.Enums.Type;
 import com.example.meta.store.werehouse.Services.ClientService;
 import com.example.meta.store.werehouse.Services.CompanyService;
@@ -79,13 +80,13 @@ public class ClientController {
 	}
 		
 
-	@GetMapping("get_all_my_containing/{value}/{id}")
-	public List<ClientProviderRelationDto> getAllMyCointaining(@PathVariable String value, @PathVariable Long id){
+	@GetMapping("get_all_my_client_containing/{id}")
+	public List<ClientProviderRelationDto> getAllMyCointaining( @PathVariable Long id,@RequestParam SearchType searchType,@RequestParam String search, @RequestParam int page , @RequestParam int pageSize){
 		Company company = companyService.getCompany();
 		if(company.getId() != id && company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 			company = companyService.getById(id).getBody();
 		}
-		return clientService.getAllMyContaining(value,company,SearchCategory.COMPANY);
+		return clientService.getAllMyContaining(search,company,SearchCategory.COMPANY, page, pageSize);
 	}
 
 
