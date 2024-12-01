@@ -107,25 +107,27 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		return invoicesDto;
 	}
 	
-	public List<InvoiceDto> getInvoicesAsClient(Long id, AccountType type) {
-		Pageable pageable = PageRequest.of(0, 1);
-		List<InvoiceDto> invoicesDto = new ArrayList<>();
-		Page<Invoice> invoices = null;
+	public List<InvoiceDto> getInvoicesAsClient(Long id, AccountType type, int page, int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
 		if(type == AccountType.COMPANY) {
-		 invoices = invoiceRepository.findAllByClientId(id, pageable);
+			Page<Invoice> invoices = invoiceRepository.findAllByClientId(id, pageable);
+			return mapToListDto(invoices.getContent());
 		}
 		else {
-			 invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED, pageable);
+			Page<Invoice> invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED, pageable);
+			return mapToListDto(invoices.getContent());
 		}
+	}
+	
+	private List<InvoiceDto> mapToListDto(List<Invoice> invoices){
+		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		for(Invoice i : invoices) {
 			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
 			invoicesDto.add(invoiceDto);
 		}
-		logger.warn("return size of invoice as client"+invoicesDto.size());
+		logger.warn("return size of invoice as client "+invoicesDto.size());
 		return invoicesDto;
 	}
-	
-	
 	
 	public List<InvoiceDto> getInvoiceNotifications( Company company,Long userId) {
 		List<Invoice> invoices = new ArrayList<>();
@@ -257,41 +259,38 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		if(invoices.isEmpty()) {
 			throw new RecordNotFoundException("threre is no invoice not accepted");
 		}
-		List<InvoiceDto> invoicesDto = new ArrayList<>();
-		for(Invoice i : invoices) {
-			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
-			invoicesDto.add(invoiceDto);
-		}
-		logger.warn("response size: "+invoicesDto.size());
-		return invoicesDto;
+		return mapToListDto(invoices.getContent());
 	}
 
 	public List<InvoiceDto> getAllMyInvoicesAsProviderAndStatus(Long companyId, PaymentStatus status, int page , int pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
 		Page<Invoice> invoices = invoiceRepository.findByProviderIdAndPaid(companyId , status, pageable);
-		if(invoices.isEmpty()) {
-			throw new RecordNotFoundException("there is no invocie "+status);
-		}
-		List<InvoiceDto> invoicesDto = new ArrayList<>();
-		for(Invoice i : invoices) {
-			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
-			invoicesDto.add(invoiceDto);
-		}
-		return invoicesDto;
+		List<InvoiceDto> dto = mapToListDto(invoices.getContent());
+		logger.warn("getAllMyInvoicesAsProviderAndStatus "+dto.size());
+		return dto;	
 	}
 
 	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsProvider( Long companyId, Status status , int page , int pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
 		Page<Invoice> invoices = invoiceRepository.findByProviderIdAndStatus(companyId , status, pageable);
-		if(invoices.isEmpty()) {
-			throw new RecordNotFoundException("there is no invoice not accepted as provider");
-		}
-		List<InvoiceDto> invoicesDto = new ArrayList<>();
-		for(Invoice i : invoices) {
-			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
-			invoicesDto.add(invoiceDto);
-		}
-		return invoicesDto;
+		List<InvoiceDto> dto = mapToListDto(invoices.getContent());
+		logger.warn("getAllMyInvoicesNotAcceptedAsProvider "+dto.size());
+		return dto;	
+	}
+
+	public List<InvoiceDto> getAllMyInvoicesAsClientAndStatus(Long id, Status status, AccountType type, int page,int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		if(type == AccountType.USER) {
+			Page<Invoice> invoices = invoiceRepository.findAllByPersonIdAndStatus(id, status, pageable);
+			List<InvoiceDto> dto = mapToListDto(invoices.getContent());
+			logger.warn("getAllMyInvoicesAsClientAndStatus "+dto.size());
+			return dto;
+		}else {
+			Page<Invoice> invoices = invoiceRepository.findAllByClientIdAndStatus(id, status, pageable);
+			List<InvoiceDto> dto = mapToListDto(invoices.getContent());
+			logger.warn("getAllMyInvoicesAsClientAndStatus "+dto.size());
+			return dto;		
+			}
 	}
 
 

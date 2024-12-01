@@ -124,20 +124,20 @@ public class InvoiceController {
 	}
 	
 	@GetMapping("getMyInvoiceAsClient/{id}")
-	public List<InvoiceDto> getInvoicesAsClient(@PathVariable Long id){
+	public List<InvoiceDto> getInvoicesAsClient(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
 		logger.warn("id is: "+id);
 		AccountType type = authenticationFilter.accountType;
 		if(type == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-			return invoiceService.getInvoicesAsClient(id,type);			
+			return invoiceService.getInvoicesAsClient(id,type, page, pageSize);			
 		}else {
 			throw new NotPermissonException("you don't have permission for that");
 		}
 		
 		}
 		User user = userService.getUser();
-		return invoiceService.getInvoicesAsClient(user.getId(), type);
+		return invoiceService.getInvoicesAsClient(user.getId(), type, page, pageSize);
 	}
 	
 //	@GetMapping("getnotaccepted")
@@ -187,8 +187,27 @@ public class InvoiceController {
 			throw new IllegalArgumentException("Unexpected value: " + status);
 		}
 	}
-	
 
+	@GetMapping("get_by_status_as_client/{id}")
+	public List<InvoiceDto> getAllMyInvoicesAsClientAndStatus(@PathVariable Long id , @RequestParam Status status, @RequestParam int page , @RequestParam int pageSize){
+
+		AccountType type = authenticationFilter.accountType;
+		if(type == AccountType.USER) {
+			User user = userService.getUser();
+			if(user.getId() == id) {
+			return invoiceService.getAllMyInvoicesAsClientAndStatus(id,status,type, page, pageSize);
+			}else {
+				throw new RecordNotFoundException("you dont have permission to do that");
+			}
+		}else {
+			Company company = companyService.getCompany();
+			if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
+			return invoiceService.getAllMyInvoicesAsClientAndStatus(id,status,type, page, pageSize);
+			}else {
+				throw new RecordNotFoundException("you dont have permission to do that");
+			}
+		}
+	}
 	
 }
 

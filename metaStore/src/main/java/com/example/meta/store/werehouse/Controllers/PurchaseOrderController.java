@@ -139,17 +139,15 @@ public class PurchaseOrderController {
 	public List<PurchaseOrderLineDto> getAllMyOrdersNotAccepted(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
-
-			if(company.getId() != id &&  company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {	
-				return purchaseOrderService.getAllMyOrdersNotAcceptedAsProvider(company.getId(),page, pageSize);			
-			}else {
+			if(company.getId() == id ||  company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 				return purchaseOrderService.getAllMyOrdersNotAcceptedAsProvider(id,page, pageSize);
-			}
+		}
 		}
 		if(authenticationFilter.accountType == AccountType.USER) {
 			User user = userService.getUser();
 			return purchaseOrderService.getAllMyOrdersNotAcceptedAsClient(user.getId(), page,pageSize);
 		}
+		logger.warn("return null for getAllMyOrdersNotAccepted id: "+id);
 		return null;
 	}
 	

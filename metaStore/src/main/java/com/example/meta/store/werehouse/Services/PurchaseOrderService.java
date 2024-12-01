@@ -353,6 +353,7 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 			PurchaseOrderLineDto dto = purchaseOrderLineMapper.mapToDto(i);
 			purchaseOrderLinesDto.add(dto);
 		}
+		logger.warn("order line size : "+purchaseOrderLinesDto.size());
 		return purchaseOrderLinesDto;
 	}
 

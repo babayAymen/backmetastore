@@ -59,6 +59,7 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 	Boolean existsByPersonIdAndProviderId(Long myUserId, Long providerId);
 
 	Boolean existsByClientIdAndProviderId(Long myCompanyId, Long providerId);
+	
 	Page<Invoice> findAllByPersonIdAndStatus(Long userId, Status status, Pageable pageable);
 
 	Page<Invoice> findAllByClientIdAndStatus(Long companyId, Status status, Pageable pageable);
