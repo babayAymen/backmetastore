@@ -9,8 +9,10 @@ import com.example.meta.store.werehouse.Enums.Unit;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 @Getter
 @Setter
+@ToString
 public class ArticleCompanyDto extends BaseDto<Long> implements Serializable{
 
 	

@@ -99,8 +99,19 @@ public class InvoiceController {
 		return null;
 	}
 	
+
+	@GetMapping("get_by_payment_paid_status_as_client/{companyId}")
+	public List<InvoiceDto> getAllBuyHistoryByPaidStatusAsClient(@PathVariable Long companyId , @RequestParam PaymentStatus status, @RequestParam int page , @RequestParam int pageSize){
+		Company company = companyService.getCompany();
+		if(company.getId() == companyId || company.getBranches().stream().anyMatch(branch -> branch.getId().equals(companyId))) {			
+			return invoiceService.getAllMyInvoicesAsClientAndPaymentStatus(companyId , status, page , pageSize);
+		}
+		return null;
+	}
+	
+
 	@GetMapping("get_all_my_invoices_not_accepted_as_client/{id}")
-	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsClient(@PathVariable Long id , @RequestParam Status status, @RequestParam int page , @RequestParam int pageSize) {
+	public List<InvoiceDto> getAllMyInvoicesNotAcceptedAsClient(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize) {
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		if(authenticationFilter.accountType == AccountType.USER) {
 			User user = userService.getUser();

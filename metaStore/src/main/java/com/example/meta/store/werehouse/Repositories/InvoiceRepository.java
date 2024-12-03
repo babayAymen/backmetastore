@@ -75,6 +75,8 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 
 	Page<Invoice> findByProviderIdAndStatus(Long companyId, Status status, Pageable pageable);
 
+	Page<Invoice> findByClientIdAndPaid(Long companyId, PaymentStatus status, Pageable pageable);
+
 
 
 

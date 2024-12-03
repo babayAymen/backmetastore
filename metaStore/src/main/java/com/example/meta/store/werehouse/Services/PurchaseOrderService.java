@@ -344,9 +344,6 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	public List<PurchaseOrderLineDto> getAllMyOrdersNotAcceptedAsProvider(Long id, int page, int pageSize) {
 		Pageable pageable  = PageRequest.of(page, pageSize);
 		Page<PurchaseOrderLine> purchaseOrderLines = purchaseOrderLineRepository.findAllNotAcceptedAsProvider(id, Status.INWAITING, pageable);
-		if(purchaseOrderLines.isEmpty()) {
-			throw new RecordNotFoundException("there is no order not accepted");
-		}
 		List<PurchaseOrderLineDto> purchaseOrderLinesDto = new ArrayList<>();
 		
 		for(PurchaseOrderLine i : purchaseOrderLines) {
@@ -362,11 +359,7 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	public List<PurchaseOrderLineDto> getAllMyOrdersNotAcceptedAsClient(Long id, int page, int pageSize) {
 		Pageable pageable  = PageRequest.of(page, pageSize);
 		Page<PurchaseOrderLine> purchaseOrderLines = purchaseOrderLineRepository.findAllNotAcceptedAsClient(id, Status.INWAITING, pageable);
-		if(purchaseOrderLines.isEmpty()) {
-			throw new RecordNotFoundException("there is no order not accepted");
-		}
 		List<PurchaseOrderLineDto> purchaseOrderLinesDto = new ArrayList<>();
-		
 		for(PurchaseOrderLine i : purchaseOrderLines) {
 			PurchaseOrderLineDto dto = purchaseOrderLineMapper.mapToDto(i);
 			purchaseOrderLinesDto.add(dto);
@@ -378,9 +371,6 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 
 	public List<PurchaseOrderLineDto> getAllPurchaseOrdersLineByOrderId(Long id, int page , int pageSize) {
 		List<PurchaseOrderLine> purchaseOrderLine = purchaseOrderLineRepository.findAllByPurchaseorderId(id);
-		if(purchaseOrderLine.isEmpty()) {
-			throw new RecordNotFoundException("there is no purchase order line with order id : "+id);
-		}
 		List<PurchaseOrderLineDto> purchaseOrderLineDtos = new ArrayList<>();
 		for(PurchaseOrderLine i : purchaseOrderLine) {
 			PurchaseOrderLineDto dto = purchaseOrderLineMapper.mapToDto(i);

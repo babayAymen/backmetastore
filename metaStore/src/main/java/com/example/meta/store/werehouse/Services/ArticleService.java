@@ -178,21 +178,10 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		
 	}
 	
-	public List<ArticleCompanyDto> getAllProvidersArticleByProviderId(Company company, Long id, int offset, int pageSize) {
+	public List<ArticleCompanyDto> getAllProvidersArticleByProviderId( Long id, int offset, int pageSize) {
 		List<ArticleCompanyDto> articlesDto = new ArrayList<ArticleCompanyDto>();
-		Page<ArticleCompany> articles = null;
-		Pageable pageable = PageRequest.of(0,20);// a return
-		if(company.getId() != id) {
-			logger.warn("if");
-			for(Company i : company.getBranches()) {
-				if(i.getId() == id) {
-					articles = articleCompanyRepository.findAllByCompanyIdOrderByCreatedDateDesc(id,pageable);		
-				}
-			}
-		}else {
-			logger.warn("else ");
-		 articles = articleCompanyRepository.findAllByCompanyIdOrderByCreatedDateDesc(company.getId(),pageable);
-		}
+		Pageable pageable = PageRequest.of(offset,pageSize);
+		Page<ArticleCompany> articles = articleCompanyRepository.findAllByCompanyIdOrderByCreatedDateDesc(id,pageable);
 		if(articles != null) {
 			List<ArticleCompany> articlesContent = articles.getContent();
 			for(ArticleCompany i : articlesContent) {
@@ -279,8 +268,10 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 //			}
 			Boolean existRelation = articleCompanyRepository.existsByArticleIdAndCompanyId(articleId, provider.getId());
 			if(existRelation) {
+				logger.warn("exsist relation ");
 				return null;
 			}
+			logger.warn("not exsist relation ");
 			Article art = findById(articleId);
 			article1.setArticle(art);
 			if(article1.getProvider() == null || article1.getProvider().getId() == null) {
@@ -296,7 +287,6 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 			}
 			article1.setCommentNumber(0L);
 			article1.setLikeNumber(0L);
-//			article1.setSharedPoint(provider.getUser().getId());
 			if(provider.getIsVisible() == PrivacySetting.ONLY_ME) {	
 			article1.setIsVisible(PrivacySetting.ONLY_ME);
 			}
@@ -318,9 +308,7 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 
 		}
 	
-		public ResponseEntity<ArticleCompanyDto> upDateArticle( MultipartFile file, String article, Company provider) 
-				throws JsonMappingException, JsonProcessingException {
-			ArticleCompanyDto articleDto = objectMapper.readValue(article, ArticleCompanyDto.class);
+		public ResponseEntity<ArticleCompanyDto> upDateArticle( ArticleCompanyDto articleDto, Company provider) {
 			ArticleCompany updatedArticle = articleCompanyMapper.mapToEntity(articleDto);
 			ArticleCompany article1 =  articleCompanyRepository.findById(articleDto.getId()).orElseThrow(() -> new RecordNotFoundException("there is no article with id: "+articleDto.getId()));	
 				 if(!article1.getCompany().equals(provider)) {
@@ -344,9 +332,8 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 			}else {			
 				updatedArticle.setIsVisible(article1.getIsVisible());
 			}
-			updatedArticle.setSharedPoint(provider.getUser().getId());
 			article1 = articleCompanyRepository.save(updatedArticle); // a verifier 
-			return null;
+			return ResponseEntity.ok().body(articleDto);
 			}
 	
 		

@@ -94,9 +94,11 @@ public class ArticleController {
 	
 	@GetMapping("getAllMyArticle/{id}/{offset}/{pageSize}")
 	public List<ArticleCompanyDto> getAllMyArticle(@PathVariable Long id, @PathVariable int offset, @PathVariable int pageSize) {
-		logger.warn("id: "+id+" offset: "+offset+" page size: "+pageSize);
 		Company company = companyService.getCompany();
-		return articleService.getAllProvidersArticleByProviderId(company,id,offset, pageSize);
+		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
+		return articleService.getAllProvidersArticleByProviderId(id,offset, pageSize);
+		}
+		return null;
 	}
 	
 	
@@ -128,8 +130,6 @@ public class ArticleController {
 			 @RequestParam("article") String article,
 			 @PathVariable Long id)
 			throws Exception{
-		logger.warn("c bon and id is :"+id);
-		logger.warn("c bon and article is :"+article);
 		Company provider = companyService.getCompany();
 		return articleService.insertArticle(file,article,provider,id);
 	}
@@ -143,10 +143,10 @@ public class ArticleController {
 	
 	@PutMapping("update")
 	public ResponseEntity<ArticleCompanyDto> upDateArticle(
-			 @RequestParam(value ="file", required = false) MultipartFile file,
-			 @RequestParam("article") String article) throws Exception{
+			 @RequestBody ArticleCompanyDto article){
 		Company provider = companyService.getCompany();
-		return articleService.upDateArticle(file,article, provider);
+		logger.warn("article: "+article.toString());
+		return articleService.upDateArticle(article, provider);
 	}
 	
 

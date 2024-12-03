@@ -256,9 +256,6 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		if(companyId != null) {
 			invoices = invoiceRepository.findAllByClientIdAndStatus(companyId, Status.INWAITING, pageable);
 		}
-		if(invoices.isEmpty()) {
-			throw new RecordNotFoundException("threre is no invoice not accepted");
-		}
 		return mapToListDto(invoices.getContent());
 	}
 
@@ -291,6 +288,14 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 			logger.warn("getAllMyInvoicesAsClientAndStatus "+dto.size());
 			return dto;		
 			}
+	}
+
+	public List<InvoiceDto> getAllMyInvoicesAsClientAndPaymentStatus(Long companyId, PaymentStatus status, int page,int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Invoice> invoices = invoiceRepository.findByClientIdAndPaid(companyId , status, pageable);
+		List<InvoiceDto> dto = mapToListDto(invoices.getContent());
+		logger.warn("getAllMyInvoicesAsProviderAndStatus "+dto.size());
+		return dto;	
 	}
 
 
