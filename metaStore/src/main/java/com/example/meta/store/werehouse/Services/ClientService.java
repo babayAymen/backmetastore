@@ -128,33 +128,7 @@ public class ClientService extends BaseService<Company, Long>{
 		invoiceRepository.save(invoice);			
 	}
 	
-	
-//	public void addExistClient(Long clientId, Type type, Company company) {
-//		Invetation invetationClientCompany = new Invetation();
-//		logger.warn(type+" type is ");
-//		if(type.equals("company")) {
-//			logger.warn("yes it is");
-//			ResponseEntity<Company> client = companyService.getById(clientId);			
-//			if(client.getBody().isVirtual()) {
-//				Optional<ClientProviderRelation> clientCompany = companycRepository.findByClientIdAndProviderId(clientId, company.getId());
-//				clientCompany.get().setDeleted(false);
-//				return;
-//			}
-//			invetationClientCompany.setCompanyReciver(client.getBody());
-//			
-//		}
-//		else {
-//			logger.warn("no in the else ");
-//			User client = userService.findById(clientId).get();
-//			invetationClientCompany.setClient(client);
-//		}
-//		invetationClientCompany.setCompanySender(company);
-//		invetationClientCompany.setStatus(Status.INWAITING);
-//		invetationClientCompany.setType(Type.CLIENT);
-//		
-//		invetationClientProviderRepository.save(invetationClientCompany);
-//	}
-//	
+
 	public List<ClientProviderRelationDto> getAllMyClient(Company company, int page , int pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);;
 		Page<ClientProviderRelation> clients = clientCompanyRRepository.getAllByProviderIdAndIsDeletedFalse(company.getId(), pageable);

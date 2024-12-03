@@ -268,10 +268,8 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 //			}
 			Boolean existRelation = articleCompanyRepository.existsByArticleIdAndCompanyId(articleId, provider.getId());
 			if(existRelation) {
-				logger.warn("exsist relation ");
 				return null;
 			}
-			logger.warn("not exsist relation ");
 			Article art = findById(articleId);
 			article1.setArticle(art);
 			if(article1.getProvider() == null || article1.getProvider().getId() == null) {

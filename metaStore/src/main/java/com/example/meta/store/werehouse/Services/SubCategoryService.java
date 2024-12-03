@@ -6,6 +6,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -137,18 +140,16 @@ public class SubCategoryService extends BaseService<SubCategory, Long>{
 		return subCategoryRepository.findByIdAndCompanyId(id, companyId);
 	}
 	
-	public List<SubCategoryDto> getAllSubCategoryByCompanyIdAndCategoryId(Long categoryId, Long companyId) {
-		
-		return getByCompanyIdAndCategoryId(companyId,categoryId);			
+	public List<SubCategoryDto> getAllSubCategoryByCompanyIdAndCategoryId(Long categoryId, Long companyId, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<SubCategory> subCategory = subCategoryRepository.findAllByCompanyIdAndCategoryId(companyId,categoryId, pageable);
+		List<SubCategoryDto> dtos = mapToSubCategoryDto(subCategory.getContent());
+		return dtos;
 	}
 	
-	private List<SubCategoryDto> getByCompanyIdAndCategoryId(Long id, Long categoryId) {
-		List<SubCategory> subCategory = subCategoryRepository.findAllByCompanyIdAndCategoryId(id,categoryId);
-		if(subCategory.isEmpty()) {
-			throw new RecordNotFoundException("there is no sub category inside this category"+ id +" categ id :"+categoryId);
-		}
+	private List<SubCategoryDto> mapToSubCategoryDto(List<SubCategory> subCategories) {
 		List<SubCategoryDto> listSubCategoryDto = new ArrayList<>();
-		for(SubCategory i: subCategory) {
+		for(SubCategory i: subCategories) {
 			SubCategoryDto subCategoryDto = subCategoryMapper.mapToDto(i);
 			listSubCategoryDto.add(subCategoryDto);
 		}

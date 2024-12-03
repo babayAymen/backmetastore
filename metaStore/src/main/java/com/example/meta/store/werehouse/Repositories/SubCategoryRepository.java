@@ -3,6 +3,8 @@ package com.example.meta.store.werehouse.Repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,7 +21,7 @@ public interface SubCategoryRepository extends BaseRepository<SubCategory, Long>
 
 	Optional<SubCategory> findByLibelleAndCompanyId(String libelle, Long companyId);
 
-	List<SubCategory> findAllByCompanyIdAndCategoryId(Long id, Long categoryId);
+	Page<SubCategory> findAllByCompanyIdAndCategoryId(Long id, Long categoryId, Pageable pageable);
 	/////////////////////////////////////////////////////// future work ///////////////////////////////////////////////////
 	/////////////////////////////////////////////////////// not work ///////////////////////////////////////////////////
 	Optional<SubCategory> findByCodeAndCompanyId(String code, Long id);

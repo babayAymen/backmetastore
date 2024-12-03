@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 
 @Validated
 @RestController
-@RequestMapping("/werehouse/subcategory")
+@RequestMapping("/werehouse/subcategory/")
 @RequiredArgsConstructor
 public class SubCategoryController {
 
@@ -49,7 +49,7 @@ public class SubCategoryController {
 	private final Logger logger = LoggerFactory.getLogger(SubCategoryController.class);
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	
-	@GetMapping("/getbycompany/{id}")
+	@GetMapping("getbycompany/{id}")
 	public ResponseEntity<List<SubCategoryDto>> getSubCategoryByCompany(@PathVariable Long id){
 //		User user = userService.getUser();
 //		if(user.getRoles().stream().anyMatch(role -> role.getName().equals(RoleEnum.ADMIN))) {
@@ -62,7 +62,7 @@ public class SubCategoryController {
 		
 	}
 	
-	@PutMapping("/update")
+	@PutMapping("update")
 	public ResponseEntity<SubCategoryDto> upDateSubCategory(
 			@RequestParam("sousCategory") String sousCategoryDto,
 			@RequestParam(value="file",required=false) MultipartFile file) throws JsonMappingException, JsonProcessingException{
@@ -70,14 +70,14 @@ public class SubCategoryController {
 		return subCategoryService.upDateSubCategory(sousCategoryDto,company,file);
 	}
 	
-	@PostMapping("/add")
+	@PostMapping("add")
 	public ResponseEntity<SubCategoryDto> insertSubCategory(@RequestParam("sousCategory") String sousCategoryDto,
 			@RequestParam(value = "file",required=false) MultipartFile file) throws JsonMappingException, JsonProcessingException{
 		Company company = companyService.getCompany();
 		return subCategoryService.insertSubCategory(sousCategoryDto,company,file);
 	}
 	
-	@GetMapping("/l/{name}")
+	@GetMapping("l/{name}")
 	public ResponseEntity<SubCategoryDto> getSubCategoryById(@PathVariable String name){
 		if(authenticationFilter.accountType == AccountType.COMPANY) {			
 			Company company = companyService.getCompany();
@@ -87,19 +87,19 @@ public class SubCategoryController {
 		
 	}
 	
-	@DeleteMapping("/delete/{id}")
+	@DeleteMapping("delete/{id}")
 	public void deleteSubCategoryById(@PathVariable Long id){
 		Company  company = companyService.getCompany();
 		subCategoryService.deleteSubCategoryById(id,company);
 	}
 	
-	@GetMapping("/{categoryId}/{companyId}")
-	public List<SubCategoryDto> getAllSubCategoriesByCompanyIdAndCategoryId(@PathVariable Long categoryId, @PathVariable Long companyId){
-		ResponseEntity<Company> company = companyService.getById(companyId);
-		if(!company.hasBody()) {
-			throw new RecordNotFoundException("thise company not found");
+	@GetMapping("getbycategory_id/{companyId}")
+	public List<SubCategoryDto> getAllSubCategoriesByCompanyIdAndCategoryId(@PathVariable Long companyId,@RequestParam Long categoryId,@RequestParam int page , @RequestParam int pageSize ){
+		Company company = companyService.getCompany();
+		if(company.getId() == companyId || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(categoryId))) {			
+			return subCategoryService.getAllSubCategoryByCompanyIdAndCategoryId(categoryId, companyId, page , pageSize);
 		}
-		return subCategoryService.getAllSubCategoryByCompanyIdAndCategoryId(categoryId, companyId);
+		return null;
 	}
 
 	
