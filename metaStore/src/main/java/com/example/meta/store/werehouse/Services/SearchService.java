@@ -58,30 +58,30 @@ public class SearchService extends BaseService<SearchHistory, Long> {
 
 	private final Logger logger = LoggerFactory.getLogger(SearchService.class);
 	
-	public List<CompanyDto> getAllContaining(String search, SearchType type, SearchCategory category, Company company, User user) {
-		switch (type) {
-		case PROVIDER: {
-			if(company != null) {		
-			return providerService.getAllProvidersContaining(company.getId(), search,0L);
-			}else {
-				return providerService.getAllProvidersContaining(0L,search, user.getId());
-			}
-		}
-
-		case OTHER : {
-			switch (category) {
-			case COMPANY: {
-				return companyService.getAllCompaniesContainig(user, company, search);
-			}
-
-			default:
-				throw new IllegalArgumentException("Unexpected value: " + category);
-			}
-		}
-		default:
-			throw new IllegalArgumentException("Unexpected value: " + type);
-		}
-	}
+//	public List<CompanyDto> getAllContaining(String search, SearchType type, SearchCategory category, Company company, User user) {
+//		switch (type) {
+//		case PROVIDER: {
+//			if(company != null) {		
+//			return providerService.getAllProvidersContaining(company.getId(), search,0L);
+//			}else {
+//				return providerService.getAllProvidersContaining(0L,search, user.getId());
+//			}
+//		}
+//
+//		case OTHER : {
+//			switch (category) {
+//			case COMPANY: {
+//				return companyService.getAllCompaniesContainig(user, company, search);
+//			}
+//
+//			default:
+//				throw new IllegalArgumentException("Unexpected value: " + category);
+//			}
+//		}
+//		default:
+//			throw new IllegalArgumentException("Unexpected value: " + type);
+//		}
+//	}
 	
 	public List<UserDto> getAllUserContaining(String search, SearchType type, SearchCategory category, Company company, User user) {
 		switch (type) {

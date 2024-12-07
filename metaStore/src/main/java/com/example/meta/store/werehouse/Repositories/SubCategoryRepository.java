@@ -15,7 +15,7 @@ public interface SubCategoryRepository extends BaseRepository<SubCategory, Long>
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	
 	@Query("SELECT a FROM SubCategory a WHERE a.company.id = :companyId")
-	List<SubCategory> findAllByCompanyId(@Param("companyId") Long companyId);
+	Page<SubCategory> findAllByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
 
 	Optional<SubCategory> findByIdAndCompanyId(Long id, Long companyId);
 

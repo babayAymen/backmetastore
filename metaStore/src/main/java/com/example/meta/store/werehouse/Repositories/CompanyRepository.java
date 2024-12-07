@@ -3,6 +3,8 @@ package com.example.meta.store.werehouse.Repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.meta.store.Base.Repository.BaseRepository;
@@ -47,18 +49,20 @@ public interface CompanyRepository extends BaseRepository<Company, Long> {
 	List<Company> findAllByIsVisibleAndNameContainingOrCodeContaining(String search, Long providerId);
 
 	@Query("SELECT c FROM Company c WHERE"
-			+ " (c.name LIKE %:search% OR c.code LIKE %:search%) AND "
-			+ "  (c.isVisible = 2 OR"
-			+ " (c.isVisible = 1 AND"
-			+ " ((EXISTS (SELECT pc FROM ClientProviderRelation pc WHERE (pc.provider = c AND (pc.client.id = :companyId OR pc.person.id = :userId)))) Or"
-			+ " ( EXISTS (SELECT pc FROM ClientProviderRelation pc WHERE (pc.client = c AND (pc.provider.id = :companyId OR pc.person.id = :userId)))))"
+			+ " (c.name LIKE %:search% OR c.code LIKE %:search%) "
+			+ " AND (c.isVisible = 2 "
+			+ " OR (c.isVisible = 1 "
+			+ " AND ((EXISTS (SELECT pc FROM ClientProviderRelation pc WHERE (pc.provider = c AND (pc.client.id = :companyId OR pc.person.id = :userId)))) "
+			+ " OR ( EXISTS (SELECT pc FROM ClientProviderRelation pc WHERE (pc.client = c AND (pc.provider.id = :companyId OR pc.person.id = :userId)))))"
 			+ ") "
-			+ ")")
-	List<Company> getAllCompaniesContaining(Long userId , Long companyId, String search);
+			+ ")"
+			)
+	Page<Company> getAllCompaniesContaining(Long userId , Long companyId, String search, Pageable pageable);
 
 	@Query("SELECT p FROM Company p JOIN p.clientCompany c WHERE (c.id = :companyId AND c.isDeleted = false) AND "
 			+ "(p.name LIKE %:search% OR p.code LIKE %:search%)")
 	List<Company> findAllMyByNameContainingOrCodeContainingAndProviderId(String search, Long companyId);
+
 	
 
 }

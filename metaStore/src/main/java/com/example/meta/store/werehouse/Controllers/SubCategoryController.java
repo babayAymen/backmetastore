@@ -1,7 +1,6 @@
 package com.example.meta.store.werehouse.Controllers;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
-import com.example.meta.store.Base.Security.Entity.User;
-import com.example.meta.store.Base.Security.Enums.RoleEnum;
-import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.SubCategoryDto;
 import com.example.meta.store.werehouse.Entities.Company;
-import com.example.meta.store.werehouse.Entities.SubCategory;
 import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Services.CompanyService;
 import com.example.meta.store.werehouse.Services.SubCategoryService;
@@ -50,15 +44,8 @@ public class SubCategoryController {
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	
 	@GetMapping("getbycompany/{id}")
-	public ResponseEntity<List<SubCategoryDto>> getSubCategoryByCompany(@PathVariable Long id){
-//		User user = userService.getUser();
-//		if(user.getRoles().stream().anyMatch(role -> role.getName().equals(RoleEnum.ADMIN))) {
-//			Company company = companyService.getCompany().orElseThrow(() -> new RecordNotFoundException("you don't have a company"));
-//		if(company.getId() != id && company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-//		}
-//		}
-		Company company = companyService.getCompany();
-		return subCategoryService.getSubCategoryByCompany(company);
+	public List<SubCategoryDto> getSubCategoryByCompany(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
+		return subCategoryService.getSubCategoryByCompany(id, page , pageSize);
 		
 	}
 	

@@ -22,11 +22,11 @@ public interface PurchaseOrderLineRepository extends BaseRepository<PurchaseOrde
 	
 	List<PurchaseOrderLine> findAllByPurchaseorderId(Long id);
 
-	@Query("SELECT p FROM PurchaseOrderLine p WHERE p.invoice.id = :invoiceId AND p.purchaseorder.company.id = :companyId")
-	List<PurchaseOrderLine> findAllByInvoiceIdAndCompanyId(Long invoiceId, Long companyId);
+	@Query("SELECT p FROM PurchaseOrderLine p WHERE p.invoice.id = :invoiceId AND (p.invoice.provider.id = :companyId OR p.invoice.client.id = :companyId)")
+	Page<PurchaseOrderLine> findAllByInvoiceIdAndCompanyId(Long invoiceId, Long companyId, Pageable pageable);
 
 	@Query("SELECT p FROM PurchaseOrderLine p WHERE p.invoice.id = :invoiceId AND p.purchaseorder.person.id = :userId")
-	List<PurchaseOrderLine> findByInvoiceIdAndPersonId(Long invoiceId, Long userId);
+	Page<PurchaseOrderLine> findByInvoiceIdAndPersonId(Long invoiceId, Long userId, Pageable pageable);
 
 	@Query("SELECT p FROM PurchaseOrderLine p WHERE p.purchaseorder.person.id = :id AND p.status = :status")
 	Page<PurchaseOrderLine> findAllNotAcceptedAsClient(Long id, Status status, Pageable pageable);

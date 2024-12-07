@@ -9,6 +9,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -42,16 +45,15 @@ public class InventoryService extends BaseService<Inventory, Long> {
 	private final Logger logger = LoggerFactory.getLogger(InventoryService.class);
 
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
-	public List<InventoryDto> getInventoryByCompanyId(Long companyId) {
-		List<Inventory> inventory = inventoryRepository.findByCompanyId(companyId);
-		if(inventory == null) {
-			throw new RecordNotFoundException("You Dont Have A Company Please Create One If You Need");
-		}
+	public List<InventoryDto> getInventoryByCompanyId(Long companyId, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Inventory> inventory = inventoryRepository.findByCompanyId(companyId, pageable);
 		List<InventoryDto> inventoriesDto = new ArrayList<>();
 		for(Inventory i:inventory) {
 			InventoryDto inventoryDto = inventoryMapper.mapToDto(i);
 			inventoriesDto.add(inventoryDto);
 		}
+		logger.warn("inventory size "+inventoriesDto.size());
 		return inventoriesDto;
 	}
 	public void addQuantity(ArticleCompany article, Double quantity, Company company) {

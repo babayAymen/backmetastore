@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.meta.store.werehouse.Dtos.CommandLineDto;
@@ -39,10 +40,10 @@ public class CommandLineController {
 	private final Logger logger = LoggerFactory.getLogger(CommandLineController.class);
 
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
-	@PostMapping("{type}/{invoicecode}/{clientid}/{discount}/{clientType}/{invoiceMode}")
+	@PostMapping("{type}/{clientid}")
 	public ResponseEntity<InputStreamResource> addCommandLine(@RequestBody  List<CommandLineDto> commandLinesDto,
-			@PathVariable Long invoicecode, @PathVariable String type, @PathVariable Long clientid, @PathVariable Double discount,
-			@PathVariable AccountType clientType,@PathVariable InvoiceMode invoiceMode)
+			@RequestParam Long invoiceCode, @RequestParam String type, @PathVariable Long clientid, @RequestParam Double discount,
+			@RequestParam AccountType clientType,@RequestParam InvoiceMode invoiceMode)
 					throws JsonProcessingException {
 		Company company = companyService.getCompany();
 		return commandLineService.insertLine(commandLinesDto, company,clientid,discount,type,clientType,invoiceMode);

@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,14 +17,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
 import com.example.meta.store.Base.Security.Entity.User;
-import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
+import com.example.meta.store.werehouse.Dtos.ClientProviderRelationDto;
 import com.example.meta.store.werehouse.Dtos.CompanyDto;
+import com.example.meta.store.werehouse.Entities.ClientProviderRelation;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.SearchType;
 import com.example.meta.store.werehouse.Services.CompanyService;
-import com.example.meta.store.werehouse.Services.WorkerService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -122,14 +121,20 @@ public class CompanyController {
 		return companyService.getBranches(company);
 	}
 	
-	@GetMapping("get_companies_containing/{search}")
-	public List<CompanyDto> getAllCompaniesContaining(@PathVariable String search){
-		Company company = null;
-		User user = userService.getUser();
-		if(authenticationFilter.accountType == AccountType.COMPANY) {			
-			company = companyService.getCompany();
+	@GetMapping("get_companies_containing/{id}")
+	public List<CompanyDto> getAllCompaniesContaining(@PathVariable Long id, @RequestParam String search , @RequestParam SearchType searchType, @RequestParam int page , @RequestParam int pageSize ){
+		if(authenticationFilter.accountType == AccountType.COMPANY) {
+			Company company = companyService.getCompany();
+			if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
+				return companyService.getAllCompaniesContainig(null,company, search, page , pageSize, searchType);
+			}
 		}
-		return companyService.getAllCompaniesContainig(user,company, search);
+		if(authenticationFilter.accountType == AccountType.USER) {
+			User user = userService.getUser();
+			return companyService.getAllCompaniesContainig(user,null, search, page , pageSize, searchType);	
+		}
+		return null;
+		
 	}
 	
 	@GetMapping("update_location/{latitude}/{longitude}")

@@ -8,6 +8,9 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,12 +26,15 @@ import com.example.meta.store.Base.Security.Service.RoleService;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.Base.Service.BaseService;
 import com.example.meta.store.werehouse.Controllers.CompanyController;
+import com.example.meta.store.werehouse.Dtos.ClientProviderRelationDto;
 import com.example.meta.store.werehouse.Dtos.CompanyDto;
 import com.example.meta.store.werehouse.Entities.Category;
 import com.example.meta.store.werehouse.Entities.ClientProviderRelation;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.InvoiceType;
 import com.example.meta.store.werehouse.Enums.PrivacySetting;
+import com.example.meta.store.werehouse.Enums.SearchType;
+import com.example.meta.store.werehouse.Mappers.ClientCompanyRMapper;
 import com.example.meta.store.werehouse.Mappers.CompanyMapper;
 import com.example.meta.store.werehouse.Repositories.ClientProviderRelationRepository;
 import com.example.meta.store.werehouse.Repositories.CompanyRepository;
@@ -47,6 +53,9 @@ public class CompanyService extends BaseService<Company, Long> {
 	private final CompanyRepository companyRepository;
 
 	private final ClientProviderRelationRepository clientRRepository;
+	
+	private final ClientCompanyRMapper clientProviderRelationMapper;
+	
 	private final CompanyMapper companyMapper;
 
 	private final RoleService roleService;
@@ -297,23 +306,30 @@ public class CompanyService extends BaseService<Company, Long> {
 	}
 
 
-	public List<CompanyDto> getAllCompaniesContainig(User user ,Company company, String search) {
+	public List<CompanyDto> getAllCompaniesContainig(User user ,Company company, String search, int page , int pageSize, SearchType searchType) {
+		Pageable pageable = PageRequest.of(page, pageSize);
 		List<Company> companies = new ArrayList<>();
 		if(company == null) {			
-			companies = companyRepository.getAllCompaniesContaining(user.getId(),null, search);
+			Page<Company> pageCompany = companyRepository.getAllCompaniesContaining(user.getId(),null, search, pageable);
+			companies.addAll(pageCompany.getContent());
 			
-		}else {			
-			companies = companyRepository.getAllCompaniesContaining(user.getId(),company.getId(),search);
+		}else {
+			if(searchType == SearchType.CLIENT) {
+				Page<Company> pageCompany = clientRRepository.findAllByProviderId(company.getId(), search , pageable);
+				companies.addAll(pageCompany.getContent());
+			}
+			if(searchType == SearchType.PROVIDER) {
+				Page<Company> pageCompany = clientRRepository.findAllByClientId(company.getId(), search , pageable);
+				companies.addAll(pageCompany.getContent());
+			}
+			if(searchType == SearchType.OTHER) {				
+			Page<Company> pageCompany = companyRepository.getAllCompaniesContaining(null,company.getId(),search, pageable);
+			companies.addAll(pageCompany.getContent());
+			}
 		}
-		if(companies.isEmpty()) {	
-			throw new RecordNotFoundException("there is no company contain : "+search);
-		}
-		List<CompanyDto> companiesDto = new ArrayList<>();
-		for(Company i : companies) {
-			CompanyDto companyDto = companyMapper.mapToDto(i);
-			companiesDto.add(companyDto);
-		}
-		return companiesDto;
+		List<CompanyDto> response = mapToCompanyDto(companies);
+		return response;
+		
 	}
 
 	@PreAuthorize("hasRole('ROLE_COMPANY')")
@@ -341,6 +357,24 @@ public class CompanyService extends BaseService<Company, Long> {
 		company.setLatitude(latitude);
 		company.setLongitude(longitude);
 		companyRepository.save(company);
+	}
+	
+	private List<ClientProviderRelationDto> mapRelationToDto(List<ClientProviderRelation> relation){
+		List<ClientProviderRelationDto> companiesDto = new ArrayList<>();
+		for(ClientProviderRelation i : relation) {
+			ClientProviderRelationDto companyDto = clientProviderRelationMapper.mapToDto(i);
+			companiesDto.add(companyDto);
+		}
+		return companiesDto;
+	}
+	
+	private List<CompanyDto> mapToCompanyDto(List<Company> companyies){
+		List<CompanyDto> companiesDto = new ArrayList<>();
+		for(Company i : companyies) {
+			CompanyDto companyDto = companyMapper.mapToDto(i);
+			companiesDto.add(companyDto);
+		}
+		return companiesDto;
 	}
 
 

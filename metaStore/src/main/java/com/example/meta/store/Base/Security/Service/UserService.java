@@ -9,6 +9,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -221,5 +223,18 @@ var jwtToken = jwtService.generateToken(user);
 	
 	public UserDto mapToDto(User user) {
 		return userMapper.mapToDto(user);
+	}
+	
+	public List<UserDto> mapListToDto(List<User> users){
+		List<UserDto> usersDto = new ArrayList<>();
+		for(User i : users) {
+			usersDto.add(mapToDto(i));
+		}
+		return usersDto;
+	}
+
+	public Page<User> findByUserNameContaining(String search, Pageable pageable) {
+		Page<User> users = userRepository.findAllByUsernameContaining(search, pageable);
+		return users;
 	}
 }

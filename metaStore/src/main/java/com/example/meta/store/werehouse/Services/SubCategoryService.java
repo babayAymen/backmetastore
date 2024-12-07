@@ -50,22 +50,19 @@ public class SubCategoryService extends BaseService<SubCategory, Long>{
 	private final Logger logger = LoggerFactory.getLogger(SubCategoryService.class);
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	
-	public ResponseEntity<List<SubCategoryDto>> getSubCategoryByCompany(Company company) {
-		List<SubCategory> subCategorys = getAllByCompanyId(company.getId());
-		if(subCategorys.isEmpty()) {
-			throw new RecordNotFoundException("there is no subCategory");
-		}
+	public List<SubCategoryDto> getSubCategoryByCompany(Long id, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<SubCategory> subCategorys = subCategoryRepository.findAllByCompanyId(id, pageable);
 		List<SubCategoryDto> subCategorysDto = new ArrayList<>();
-		for(SubCategory i : subCategorys) {
+		for(SubCategory i : subCategorys.getContent()) {
 			SubCategoryDto subCategoryDto = subCategoryMapper.mapToDto(i);
 			subCategorysDto.add(subCategoryDto);
 		}
-		return ResponseEntity.ok(subCategorysDto);
+		logger.warn(id+" sub category size : "+subCategorysDto.size());
+		return subCategorysDto;
 	}
 
-	private List<SubCategory> getAllByCompanyId(Long companyId) {
-		return subCategoryRepository.findAllByCompanyId(companyId);
-	}
+
 	
 	public ResponseEntity<SubCategoryDto> upDateSubCategory( String dto, Company company, MultipartFile file) throws JsonMappingException, JsonProcessingException {
 		SubCategoryDto subCategoryDto = objectMapper.readValue(dto, SubCategoryDto.class);

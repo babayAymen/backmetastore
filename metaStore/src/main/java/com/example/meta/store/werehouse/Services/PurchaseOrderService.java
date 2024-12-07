@@ -318,19 +318,8 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	}
 
 
+	private List<PurchaseOrderLineDto> mapToPurchaseOrderLineDto(List<PurchaseOrderLine> purchaseOrdersLine){
 
-	public List<PurchaseOrderLineDto> getAllPurchaseOrderLinesByInvoice(Long invoiceId, Long companyId, Long userId) {
-		
-		List<PurchaseOrderLine> purchaseOrdersLine = new ArrayList<>();
-		if(companyId != null) {
-			purchaseOrdersLine =	purchaseOrderLineRepository.findAllByInvoiceIdAndCompanyId(invoiceId, companyId);
-		}
-		if(userId != null) {
-			purchaseOrdersLine = purchaseOrderLineRepository.findByInvoiceIdAndPersonId(invoiceId, userId);
-		}
-		if(purchaseOrdersLine.isEmpty()) {
-			throw new RecordNotFoundException("there is no order with this invoice");
-		}
 		List<PurchaseOrderLineDto> purchaseOrderLineDtos = new ArrayList<>();
 		for(PurchaseOrderLine i : purchaseOrdersLine) {
 			PurchaseOrderLineDto purchaseOrderLineDto = purchaseOrderLineMapper.mapToDto(i);
@@ -338,8 +327,6 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 		}
 		return purchaseOrderLineDtos;
 	}
-
-
 
 	public List<PurchaseOrderLineDto> getAllMyOrdersNotAcceptedAsProvider(Long id, int page, int pageSize) {
 		Pageable pageable  = PageRequest.of(page, pageSize);
@@ -379,9 +366,24 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 		return purchaseOrderLineDtos;
 	}
 
-//	private double round(double value) {
-//	    return Math.round(value * 100.0) / 100.0; 
-//	}
+
+
+	public List<PurchaseOrderLineDto> getAllPurchaseOrderLinesByInvoice(Long invoiceId, Long companyId, Long userId, int page,	int pageSize ) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		List<PurchaseOrderLineDto> purchaseOrderLineDto = new ArrayList<>();
+		if(companyId != null) {
+		Page<PurchaseOrderLine>	purchaseOrdersLine = purchaseOrderLineRepository.findAllByInvoiceIdAndCompanyId(invoiceId, companyId, pageable);
+		purchaseOrderLineDto = mapToPurchaseOrderLineDto(purchaseOrdersLine.getContent());
+		}
+		if(userId != null) {
+			Page<PurchaseOrderLine> purchaseOrdersLine = purchaseOrderLineRepository.findByInvoiceIdAndPersonId(invoiceId, userId, pageable);
+			purchaseOrderLineDto = mapToPurchaseOrderLineDto(purchaseOrdersLine.getContent());
+		}
+		logger.warn("purchase order line size :" +purchaseOrderLineDto.size());
+		return purchaseOrderLineDto;
+		
+	}
+
 
 
 	

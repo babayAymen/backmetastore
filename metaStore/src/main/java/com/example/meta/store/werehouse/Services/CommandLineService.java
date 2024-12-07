@@ -102,6 +102,7 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 				invoice.setStatus(Status.ACCEPTED);
 			}		}
 		if(clientType == AccountType.USER) {
+			logger.warn("person id "+clientId + " provider id "+company.getId());
 			clientCompany = clientCompanyRRepository.findByPersonIdAndProviderId(clientId, company.getId()).get();
 		}
 		Double defference = minesTwoValue(totTtc, invoice.getPrix_invoice_tot()!= null ? invoice.getPrix_invoice_tot() : 0.0);
@@ -122,7 +123,7 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 		invoiceService.insert(invoice);
 		inventoryService.impacteInvoice(company,commandLines);
 		clientCompany.setMvt(mvt);
-		if (type.equals("pdf-save-client") ) {	
+		if (type.equals("pdf-save-clien") ) {	
 			return invoiceService.export(company,commandLines);
 		}
 		return null;

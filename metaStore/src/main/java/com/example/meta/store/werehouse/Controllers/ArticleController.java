@@ -24,7 +24,6 @@ import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.ArticleCompanyDto;
 import com.example.meta.store.werehouse.Dtos.ArticleDto;
 import com.example.meta.store.werehouse.Dtos.CommentDto;
-import com.example.meta.store.werehouse.Entities.Article;
 import com.example.meta.store.werehouse.Entities.ArticleCompany;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.AccountType;
@@ -193,14 +192,19 @@ public class ArticleController {
 		return commentService.getAllCommentsByArticleId(articleId);
 	}
 	
-	@GetMapping("search/{articlenamecontaining}/{type}")
-	public List<ArticleCompanyDto> getByNameContaining(@PathVariable String articlenamecontaining , @PathVariable SearchType type){
-		User user = userService.getUser();
-		Long companyId = null;
+	@GetMapping("search/{id}")
+	public List<ArticleCompanyDto> getByNameContaining(@PathVariable Long id ,@RequestParam String search , @RequestParam SearchType searchType, @RequestParam int page , @RequestParam int pageSize){
+			Long companyId = null;
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
-			companyId  = companyService.getCompany().getId();	
+			Company company  = companyService.getCompany();	
+			companyId = company.getId();
+			if((company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) && searchType == SearchType.MY) {
+				return articleService.getMyArticleContaining(id, search, page , pageSize);
+			}
+			
 		}
-		return articleService.getByNameContaining(articlenamecontaining,companyId, user.getId(), type);
+		User user = userService.getUser();
+		return articleService.getByNameContaining(companyId , user.getId(), search , page, pageSize );
 	}
 	
 	@GetMapping("get_articles_by_category/{id}")
@@ -214,7 +218,12 @@ public class ArticleController {
 		Company company = companyService.getCompany();
 		return articleService.getArticleByBarcode(company.getId(), barcode);
 	}
-
+	
+	@GetMapping("get_company_article_by_company_id/{companyId}")
+	public List<ArticleCompanyDto> getAllCompanyArticles(@PathVariable Long companyId , @RequestParam int page , @RequestParam int pageSize){
+		return articleService.getAllCompanyArticlesByCompanyId(companyId , page, pageSize);
+	}
+ 
 }
 
 

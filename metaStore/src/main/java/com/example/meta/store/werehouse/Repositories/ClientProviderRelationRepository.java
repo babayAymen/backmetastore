@@ -40,6 +40,8 @@ public interface ClientProviderRelationRepository extends BaseRepository<ClientP
 
 	Optional<ClientProviderRelation> findByProviderIdAndClientIdAndIsDeletedTrue(Long providerId, Long clientId);
 
+	@Query("SELECT r FROM ClientProviderRelation r WHERE (r.client.id = :clientId AND r.provider.id = :providerId) OR"
+			+ " (r.client.id = :providerId AND r.provider.id = :clientId)")
 	Optional<ClientProviderRelation> findByClientIdAndProviderId(Long clientId, Long providerId);
 //	
 //	@Query("SELECT r FROM ClientProviderRelation r WHERE (r.client.id = :id1 AND r.provider.id = :id2) OR (r.client.id = :id2 AND r.provider.id = :id1) ")
@@ -89,7 +91,21 @@ public interface ClientProviderRelationRepository extends BaseRepository<ClientP
 		       ")")
 		List<User> findByMyUserContaining(@Param("search") String search, @Param("id") Long id);
 	
+
 	Optional<ClientProviderRelation> findByPersonIdAndProviderId(Long clientId, Long id);
+	
+	Optional<ClientProviderRelation> findByClientIdOrProviderId(Long companyId,Long providerId);
+	
+	@Query("SELECT r.client FROM ClientProviderRelation r WHERE (r.provider.id = :id) AND (r.isDeleted = false)"
+			+ " AND (r.client.name LIKE %:search% OR r.client.code LIKE %:search%)")
+	Page<Company> findAllByProviderId(Long id, String search, Pageable pageable);
+
+	@Query("SELECT r.provider FROM ClientProviderRelation r WHERE (r.client.id = :id) AND (r.isDeleted = false)"
+			+ " AND (r.provider.name LIKE %:search% OR r.provider.code LIKE %:search%)")
+	Page<Company> findAllByClientId(Long id, String search, Pageable pageable);
+	
+	@Query("SELECT r.person FROM ClientProviderRelation r WHERE r.provider.id = :id AND r.person.username LIKE %:search% ")
+	Page<User> findByUserNameContaining(Long id, String search, Pageable pageable);
 	
 
 	

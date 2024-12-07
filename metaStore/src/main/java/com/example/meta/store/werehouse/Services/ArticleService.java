@@ -378,18 +378,13 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 
 		
 	/////////////////////////////////////// future work ////////////////////////////////////////////////////////
-	public List<ArticleCompanyDto> getByNameContaining(String articlenamecontaining, Long providerId, Long userId, SearchType type) {
-		List<ArticleCompany> article = new ArrayList<>();
-				if(type == SearchType.OTHER) {					
-		article = articleCompanyRepository.findAllByLibelleAndProviderIdContaining(articlenamecontaining,providerId, userId);
-				}else {
-					article = articleCompanyRepository.findAllMyByLibeleContaining(articlenamecontaining,providerId);
-				}
-		
-		if(!article.isEmpty()) {
-	List<ArticleCompanyDto> articleDto = new ArrayList<>();
-	Boolean isFav = false;
-	for(ArticleCompany i : article) {
+	public List<ArticleCompanyDto> getByNameContaining( Long providerId, Long userId,String articlenamecontaining, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);				
+		Page<ArticleCompany> article = articleCompanyRepository.findAllByLibelleAndProviderIdContaining(articlenamecontaining,providerId, userId,pageable);
+		List<ArticleCompanyDto> articleDto = new ArrayList<>();
+			if(!article.isEmpty()) {
+			Boolean isFav = false;
+			for(ArticleCompany i : article.getContent()) {
 		if(providerId == null) {
 			isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),userId);
 		}
@@ -401,9 +396,8 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 			articleDto.add(artDto);
 	}
 	logger.warn(articleDto.size()+" size article contain");
-	return articleDto;
 	}
-		throw new RecordNotFoundException("there is no record cointaining "+articlenamecontaining +" provide id: "+providerId);
+		return articleDto;
 
 	}
 
@@ -731,8 +725,30 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		return articleCompanyDto;
 	}
 
+	public List<ArticleCompanyDto> getMyArticleContaining(Long id, String search, int page, int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<ArticleCompany> article = articleCompanyRepository.findAllByCompanyIdAndLibelleContaining(id , search , pageable);
+		List<ArticleCompanyDto> response = mapArticleCompanyListToDto(article.getContent());
+		return response;
+	}
 
 
+
+	private List<ArticleCompanyDto> mapArticleCompanyListToDto(List<ArticleCompany> articles){
+		List<ArticleCompanyDto> articlesDto = new ArrayList<>();
+		for(ArticleCompany i : articles) {
+			ArticleCompanyDto articleDto = articleCompanyMapper.mapToDto(i);
+			articlesDto.add(articleDto);
+		}
+		return articlesDto;
+	}
+
+	public List<ArticleCompanyDto> getAllCompanyArticlesByCompanyId(Long companyId, int page, int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<ArticleCompany> articleCompany = articleCompanyRepository.findByCompanyId(companyId , pageable);
+		List<ArticleCompanyDto> articlesCompanyDto = mapArticleCompanyListToDto(articleCompany.getContent());
+		return articlesCompanyDto;
+	}
 
 
 	

@@ -201,7 +201,7 @@ public class ClientService extends BaseService<Company, Long>{
 	}
 		
 
-	public List<ClientProviderRelationDto> getAllMyContaining(String search,Company company, SearchCategory category, int page , int pageSize) {
+	public List<ClientProviderRelationDto> getAllMyContaining(String search,Company company, int page , int pageSize) {
 		logger.warn("id company from service "+company.getId());
 		Pageable pageable = PageRequest.of(page, pageSize);
 		Page<ClientProviderRelation> clientProviderRelation = clientCompanyRRepository.findByMyCompanyAndUserContaining(search, company.getId(), pageable);
@@ -209,17 +209,9 @@ public class ClientService extends BaseService<Company, Long>{
 		List<ClientProviderRelation> response = new ArrayList<>();
 		response.addAll(clientProviderRelation.getContent());
 		response.addAll(peronProviderRelation.getContent());
-		List<ClientProviderRelationDto> clientProviderDto = new ArrayList<>();
-		for(ClientProviderRelation i : response) {
-			ClientProviderRelationDto dto = clientCompanyMapper.mapToDto(i);
-			clientProviderDto.add(dto);
-			logger.warn(clientProviderDto.size()+" size of return client provider relation "+i.getId());
-		}
-		return clientProviderDto;
+		return mapToDto(response);
 
 	}
-	
-	
 	
 	
 	
@@ -332,13 +324,35 @@ public class ClientService extends BaseService<Company, Long>{
 		}
 	return null;
 	}
+
+
+	public List<UserDto> getAllPersonContaining(String search,int page, int pageSize) {
+
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<User> users = userService.findByUserNameContaining(search, pageable);
+		List<UserDto> response = userService.mapListToDto(users.getContent());
+		return response;
+	}
 	
-	/////////////////////////////////////////////////////// not work ///////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	private List<ClientProviderRelationDto> mapToDto(List<ClientProviderRelation> response){
+		List<ClientProviderRelationDto> clientProviderDto = new ArrayList<>();
+		for(ClientProviderRelation i : response) {
+			ClientProviderRelationDto dto = clientCompanyMapper.mapToDto(i);
+			clientProviderDto.add(dto);
+			logger.warn(clientProviderDto.size()+" size of return client provider relation "+i.getId());
+		}
+		return clientProviderDto;
+	}
 
 
-
+	public List<UserDto> getAllMyPersonContaining(String search, Long id, int page, int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<User> user = clientCompanyRRepository.findByUserNameContaining(id, search, pageable);
+		List<UserDto> userDto = userService.mapListToDto(user.getContent());
+		return userDto;
+	}
 	
 	
 	

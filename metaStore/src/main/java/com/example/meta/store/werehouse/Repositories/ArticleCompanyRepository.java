@@ -80,7 +80,7 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 			+ " AND EXISTS (SELECT 1 FROM ClientProviderRelation cc WHERE"
 			+ " (cc.client.id = :providerId OR cc.provider.id = :providerId OR cc.person.id = :userId))))"
 			)
-	List<ArticleCompany> findAllByLibelleAndProviderIdContaining(String libelle, Long providerId, Long userId);
+	Page<ArticleCompany> findAllByLibelleAndProviderIdContaining(String libelle, Long providerId, Long userId, Pageable pageable);
 
 	@Query("SELECT a FROM ArticleCompany a WHERE "
 			+ " (a.article.libelle LIKE %:libelle% OR a.article.code LIKE %:libelle%)"
@@ -130,6 +130,11 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 
 	@Query("SELECT a FROM ArticleCompany a WHERE a.company.id = :id AND a.article.barcode = :barcode")
 	ArticleCompany findByBarcodeAndCompanyId(String barcode, Long id);
+
+	@Query("SELECT a FROM ArticleCompany a WHERE a.company.id = :id AND a.article.libelle LIKE %:search%")
+	Page<ArticleCompany> findAllByCompanyIdAndLibelleContaining(Long id, String search, Pageable pageable);
+
+	Page<ArticleCompany> findByCompanyId(Long companyId, Pageable pageable);
 	
 
 	

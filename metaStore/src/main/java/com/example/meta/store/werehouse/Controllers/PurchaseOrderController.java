@@ -121,19 +121,6 @@ public class PurchaseOrderController {
 		purchaseOrderService.UpdatePurchaseOrderLine(purchaseOrderLineDto,null,user.getId());
 	} 
 
-	@GetMapping("get_all_by_invoice/{invoiceId}")
-	public List<PurchaseOrderLineDto> getAllPurchaseOrderLinesByInvoice(@PathVariable Long invoiceId){
-		logger.warn("getAllPurchaseOrderLinesByInvoice");
-		if(authenticationFilter.accountType == AccountType.COMPANY) {
-			Company company = companyService.getCompany();
-		return purchaseOrderService.getAllPurchaseOrderLinesByInvoice(invoiceId, company.getId(), null);
-		}
-		if(authenticationFilter.accountType == AccountType.USER) {
-			User user = userService.getUser();
-			return purchaseOrderService.getAllPurchaseOrderLinesByInvoice(invoiceId, null, user.getId());
-		}
-		return null;
-	}
 
 	@GetMapping("get_all_my_orders_not_accepted/{id}")
 	public List<PurchaseOrderLineDto> getAllMyOrdersNotAccepted(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
@@ -147,7 +134,7 @@ public class PurchaseOrderController {
 			User user = userService.getUser();
 			return purchaseOrderService.getAllMyOrdersNotAcceptedAsClient(user.getId(), page,pageSize);
 		}
-		logger.warn("return null for getAllMyOrdersNotAccepted id: "+id);
+		logger.warn("return null for getAllMyOrdersNotAccepted id: "+id+" andaccount type : "+authenticationFilter.accountType);
 		return null;
 	}
 	
@@ -155,5 +142,22 @@ public class PurchaseOrderController {
 	public List<PurchaseOrderLineDto> getAllPurchaseOrdersLineByOrderId(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
 		return purchaseOrderService.getAllPurchaseOrdersLineByOrderId(id,page , pageSize);
 	}
+	
+	@GetMapping("get_purchaseorder_line_by_invoice_id/{companyId}")
+	public List<PurchaseOrderLineDto> getAllMyOrdersLinesByInvoiceId(@PathVariable Long companyId , @RequestParam Long invoiceId , @RequestParam int page , @RequestParam int pageSize){
+		if(authenticationFilter.accountType == AccountType.COMPANY) {
+			Company company = companyService.getCompany();
+			if(company.getId() == companyId || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(companyId))) {
+				return purchaseOrderService.getAllPurchaseOrderLinesByInvoice(invoiceId, company.getId(), null, page, pageSize);
+			}
+		}
+		if(authenticationFilter.accountType == AccountType.USER) {
+			User user = userService.getUser();
+			return purchaseOrderService.getAllPurchaseOrderLinesByInvoice(invoiceId, null, user.getId(), page , pageSize);
+		}
+		
+		return null;
+	}
+
 	
 }

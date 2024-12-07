@@ -3,6 +3,8 @@ package com.example.meta.store.Base.Security.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.meta.store.Base.Repository.BaseRepository;
@@ -23,6 +25,10 @@ public interface UserRepository extends BaseRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.username like %:search%") //JOIN u.roles r WHERE r.id = 2 AND
 	List<User> findAllByUsernameContainingAndRoles(String search);
+
+
+    @Query("SELECT u FROM User u WHERE u.username like %:search%")
+	Page<User> findAllByUsernameContaining(String search, Pageable pageable);
     
 
 
