@@ -50,10 +50,10 @@ public class CommandLineController {
 		
 	}
 	
-	@GetMapping("getcommandline/{invoiceId}")
-	public List<CommandLineDto> getCommandLines(@PathVariable Long invoiceId){
-		logger.warn("getcommand line by invoice id"+invoiceId);
-		return commandLineService.getCommandLines(invoiceId);
+	@GetMapping("get_command_line/{companyId}")
+	public List<CommandLineDto> getCommandLines(@PathVariable Long companyId, @RequestParam Long invoiceId , @RequestParam int page , @RequestParam int pageSize){
+	
+		return commandLineService.getCommandLines(invoiceId, page, pageSize);
 	}
 	
 

@@ -12,8 +12,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -103,19 +105,17 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 	
-	public List<PaymentForProvidersDto> getAllMyPayments(Long id , int page , int pageSize){
-		Pageable pageable = PageRequest.of(page, pageSize);
+	public Page<PaymentForProvidersDto> getAllMyPayments(Long id , int page , int pageSize){
+		Sort sort = Sort.by(Sort.Direction.ASC,"id");
+		Pageable pageable = PageRequest.of(page, pageSize,sort);
 			Page<PaymentForProviders>paymentForProviders = paymentForProvidersRepository.getPaymentForProvidersAsCompany(id, pageable);
-		if(paymentForProviders.isEmpty()) {
-			throw new RecordNotFoundException("there is no payment");
-		}
-		List<PaymentForProvidersDto> paymentForProvidersDto = new ArrayList<>();
-		for(PaymentForProviders i : paymentForProviders) {
-			PaymentForProvidersDto paymentForProviderDto = paymentForProvidersMapper.mapToDto(i);
-			paymentForProvidersDto.add(paymentForProviderDto);
-		}
+			  List<PaymentForProvidersDto> paymentForProvidersDto = paymentForProviders.stream()
+				        .map(paymentForProvidersMapper::mapToDto)
+				        .toList();
+				    
 		logger.warn(paymentForProvidersDto.size()+" size");
-		return paymentForProvidersDto;
+		return new PageImpl<>(paymentForProvidersDto, pageable, paymentForProviders.getTotalElements());
+
 	}
 	
 

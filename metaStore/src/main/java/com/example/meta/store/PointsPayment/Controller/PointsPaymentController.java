@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -82,8 +84,9 @@ public class PointsPaymentController {
 		
 	}
 	
+	@ResponseBody
 	@GetMapping("get_all_my_payment/{companyId}")
-	public List<PaymentForProvidersDto> getAllMyPayments(@PathVariable Long companyId, @RequestParam int page , @RequestParam int pageSize) {
+	public Page<PaymentForProvidersDto> getAllMyPayments(@PathVariable Long companyId, @RequestParam int page , @RequestParam int pageSize) {
 		logger.warn("dhrab id  : "+companyId);
 		Company company = companyService.getCompany();
 		if(company.getId() == companyId || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(companyId))) {

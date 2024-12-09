@@ -10,6 +10,9 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -86,7 +89,7 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 				impactOnSubArticle(article,i.getQuantity());
 			}		}
 		super.insertAll(commandLines);
-		List<CommandLine> commandLine = commandLineRepository.findAllByInvoiceId(invoice.getId());
+		List<CommandLine> commandLine = commandLineRepository.findAllByInvoice(invoice.getId());
 		double totHt= 0;
 		double totTva= 0;
 		double totTtc= 0;
@@ -140,13 +143,16 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 	}
 
 
-	public List<CommandLineDto> getCommandLines(Long invoiceId) {
-		List<CommandLine> commandLines = commandLineRepository.findAllByInvoiceId(invoiceId);
+	public List<CommandLineDto> getCommandLines(Long invoiceId, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<CommandLine> commandLines = commandLineRepository.findAllByInvoiceId(invoiceId, pageable);
+		
 		List<CommandLineDto> commandLinesDto = new ArrayList<>();
-		for(CommandLine i : commandLines) {
+		for(CommandLine i : commandLines.getContent()) {
 			CommandLineDto commandLineDto = commandLineMapper.mapToDto(i);
 			commandLinesDto.add(commandLineDto);
 		}
+		logger.warn("size command line : "+commandLinesDto.size());
 		return commandLinesDto;
 	}
 	

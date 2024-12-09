@@ -750,6 +750,21 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		return articlesCompanyDto;
 	}
 
+	public List<ArticleCompanyDto> companyArticlesByCategoryOrSubCategory(Long companyId, Long categoryId,Long subCategoryId, Long clientId, Long userId, int page, int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		List<ArticleCompany> articlesCompany = new ArrayList<>();
+		if(subCategoryId != 0) {
+			Page<ArticleCompany> articleCompany = articleCompanyRepository.findByCompanyIdAndSubCategoryId(companyId , subCategoryId ,clientId, userId, pageable);
+			articlesCompany.addAll(articleCompany.getContent());
+			
+		}else {
+		Page<ArticleCompany> articleCompany = articleCompanyRepository.findByCompanyIdAndCategoryId(companyId , categoryId, clientId, userId , pageable);
+		articlesCompany.addAll(articleCompany.getContent());
+		}
+		List<ArticleCompanyDto> response = mapArticleCompanyListToDto(articlesCompany);
+		return response;
+	}
+
 
 	
 

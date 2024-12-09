@@ -70,9 +70,6 @@ public class PointsPaymentService extends BaseService<PointsPayment, Long> {
 		List<PointsPaymentDto> pointsPaymentDto = new ArrayList<>();
 		logger.warn("company id : "+companyId + " user id : "+userId);
 		Page<PointsPayment> pointsPayment = pointPaymentRepository.findAllByCompanyIdOrUserId(companyId, userId, pageable);
-		if(pointsPayment.isEmpty()) {
-			throw new RecordNotFoundException("there is no payment");
-		}
 		for(PointsPayment i : pointsPayment) {
 			PointsPaymentDto dto = pointsPaymentMapper.mapToDto(i);
 			pointsPaymentDto.add(dto);

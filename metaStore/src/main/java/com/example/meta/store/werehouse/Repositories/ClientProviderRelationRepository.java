@@ -29,7 +29,7 @@ public interface ClientProviderRelationRepository extends BaseRepository<ClientP
 
 	void deleteByProviderIdAndClientId(Long id, Long id2);
 
-	Page<ClientProviderRelation> findAllByClientIdAndIsDeletedFalseAndIsDeletedFalse(Long companyId, Pageable pageable);
+	Page<ClientProviderRelation> findAllByClientIdAndIsDeletedFalse(Long companyId, Pageable pageable);
 
 	@Query("SELECT p FROM ClientProviderRelation p WHERE (p.client.id = :companyId OR p.person.id = :userId) AND p.isDeleted = false AND "
 			+ "(p.provider.name LIKE %:search% OR p.provider.code LIKE %:search%)")

@@ -97,10 +97,7 @@ public class ProviderService extends BaseService<Company, Long> {
 	public List<ClientProviderRelationDto> getAllMyProvider(Long companyId, int page , int pageSize) {
 
 		Pageable pageable = PageRequest.of(page, pageSize);
-		Page<ClientProviderRelation> providers = companycRepository.findAllByClientIdAndIsDeletedFalseAndIsDeletedFalse(companyId, pageable);
-		if(providers.isEmpty()) {
-			throw new RecordNotFoundException("There Is No Provider Yet");
-		}
+		Page<ClientProviderRelation> providers = companycRepository.findAllByClientIdAndIsDeletedFalse(companyId, pageable);
 		List<ClientProviderRelationDto> providersDto = new ArrayList<>();
 		for(ClientProviderRelation i : providers) {
 			ClientProviderRelationDto providerDto = clientCompanyMapper.mapToDto(i);

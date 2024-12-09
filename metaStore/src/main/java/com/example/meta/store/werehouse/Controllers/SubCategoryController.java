@@ -82,11 +82,8 @@ public class SubCategoryController {
 	
 	@GetMapping("getbycategory_id/{companyId}")
 	public List<SubCategoryDto> getAllSubCategoriesByCompanyIdAndCategoryId(@PathVariable Long companyId,@RequestParam Long categoryId,@RequestParam int page , @RequestParam int pageSize ){
-		Company company = companyService.getCompany();
-		if(company.getId() == companyId || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(categoryId))) {			
-			return subCategoryService.getAllSubCategoryByCompanyIdAndCategoryId(categoryId, companyId, page , pageSize);
-		}
-		return null;
+		return subCategoryService.getAllSubCategoryByCompanyIdAndCategoryId(categoryId, companyId, page , pageSize);
+		
 	}
 
 	

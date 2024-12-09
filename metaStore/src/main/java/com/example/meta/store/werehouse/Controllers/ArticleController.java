@@ -223,7 +223,22 @@ public class ArticleController {
 	public List<ArticleCompanyDto> getAllCompanyArticles(@PathVariable Long companyId , @RequestParam int page , @RequestParam int pageSize){
 		return articleService.getAllCompanyArticlesByCompanyId(companyId , page, pageSize);
 	}
- 
+	
+	@GetMapping("get_company_article_by_category_or_subcategory/{companyId}")
+	public List<ArticleCompanyDto> companyArticlesByCategoryOrSubCategory(@PathVariable Long companyId, @RequestParam Long categoryId , @RequestParam Long subCategoryId, @RequestParam int page, @RequestParam int pageSize){
+		Long clientId = null;
+		Long userId = null;
+		if(authenticationFilter.accountType == AccountType.COMPANY) {
+			Company company = companyService.getCompany();
+			clientId = company.getId();
+		}
+		if(authenticationFilter.accountType == AccountType.USER) {
+			User user = userService.getUser();
+			userId = user.getId();
+		}
+		return articleService.companyArticlesByCategoryOrSubCategory(companyId ,categoryId, subCategoryId,clientId , userId, page , pageSize);
+	}
+   
 }
 
 

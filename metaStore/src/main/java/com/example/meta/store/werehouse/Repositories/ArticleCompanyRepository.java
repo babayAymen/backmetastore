@@ -135,6 +135,18 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 	Page<ArticleCompany> findAllByCompanyIdAndLibelleContaining(Long id, String search, Pageable pageable);
 
 	Page<ArticleCompany> findByCompanyId(Long companyId, Pageable pageable);
+
+	@Query("SELECT a FROM ArticleCompany a WHERE a.company.id = :companyId AND a.subCategory.id = :subCategoryId AND (a.isVisible = 2"
+			+ " OR (a.isVisible = 1 AND EXISTS (SELECT 1 FROM ClientProviderRelation cc WHERE (cc.person.id = :userId OR (cc.client.id = :clientId ) OR (cc.provider.id = :clientId)) "
+			+ "AND cc.provider.id = a.company.id )))"
+			)
+	Page<ArticleCompany> findByCompanyIdAndSubCategoryId(Long companyId, Long subCategoryId,Long clientId , Long userId , Pageable pageable);
+
+	@Query("SELECT a FROM ArticleCompany a WHERE a.company.id = :companyId AND a.category.id = :categoryId AND (a.isVisible = 2"
+			+ " OR (a.isVisible = 1 AND EXISTS (SELECT 1 FROM ClientProviderRelation cc WHERE (cc.person.id = :userId OR (cc.client.id = :clientId ) OR (cc.provider.id = :clientId)) "
+			+ "AND cc.provider.id = a.company.id )))"
+			)
+	Page<ArticleCompany> findByCompanyIdAndCategoryId(Long companyId, Long categoryId,Long clientId, Long userId, Pageable pageable);
 	
 
 	

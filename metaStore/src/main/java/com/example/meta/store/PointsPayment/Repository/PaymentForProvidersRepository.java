@@ -15,11 +15,20 @@ import com.example.meta.store.werehouse.Entities.Payment;
 public interface PaymentForProvidersRepository extends BaseRepository<PaymentForProviders, Long> {
 
 	
+//	@Query("SELECT p FROM PaymentForProviders p "
+//			+ "JOIN p.purchaseOrderLine l "
+//			+ "JOIN l.purchaseorder o  "
+//			+ "WHERE o.client.id = :me OR o.company.id = :me")
+//	Page<PaymentForProviders> getPaymentForProvidersAsCompany(Long me, Pageable pagebale);
+//	
+	
 	@Query("SELECT p FROM PaymentForProviders p "
-			+ "JOIN p.purchaseOrderLine l "
-			+ "JOIN l.purchaseorder o  "
-			+ "WHERE o.client.id = :me OR o.company.id = :me")
-	Page<PaymentForProviders> getPaymentForProvidersAsCompany(Long me, Pageable pagebale);
+		       + "JOIN p.purchaseOrderLine l "
+		       + "JOIN l.purchaseorder o "
+		       + "WHERE o.client.id = :me OR o.company.id = :me "
+		       + "ORDER BY p.purchaseOrderLine ASC")
+		Page<PaymentForProviders> getPaymentForProvidersAsCompany(Long me, Pageable pageable);
+
 	
 	@Query("SELECT p FROM PaymentForProviders p "
 			+ "JOIN p.purchaseOrderLine l "

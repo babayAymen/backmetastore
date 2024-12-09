@@ -70,7 +70,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	///////////////////////////////////////////////////////////////////////// real work ////////////////////////////////////////////////////////
 	public void accepted(Long invoiceId, Long clientId, AccountType type) {
 		Invoice invoice = super.getById(invoiceId).getBody();
-		List<CommandLine> commandLines = commandLineRepository.findAllByInvoiceId(invoiceId);
+		List<CommandLine> commandLines = commandLineRepository.findAllByInvoice(invoiceId);
 		if(type == AccountType.COMPANY) {
 		articleService.impactInvoice(commandLines);
 		}
@@ -89,7 +89,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	
 	public void refused(Long invoiceId, Long clientId) {
 		Invoice invoice = super.getById(invoiceId).getBody();
-		List<CommandLine> commandLines = commandLineRepository.findAllByInvoiceId(invoice.getId());
+		List<CommandLine> commandLines = commandLineRepository.findAllByInvoice(invoice.getId());
 		inventoryService.rejectInvoice(commandLines, invoice.getProvider().getId());
 		invoice.setStatus(Status.REFUSED);
 		invoiceRepository.save(invoice);
@@ -190,7 +190,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		if(!company.equals(invoice.getProvider())) {
 			throw new PermissionDeniedDataAccessException("you dont have permission", null);
 		}
-		List<CommandLine> commandLines = commandLineRepository.findAllByInvoiceId(invoice.getId());
+		List<CommandLine> commandLines = commandLineRepository.findAllByInvoice(invoice.getId());
 		
 		for(CommandLine i : commandLines) {
 			ArticleCompany article = articleService.findByArticleCompanyId(i.getArticle().getId());
