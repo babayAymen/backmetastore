@@ -25,8 +25,8 @@ public interface PaymentForProvidersRepository extends BaseRepository<PaymentFor
 	@Query("SELECT p FROM PaymentForProviders p "
 		       + "JOIN p.purchaseOrderLine l "
 		       + "JOIN l.purchaseorder o "
-		       + "WHERE o.client.id = :me OR o.company.id = :me "
-		       + "ORDER BY p.purchaseOrderLine ASC")
+		       + "WHERE o.company.id = :me "   //o.client.id = :me OR
+		       )
 		Page<PaymentForProviders> getPaymentForProvidersAsCompany(Long me, Pageable pageable);
 
 	

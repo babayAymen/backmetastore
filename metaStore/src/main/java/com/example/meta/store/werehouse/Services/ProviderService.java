@@ -192,8 +192,8 @@ public class ProviderService extends BaseService<Company, Long> {
 		companycRepository.save(relation);
 	}
 	
-	public void updateProvider(String companyDto, MultipartFile file) throws JsonMappingException, JsonProcessingException {
-		companyService.upDateCompany(companyDto, file);
+	public void updateProvider(String companyDto, MultipartFile file, Company myCompany) throws JsonMappingException, JsonProcessingException {
+		companyService.upDateCompany(companyDto, file, myCompany);
 		//the same ompl ofupdate company in company service 
 	}
 	

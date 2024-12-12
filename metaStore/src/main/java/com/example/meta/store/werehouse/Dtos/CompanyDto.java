@@ -22,6 +22,8 @@ public class CompanyDto extends BaseDto<Long> implements Serializable {
 
     private static final long serialVersionUID = 12345678102L;
     
+    private Long id ;
+    
 	private String name;
 	
 	private String code;

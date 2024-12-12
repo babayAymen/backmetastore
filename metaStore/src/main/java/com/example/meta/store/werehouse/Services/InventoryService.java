@@ -47,7 +47,7 @@ public class InventoryService extends BaseService<Inventory, Long> {
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	public List<InventoryDto> getInventoryByCompanyId(Long companyId, int page , int pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
-		Page<Inventory> inventory = inventoryRepository.findByCompanyId(companyId, pageable);
+		Page<Inventory> inventory = inventoryRepository.findByCompanyIdAndIsDeleteFalse(companyId, pageable);
 		List<InventoryDto> inventoriesDto = new ArrayList<>();
 		for(Inventory i:inventory) {
 			InventoryDto inventoryDto = inventoryMapper.mapToDto(i);

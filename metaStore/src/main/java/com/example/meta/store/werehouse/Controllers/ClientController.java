@@ -1,9 +1,11 @@
 package com.example.meta.store.werehouse.Controllers;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +22,15 @@ import com.example.meta.store.Base.Security.Dto.UserDto;
 import com.example.meta.store.Base.Security.Entity.User;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.ClientProviderRelationDto;
+import com.example.meta.store.werehouse.Dtos.CompanyDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.SearchCategory;
 import com.example.meta.store.werehouse.Enums.SearchType;
 import com.example.meta.store.werehouse.Services.ClientService;
 import com.example.meta.store.werehouse.Services.CompanyService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -62,19 +67,35 @@ public class ClientController {
 	}
 
 	@PostMapping("add")
-	public void insertClient(@RequestParam("company") String companyDto,
+	public ResponseEntity<ClientProviderRelationDto> insertClient(@RequestParam("company") String companyDto,
 			@RequestParam(value ="file", required = false) MultipartFile file
-			) throws Exception{
+			) throws JsonMappingException, JsonProcessingException{
 		Company company = companyService.getCompany();
-		clientService.insertClient(companyDto,file, company);
+		return clientService.insertClient(companyDto,file, company);
+	}
+	
+
+	@PostMapping("add_without_image")
+	public ResponseEntity<ClientProviderRelationDto> insertClientWithoutImage(@RequestParam("company") String companyDto) throws JsonMappingException, JsonProcessingException{
+		Company company = companyService.getCompany();
+		return clientService.insertClient(companyDto,null, company);
 	}
 	
 	@PutMapping("update")
-	public void updateClient(@RequestParam("company") String companyDto,
+	public ResponseEntity<CompanyDto> updateClient(@RequestParam("company") String companyDto,
 			@RequestParam(value ="file", required = false) MultipartFile file
-			) throws Exception{
+			) throws JsonMappingException, JsonProcessingException{
+		logger.warn("dhrab fi update");
 		Company company = companyService.getCompany();
-		clientService.updateClient( companyDto,file, company);
+		return clientService.updateClient( companyDto,file, company);
+	}
+	
+	@PutMapping("update_without_image")
+	public ResponseEntity<CompanyDto> updateClientt(@RequestParam("company") String companyDto
+			) throws JsonMappingException, JsonProcessingException {
+		logger.warn("dhrab fi updatee");
+		Company company = companyService.getCompany();
+		return clientService.updateClientt( companyDto, company);
 	}
 		
 	
@@ -83,7 +104,7 @@ public class ClientController {
 			logger.warn("atsdrgh");
 		Company company = companyService.getCompany();
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-			return clientService.getAllMyContaining(search,company, page, pageSize);
+			return clientService.getAllMyContaining(search,id, page, pageSize);
 		}
 		return null;
 	}

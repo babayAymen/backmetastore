@@ -55,7 +55,8 @@ public class CompanyController {
 			@RequestParam("company") String companyDto,
 			@RequestParam(value ="file", required = false) MultipartFile file
 			) throws Exception{
-		return companyService.upDateCompany(companyDto, file);
+		Company myCompany = companyService.getCompany();
+		return companyService.upDateCompany(companyDto, file, myCompany);
 	}
 	
 

@@ -59,6 +59,7 @@ public class ArticleController {
 	@GetMapping("getrandom")
 	public List<ArticleCompanyDto> findRandomArticles( @RequestParam int offset, @RequestParam int pageSize){
 		User user = userService.getUser();
+		logger.warn("account type in random article fun "+authenticationFilter.accountType);
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company myCompany = companyService.getCompany();
 			return articleService.findRandomArticlesPub(myCompany, user,offset, pageSize);
@@ -124,13 +125,9 @@ public class ArticleController {
 	
 	
 	@PostMapping("add/{id}")
-	public ResponseEntity<ArticleDto> insertArticle(
-			 @RequestParam(value ="file", required = false) MultipartFile file,
-			 @RequestParam("article") String article,
-			 @PathVariable Long id)
-			throws Exception{
+	public ResponseEntity<ArticleCompanyDto> insertArticle( @PathVariable Long id , @RequestBody ArticleCompanyDto article){
 		Company provider = companyService.getCompany();
-		return articleService.insertArticle(file,article,provider,id);
+		return articleService.insertArticle(article,provider,id);
 	}
 	
 	@GetMapping("{id}/{quantity}")

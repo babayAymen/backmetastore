@@ -94,7 +94,8 @@ public class ProviderController {
 	@PutMapping("/update")
 	public void upDateMyProviderById( @RequestParam("company") String company,@RequestParam(value ="file", required = false) MultipartFile file)
 			throws JsonMappingException, JsonProcessingException {
-		 providerService.updateProvider(company,file);
+		Company myCompany = companyService.getCompany();
+		 providerService.updateProvider(company,file, myCompany);
 	}
 	
 

@@ -13,7 +13,8 @@ import com.example.meta.store.werehouse.Entities.Inventory;
 public interface InventoryRepository extends BaseRepository<Inventory, Long>{
 
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
-	Page<Inventory> findByCompanyId(Long companyId, Pageable pageable);
+	@Query("SELECT i FROM Inventory i WHERE i.company.id = :companyId AND i.article.isDeleted = false")
+	Page<Inventory> findByCompanyIdAndIsDeleteFalse(Long companyId, Pageable pageable);
 	
 //	@Query("SELECT i FROM Inventory i WHERE i.article.id = :companyArticle AND i.company.id = :id")
 	Optional<Inventory> findByArticleIdAndCompanyId(Long companyArticle, Long id);

@@ -15,6 +15,7 @@ import lombok.ToString;
 @ToString
 public class ArticleCompanyDto extends BaseDto<Long> implements Serializable{
 
+	private Long id ;
 	
 	private Double cost;
 

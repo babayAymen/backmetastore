@@ -47,13 +47,13 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 			+ " (cc.person.id = :clientId AND cc.client.id = :companyId) OR"
 			+ " (cc.provider.id = :companyId))))))"
 			+ " AND (a.company.id = :providerId) ")
-	Page<ArticleCompany> findAllByCompanyId(Long companyId,Long clientId, Long providerId, Pageable pageable);
+	Page<ArticleCompany> findAllByCompanyIdAndIsDeletedFalseOrderByLibelleASC(Long companyId,Long clientId, Long providerId, Pageable pageable);
 
 
 	@Query("SELECT a FROM ArticleCompany a WHERE a.article.code LIKE %:code% AND a.provider.id = :id")
 	Optional<ArticleCompany> findByCodeAndProviderId(String code, Long id);
 
-	Page<ArticleCompany> findAllByCompanyIdOrderByCreatedDateDesc(Long id, Pageable pageable);
+	Page<ArticleCompany> findAllByCompanyIdAndIsDeletedFalseOrderByCreatedDateDesc(Long id, Pageable pageable);
 
 	@Query("SELECT a FROM ArticleCompany a WHERE (a.category.id = :categoryId AND a.company.id = :companyId)"
 			+ " AND (a.isVisible = 2"
@@ -106,7 +106,7 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 
 	Boolean existsByIdAndCompaniesId(Long id, Long companyId);
 	
-	Boolean existsByArticleIdAndCompanyId(Long articleId, Long companyId);
+	Optional<ArticleCompany> findByArticleIdAndCompanyId(Long articleId, Long companyId);
 
 	@Query(value = "SELECT a FROM ArticleCompany a WHERE"
 			+ " (a.company.category = :categname) "
@@ -147,6 +147,8 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 			+ "AND cc.provider.id = a.company.id )))"
 			)
 	Page<ArticleCompany> findByCompanyIdAndCategoryId(Long companyId, Long categoryId,Long clientId, Long userId, Pageable pageable);
+
+	Optional<ArticleCompany> findByIdAndIsDeletedFalse(Long articleId);
 	
 
 	

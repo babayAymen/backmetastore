@@ -112,9 +112,9 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		Pageable pageable = PageRequest.of(offset, pageSize);
 		Page<ArticleCompany> articles;
 		if(providerId == myCompanyId) {
-			articles = articleCompanyRepository.findAllByCompanyIdOrderByCreatedDateDesc(myCompanyId,pageable);			
+			articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByCreatedDateDesc(myCompanyId,pageable);			
 		}else {			
-		 articles = articleCompanyRepository.findAllByCompanyId(myCompanyId,myClientId,providerId,pageable);
+		 articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByLibelleASC(myCompanyId,myClientId,providerId,pageable);
 		}
 		if(articles.isEmpty()) {
 			throw new RecordNotFoundException("there is no article");
@@ -181,7 +181,7 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 	public List<ArticleCompanyDto> getAllProvidersArticleByProviderId( Long id, int offset, int pageSize) {
 		List<ArticleCompanyDto> articlesDto = new ArrayList<ArticleCompanyDto>();
 		Pageable pageable = PageRequest.of(offset,pageSize);
-		Page<ArticleCompany> articles = articleCompanyRepository.findAllByCompanyIdOrderByCreatedDateDesc(id,pageable);
+		Page<ArticleCompany> articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByCreatedDateDesc(id,pageable);
 		if(articles != null) {
 			List<ArticleCompany> articlesContent = articles.getContent();
 			for(ArticleCompany i : articlesContent) {
@@ -259,17 +259,12 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 	
 	
 	
-	   public ResponseEntity<ArticleDto> insertArticle( MultipartFile file, String article, Company provider, Long articleId)
-				throws JsonMappingException, JsonProcessingException {
-			ArticleCompany article1 = objectMapper.readValue(article, ArticleCompany.class);
-//			if(file != null) {
-//				String newFileName = imageService.insertImag(file,provider.getUser().getId(), "article");// the user id must be change because it does not make sense
-//				article1.setImage(newFileName);
-//			}
-			Boolean existRelation = articleCompanyRepository.existsByArticleIdAndCompanyId(articleId, provider.getId());
-			if(existRelation) {
+	   public ResponseEntity<ArticleCompanyDto> insertArticle(ArticleCompanyDto article, Company provider, Long articleId) {
+			Optional<ArticleCompany> existRelation = articleCompanyRepository.findByArticleIdAndCompanyId(articleId, provider.getId());
+			if(existRelation.isPresent() && !existRelation.get().getIsDeleted() ) {
 				return null;
 			}
+			ArticleCompany article1 = articleCompanyMapper.mapToEntity(article);
 			Article art = findById(articleId);
 			article1.setArticle(art);
 			if(article1.getProvider() == null || article1.getProvider().getId() == null) {
@@ -291,10 +286,31 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 			if(provider.getIsVisible() == PrivacySetting.CLIENT && article1.getIsVisible() == PrivacySetting.PUBLIC) {
 				article1.setIsVisible(PrivacySetting.CLIENT);
 			}
-			article1.setCompany(provider);	
+			article1.setCompany(provider);
+			article1.setIsDeleted(false);
+			if(existRelation.isPresent() && existRelation.get().getIsDeleted()) {
+				ArticleCompany relation = existRelation.get();
+				existRelation.get().setArticle(art);
+				existRelation.get().setProvider(article1.getProvider());
+				existRelation.get().setCategory(article1.getCategory());
+				existRelation.get().setSubCategory(article1.getSubCategory());
+				existRelation.get().setCommentNumber(relation.getCommentNumber());
+				existRelation.get().setLikeNumber(relation.getLikeNumber());
+				existRelation.get().setIsDeleted(false);
+				existRelation.get().setQuantity(article1.getQuantity());
+				existRelation.get().setMinQuantity(article1.getMinQuantity());
+				existRelation.get().setCompany(relation.getCompany());
+				existRelation.get().setIsVisible(article1.getIsVisible());
+				existRelation.get().setSellingPrice(article1.getSellingPrice());
+				existRelation.get().setUnit(article1.getUnit());
+				article1.setId(relation.getId());
+				//				articleCompanyRepository.save(relation);
+			}else {
 			inventoryService.makeInventory(article1, provider);
 			articleCompanyRepository.save(article1);
-			return ResponseEntity.ok(null);
+			}
+			ArticleCompanyDto response = articleCompanyMapper.mapToDto(article1);
+			return ResponseEntity.ok(response);
 		}
 	
 		public void addQuantity(Long id, Double quantity, Company provider) {
@@ -350,22 +366,10 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		}
 		
 		public ResponseEntity<String> deleteByCompanyArticleId(Long articleId, Company provider) {
-			Article article = articleRepository.findById(articleId).orElseThrow(() -> new RecordNotFoundException("This Article Does Not Exist"));							
-//				if(article.getProvider().getId() == provider.getId() ||
-//						article.getProvider().isVirtual() == true &&
-//								article.getProvider() == provider ) {
-//					Inventory inventory = inventoryService.findByArticleIdAndCompanyId(articleId, provider.getId());
-//					if(inventory.getOut_quantity() == 0) {
-//					inventory.setArticle(null);	
-//					inventoryService.deleteById(inventory.getId());
-//					articleRepository.deleteById(articleId);
-//					}
-//					else {
-//						article.setProvider(null);
-//						articleRepository.save(article);
-//					}
-//				}
-			//delete autrement
+			ArticleCompany article = articleCompanyRepository.findByIdAndIsDeletedFalse(articleId).orElseThrow(() -> new RecordNotFoundException("This Article Does Not Exist"));	
+			article.setQuantity(0.0);
+			article.setIsDeleted(true);
+			logger.warn("successfully deleted ");
 				return ResponseEntity.ok("successfuly deleted");
 		}
 		

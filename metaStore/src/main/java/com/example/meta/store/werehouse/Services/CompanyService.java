@@ -73,7 +73,7 @@ public class CompanyService extends BaseService<Company, Long> {
 	private final ObjectMapper objectMapper;
 
 
-	private final Logger logger = LoggerFactory.getLogger(CompanyController.class);
+	private final Logger logger = LoggerFactory.getLogger(CompanyService.class);
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	
 	
@@ -165,10 +165,10 @@ public class CompanyService extends BaseService<Company, Long> {
 		}
 	}
 	
-	public ResponseEntity<CompanyDto> upDateCompany(String companyDto, MultipartFile file)
+	public ResponseEntity<CompanyDto> upDateCompany(String companyDto, MultipartFile file, Company myCompany)
 			throws JsonMappingException, JsonProcessingException {
-		CompanyDto companyDto1 = objectMapper.readValue(companyDto, CompanyDto.class);
-		logger.warn(companyDto1.getId()+" company id");;
+		logger.warn("wsol lil company service" +companyDto);
+		Company companyDto1 = objectMapper.readValue(companyDto, Company.class);
 		Company company = companyRepository.findById(companyDto1.getId()).orElseThrow(() -> new RecordNotFoundException("you don't have a company"));
 		if(!company.getName().equals(companyDto1.getName()))
 		{
@@ -176,6 +176,7 @@ public class CompanyService extends BaseService<Company, Long> {
 			if(existName) {				
 				throw new RecordIsAlreadyExist("This Name Is Already Exist Please Choose Another One");
 			}
+			company.setName(companyDto1.getName());
 		}
 		
 		if(company.getCode() == null || !company.getCode().equals(companyDto1.getCode()) ) {
@@ -185,36 +186,33 @@ public class CompanyService extends BaseService<Company, Long> {
 			}
 		}
 		if(company.isVirtual()) {
-			
-		if(company.getMatfisc() == null || !company.getMatfisc().equals(companyDto1.getMatfisc())) {
+		if( !company.getMatfisc().equals(companyDto1.getMatfisc())) {
 			boolean existMatfisc = companyRepository.existsByMatfisc(companyDto1.getMatfisc());
 			if(existMatfisc) {				
 				throw new RecordIsAlreadyExist("this matricule fiscale is already related by another company");
 			}
 		}
-		if(company.getBankaccountnumber() == null || !company.getBankaccountnumber().equals(companyDto1.getBankaccountnumber())) {
+		if(!company.getBankaccountnumber().equals(companyDto1.getBankaccountnumber())) {
 			boolean existBanckAccount = companyRepository.existsByBankaccountnumber(companyDto1.getBankaccountnumber());
 			if(existBanckAccount) {
 				throw new RecordIsAlreadyExist("this banck account is already related by another company ");
 			}
 		}
+		companyDto1.setIsVisible(PrivacySetting.ONLY_ME);
+		companyDto1.setVirtual(true);
 		}
-		Company updatedCompany = companyMapper.mapToEntity(companyDto1);
-		updatedCompany.setParentCompany(company.getParentCompany());
-		updatedCompany.setUser(company.getUser());
 		if (file != null) {
-			String newFileName = imageService.insertImag(file, company.getUser().getId(), "company");
-			updatedCompany.setLogo(newFileName);
+			String newFileName = imageService.insertImag(file, myCompany.getUser().getId(), "company");
+			companyDto1.setLogo(newFileName);
+		}else {
+			companyDto1.setLogo(company.getLogo());
 		}
-		else {			
-			updatedCompany.setLogo(company.getLogo());
-		}
-		updatedCompany.setVirtual(company.isVirtual());
-		updatedCompany.setLatitude(company.getLatitude());
-		updatedCompany.setLongitude(company.getLongitude());
-		company = updatedCompany;
+		
+		company = companyDto1;
 		companyRepository.save(company);
-		return ResponseEntity.ok(companyDto1);
+		logger.warn("company "+company);
+		CompanyDto response = companyMapper.mapToDto(company);
+		return ResponseEntity.ok(response);
 		
 		
 	}

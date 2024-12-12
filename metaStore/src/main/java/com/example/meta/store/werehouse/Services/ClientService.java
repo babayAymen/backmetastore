@@ -149,7 +149,7 @@ public class ClientService extends BaseService<Company, Long>{
 	}
 	
 
-	public void insertClient(String company, MultipartFile file, Company myCompany)
+	public ResponseEntity<ClientProviderRelationDto> insertClient(String company, MultipartFile file, Company myCompany)
 			throws JsonMappingException, JsonProcessingException{
 
 		CompanyDto companyDto = objectMapper.readValue(company, CompanyDto.class);
@@ -176,13 +176,18 @@ public class ClientService extends BaseService<Company, Long>{
 		relation.setProvider(myCompany);
 		relation.setClient(company1);
 		companycRepository.save(relation);
+		ClientProviderRelationDto dto = clientCompanyMapper.mapToDto(relation);
+		return ResponseEntity.ok(dto);
 	}
 	
 	
 
-	public void updateClient(String companyDto, MultipartFile file, Company myCompany) throws JsonMappingException, JsonProcessingException {
-		companyService.upDateCompany(companyDto, file);
-		//the same ompl ofupdate company in company service 
+	public ResponseEntity<CompanyDto> updateClient(String companyDto, MultipartFile file, Company myCompany) throws JsonMappingException, JsonProcessingException {
+		return companyService.upDateCompany(companyDto, file, myCompany);
+	}
+
+	public ResponseEntity<CompanyDto> updateClientt(String companyDto, Company myCompany) throws JsonMappingException, JsonProcessingException {
+		return companyService.upDateCompany(companyDto, null, myCompany);
 	}
 	
 	
@@ -201,11 +206,10 @@ public class ClientService extends BaseService<Company, Long>{
 	}
 		
 
-	public List<ClientProviderRelationDto> getAllMyContaining(String search,Company company, int page , int pageSize) {
-		logger.warn("id company from service "+company.getId());
+	public List<ClientProviderRelationDto> getAllMyContaining(String search,Long id, int page , int pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
-		Page<ClientProviderRelation> clientProviderRelation = clientCompanyRRepository.findByMyCompanyAndUserContaining(search, company.getId(), pageable);
-		Page<ClientProviderRelation> peronProviderRelation = clientCompanyRRepository.findByMyCompanyAndClientContaining(search, company.getId(), pageable);
+		Page<ClientProviderRelation> clientProviderRelation = clientCompanyRRepository.findByMyCompanyAndUserContaining(search, id, pageable);
+		Page<ClientProviderRelation> peronProviderRelation = clientCompanyRRepository.findByMyCompanyAndClientContaining(search, id, pageable);
 		List<ClientProviderRelation> response = new ArrayList<>();
 		response.addAll(clientProviderRelation.getContent());
 		response.addAll(peronProviderRelation.getContent());

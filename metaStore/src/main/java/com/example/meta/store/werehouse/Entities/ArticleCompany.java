@@ -77,4 +77,6 @@ public class ArticleCompany extends BaseEntity<Long> implements Serializable{
 	@ManyToOne
 	@JoinColumn(name = "articleId")
 	private Article article;
+	
+	private Boolean isDeleted;
 }
