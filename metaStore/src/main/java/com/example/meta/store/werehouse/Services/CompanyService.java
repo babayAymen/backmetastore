@@ -167,9 +167,11 @@ public class CompanyService extends BaseService<Company, Long> {
 	
 	public ResponseEntity<CompanyDto> upDateCompany(String companyDto, MultipartFile file, Company myCompany)
 			throws JsonMappingException, JsonProcessingException {
-		logger.warn("wsol lil company service" +companyDto);
 		Company companyDto1 = objectMapper.readValue(companyDto, Company.class);
 		Company company = companyRepository.findById(companyDto1.getId()).orElseThrow(() -> new RecordNotFoundException("you don't have a company"));
+		if(!company.isVirtual() && company.getId() != myCompany.getId()) {
+			throw new RecordNotFoundException("you do not have abalte to update a real provider or client");
+		}
 		if(!company.getName().equals(companyDto1.getName()))
 		{
 			boolean existName = companyRepository.existsByName(companyDto1.getName());
@@ -207,10 +209,11 @@ public class CompanyService extends BaseService<Company, Long> {
 		}else {
 			companyDto1.setLogo(company.getLogo());
 		}
-		
+		if(companyDto1.getId() == myCompany.getId()) {
+			companyDto1.setUser(myCompany.getUser());
+		}
 		company = companyDto1;
 		companyRepository.save(company);
-		logger.warn("company "+company);
 		CompanyDto response = companyMapper.mapToDto(company);
 		return ResponseEntity.ok(response);
 		

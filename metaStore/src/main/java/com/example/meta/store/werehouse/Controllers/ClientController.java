@@ -51,10 +51,10 @@ public class ClientController {
 	private final Logger logger = LoggerFactory.getLogger(ClientController.class);
 	
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
-	@DeleteMapping("delete/{id}")
-	public void deleteById(@PathVariable Long id) {
+	@DeleteMapping("{id}")
+	public ResponseEntity<String> deleteById(@PathVariable Long id) {
 		Company company = companyService.getCompany();
-		clientService.deleteClientByIdAndCompanyId(id, company);
+		return clientService.deleteClientByIdAndCompanyId(id, company);
 	}
 	
 	@GetMapping("get_all_my/{id}")

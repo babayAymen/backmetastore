@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @Validated
 @RestController
-@RequestMapping("/werehouse/invetation/")
+@RequestMapping("/werehouse/invitation/")
 @RequiredArgsConstructor
 public class InvetationController {
 

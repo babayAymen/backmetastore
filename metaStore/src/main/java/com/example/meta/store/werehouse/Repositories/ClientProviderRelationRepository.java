@@ -107,6 +107,6 @@ public interface ClientProviderRelationRepository extends BaseRepository<ClientP
 	@Query("SELECT r.person FROM ClientProviderRelation r WHERE r.provider.id = :id AND r.person.username LIKE %:search% ")
 	Page<User> findByUserNameContaining(Long id, String search, Pageable pageable);
 	
-
+	
 	
 }

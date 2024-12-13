@@ -44,8 +44,8 @@ import lombok.RequiredArgsConstructor;
 public class ProviderService extends BaseService<Company, Long> {
 		
 	private final InvetationRepository invetationClientProviderRepository;	    
-	private final ClientProviderRelationRepository companycRepository;
-	private final CompanyRepository			 companyRepository;
+	private final ClientProviderRelationRepository clientProviderRepository;
+	private final CompanyRepository companyRepository;
 	private final ClientCompanyRMapper clientCompanyMapper;
 	private final CompanyMapper companyMapper;
 	private final ObjectMapper objectMapper;
@@ -72,23 +72,26 @@ public class ProviderService extends BaseService<Company, Long> {
 
 	//@Cacheable(value = "provider", key = "#root.methodName")
 
-	//@Cacheable(value = "provider", key = "#root.methodName")
 
 
 /////////////////////////////////////////////////////// company insted of provider ///////////////////////////////////////////////
 	
+//	@Cacheable(value = "provider", key = "#root.methodName")
 	public void deleteProviderById(Long id, Company myCompany) {
-		ClientProviderRelation providerCompany = companycRepository.findByProviderIdAndClientIdAndIsDeletedFalse(id, myCompany.getId()).orElseThrow(() -> new RecordNotFoundException("this provider is already not yours"));
+		ClientProviderRelation providerCompany = clientProviderRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("this provider is already not yours"));
+		if(providerCompany.getProvider().getId() == myCompany.getId()) {
+			throw new RecordNotFoundException("you can not delete yourself");
+		}
 		if(providerCompany.getMvt() !=0) {
 			providerCompany.setDeleted(true);
 			return;
 		}
-		companycRepository.deleteByProviderIdAndClientId(id,myCompany.getId());
+		clientProviderRepository.deleteById(id);
 		if(providerCompany.getProvider().isVirtual()) {
-			super.deleteById(id);
+			super.deleteById(providerCompany.getProvider().getId());
 			return;
-		}		
-		invetationClientProviderRepository.deleteByCompanyReciverIdAndCompanySenderId(id, myCompany.getId());
+		}
+		invetationClientProviderRepository.deleteByCompanyReciverIdAndCompanySenderId(providerCompany.getProvider().getId(), myCompany.getId());
 		
 		
 	} 
@@ -97,7 +100,7 @@ public class ProviderService extends BaseService<Company, Long> {
 	public List<ClientProviderRelationDto> getAllMyProvider(Long companyId, int page , int pageSize) {
 
 		Pageable pageable = PageRequest.of(page, pageSize);
-		Page<ClientProviderRelation> providers = companycRepository.findAllByClientIdAndIsDeletedFalse(companyId, pageable);
+		Page<ClientProviderRelation> providers = clientProviderRepository.findAllByClientIdAndIsDeletedFalse(companyId, pageable);
 		List<ClientProviderRelationDto> providersDto = new ArrayList<>();
 		for(ClientProviderRelation i : providers) {
 			ClientProviderRelationDto providerDto = clientCompanyMapper.mapToDto(i);
@@ -116,7 +119,7 @@ public class ProviderService extends BaseService<Company, Long> {
 		if(companyId != 0) {
 			 providers = companyRepository.findAllMyByNameContainingOrCodeContainingAndProviderId(search, companyId);
 		}else {
-			 providers = companycRepository.findAllMyByNameContainingOrCodeContaining(search, userId);
+			 providers = clientProviderRepository.findAllMyByNameContainingOrCodeContaining(search, userId);
 		}
 		
 		if(providers.isEmpty()) {
@@ -138,7 +141,7 @@ public class ProviderService extends BaseService<Company, Long> {
 	
 	private ClientProviderRelationDto checkIfHasRelation(Long providerId, Long myCompanyId) {
 	//	for(ClientProviderRelation i : provider.getProviderCompany())
-		Optional<ClientProviderRelation> relation = companycRepository.findByClientIdAndProviderId(myCompanyId, providerId);
+		Optional<ClientProviderRelation> relation = clientProviderRepository.findByClientIdAndProviderId(myCompanyId, providerId);
 			if(relation.isPresent()) {
 				
 				ClientProviderRelationDto clientCompanyRDto = clientCompanyMapper.mapToDto(relation.get());
@@ -151,7 +154,7 @@ public class ProviderService extends BaseService<Company, Long> {
 
 	
 	public List<ClientProviderRelationDto> getAllMyVirtaul(Company company){
-		List<ClientProviderRelation> providers = companycRepository.findAllByCompanyIdAndIsVirtualTrue(company.getId());
+		List<ClientProviderRelation> providers = clientProviderRepository.findAllByCompanyIdAndIsVirtualTrue(company.getId());
 		if(providers == null) {
 			throw new RecordNotFoundException("there is no provider yet");
 		}
@@ -163,7 +166,7 @@ public class ProviderService extends BaseService<Company, Long> {
 		return dtos;
 	}
 	
-	public void insertProvider(String company, MultipartFile file, Company myCompany)
+	public ResponseEntity<ClientProviderRelationDto> insertProvider(String company, MultipartFile file, Company myCompany)
 			throws JsonMappingException, JsonProcessingException{
 
 		CompanyDto companyDto = objectMapper.readValue(company, CompanyDto.class);
@@ -189,11 +192,13 @@ public class ProviderService extends BaseService<Company, Long> {
 		relation.setCredit(0.0);
 		relation.setProvider(company1);
 		relation.setClient(myCompany);
-		companycRepository.save(relation);
+		clientProviderRepository.save(relation);
+		ClientProviderRelationDto response = clientCompanyMapper.mapToDto(relation);
+		return ResponseEntity.ok(response);
 	}
 	
-	public void updateProvider(String companyDto, MultipartFile file, Company myCompany) throws JsonMappingException, JsonProcessingException {
-		companyService.upDateCompany(companyDto, file, myCompany);
+	public ResponseEntity<CompanyDto> updateProvider(String companyDto, MultipartFile file, Company myCompany) throws JsonMappingException, JsonProcessingException {
+		return companyService.upDateCompany(companyDto, file, myCompany);
 		//the same ompl ofupdate company in company service 
 	}
 	

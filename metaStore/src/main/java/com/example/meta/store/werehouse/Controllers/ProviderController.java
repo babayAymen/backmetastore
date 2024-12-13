@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 
 @Validated
 @RestController
-@RequestMapping("/werehouse/provider")
+@RequestMapping("/werehouse/provider/")
 @RequiredArgsConstructor
 public class ProviderController {
 
@@ -54,7 +54,7 @@ public class ProviderController {
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	
 
-	@GetMapping("/get_all_my/{id}")
+	@GetMapping("get_all_my/{id}")
 	public List<ClientProviderRelationDto> getAllMy(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
 		logger.warn("c bon je lil provider");
 		Company company = companyService.getCompany();
@@ -67,7 +67,7 @@ public class ProviderController {
 	
 	
 	
-	@GetMapping("/get_all_my_provider_containing/{search}/{id}")
+	@GetMapping("get_all_my_provider_containing/{search}/{id}")
 	public List<CompanyDto> getAllProviderContaining(@PathVariable String search, @PathVariable Long id){
 		Company company = companyService.getCompany();
 		Long companyId = company.getId();
@@ -77,29 +77,38 @@ public class ProviderController {
 		return providerService.getAllProvidersContaining(companyId, search,0L);
 	}
 	
-	@GetMapping("/get_all_my_virtual")
+	@GetMapping("get_all_my_virtual")
 	public List<ClientProviderRelationDto> getAllMyVirtual() {
 		Company company = companyService.getCompany();
 		return providerService.getAllMyVirtaul(company);
 	}
 	
 	
-	@PostMapping("/add")
-	public void insertProvider(@RequestParam("company") String company,
+	@PostMapping("add")
+	public ResponseEntity<ClientProviderRelationDto> insertProvider(@RequestParam("company") String company,
 	@RequestParam(value ="file", required = false) MultipartFile file)throws Exception{
 		Company myCompany = companyService.getCompany();
-		 providerService.insertProvider(company,file, myCompany);
+		 return providerService.insertProvider(company,file, myCompany);
 	}
 	
-	@PutMapping("/update")
-	public void upDateMyProviderById( @RequestParam("company") String company,@RequestParam(value ="file", required = false) MultipartFile file)
+	@PutMapping("update")
+	public ResponseEntity<CompanyDto> upDateMyProviderById( @RequestParam("company") String company,@RequestParam(value ="file", required = false) MultipartFile file)
 			throws JsonMappingException, JsonProcessingException {
+		logger.warn("update provider with image");
 		Company myCompany = companyService.getCompany();
-		 providerService.updateProvider(company,file, myCompany);
+		return providerService.updateProvider(company,file, myCompany);
+	}
+
+	@PutMapping("update_without_image")
+	public ResponseEntity<CompanyDto> upDateMyProviderByIdWithoutImage( @RequestParam("company") String company)
+			throws JsonMappingException, JsonProcessingException {
+		logger.warn("update provider without image");
+		Company myCompany = companyService.getCompany();
+		return providerService.updateProvider(company,null, myCompany);
 	}
 	
 
-	@DeleteMapping("/delete/{id}")
+	@DeleteMapping("delete/{id}")
 	public void deleteProvider(@PathVariable Long id) {
 		Company company = companyService.getCompany();
 		providerService.deleteProviderById(id,company);

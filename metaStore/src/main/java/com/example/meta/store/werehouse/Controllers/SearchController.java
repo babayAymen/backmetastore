@@ -51,15 +51,7 @@ public class SearchController {
 	
 	private final Logger logger = LoggerFactory.getLogger(SearchController.class);
 //	
-//	@GetMapping("company/{search}/{type}/{category}")
-//	public List<CompanyDto> getAllCompanyContaining(@PathVariable String search, @PathVariable SearchType type, @PathVariable SearchCategory category){
-//		User user = userService.getUser();
-//		if(authenticationFilter.accountType == AccountType.COMPANY) {
-//		Company company = companyService.getCompany();
-//		return searchService.getAllContaining(search, type,category,company,user);
-//		}
-//		return searchService.getAllContaining(search, type,category,null,user);
-//	}
+
 	
 	@GetMapping("user/{search}/{type}/{category}")
 	public List<UserDto> getAllUserContaining(@PathVariable String search, @PathVariable SearchType type, @PathVariable SearchCategory category){

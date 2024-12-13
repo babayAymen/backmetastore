@@ -82,24 +82,28 @@ public class ClientService extends BaseService<Company, Long>{
 	
 	
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
-	public void deleteClientByIdAndCompanyId(Long id, Company company) {
-		ClientProviderRelation clientCompany = clientCompanyRRepository.findByClientIdAndProviderId(id, company.getId())
+	public ResponseEntity<String> deleteClientByIdAndCompanyId(Long id, Company company) {
+		ClientProviderRelation clientCompany = clientCompanyRRepository.findById(id)
 				.orElseThrow(() ->new RecordNotFoundException("Client Not Found "));
+		if(clientCompany.getClient() != null && clientCompany.getClient().getId() == company.getId()) {
+			throw new RecordNotFoundException("you can not delete yourself");
+		}
 		if(clientCompany.getMvt() != 0) {
 			clientCompany.setDeleted(true);
-			return;
-		} 
-		if(clientCompany.getPerson() == null) {		
-			clientCompanyRRepository.deleteByClientIdAndProviderId(id, company.getId());
+			return ResponseEntity.ok("delete successful");
+		}
+		clientCompanyRRepository.deleteById(id);
+		    
+		if(clientCompany.getPerson() == null) {
 		if(clientCompany.getClient().isVirtual()) {
-			super.deleteById(id);
+			super.deleteById(clientCompany.getClient().getId());
+		}else
+		invetationClientProviderRepository.deleteByCompanyReciverIdAndCompanySenderId(clientCompany.getClient().getId(), company.getId());
+		}else {	
+			clientCompanyRRepository.deleteById(id);
+			invetationClientProviderRepository.deleteByClientIdAndCompanyReciverIdOrCompanySenderId(clientCompany.getPerson().getId(), company.getId(), company.getId());
 		}
-		if(!clientCompany.getClient().isVirtual())
-		invetationClientProviderRepository.deleteByCompanyReciverIdAndCompanySenderId(id, company.getId());
-		}else {			
-			clientCompanyRRepository.deleteByPersonIdAndProviderId(id, company.getId());
-			invetationClientProviderRepository.deleteByClientIdAndCompanyReciverIdOrCompanySenderId(id, company.getId(), company.getId());
-		}
+		return ResponseEntity.ok("delete successful");
 		
 	}
 

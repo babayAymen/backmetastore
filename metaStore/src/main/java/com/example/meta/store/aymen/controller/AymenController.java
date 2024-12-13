@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Validated
 @RestController
-@RequestMapping("/werehouse/aymen/")
+@RequestMapping("/werehouse/meta/")
 @RequiredArgsConstructor
 public class AymenController {
 
