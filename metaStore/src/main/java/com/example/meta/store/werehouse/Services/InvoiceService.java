@@ -14,6 +14,7 @@ import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -95,9 +96,16 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		invoiceRepository.save(invoice);
 	}
 	
-	public List<InvoiceDto> getMyInvoiceAsProvider(Long companyId, Long userId, int page , int pageSize) {
-		Pageable pageable = PageRequest.of(page, pageSize);
-		Page<Invoice> invoices =  invoiceRepository.findAllByProviderId(companyId, pageable);
+	public List<InvoiceDto> getMyInvoiceAsProvider(Long companyId, Long userId, PaymentStatus status, int page , int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC, "lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
+		Page<Invoice> invoices;
+		if (status == PaymentStatus.ALL) {
+		    invoices = invoiceRepository.findAllByProviderId(companyId, pageable);
+		} else {
+		    invoices = invoiceRepository.findAllByProviderIdAndPaid(companyId, status, pageable);
+		}
+
 		List<InvoiceDto> invoicesDto = new ArrayList<>();
 		for(Invoice i : invoices) {
 			InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
@@ -107,16 +115,21 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		return invoicesDto;
 	}
 	
-	public List<InvoiceDto> getInvoicesAsClient(Long id, AccountType type, int page, int pageSize) {
-		Pageable pageable = PageRequest.of(page, pageSize);
+	public List<InvoiceDto> getInvoicesAsClient(Long id, AccountType type,PaymentStatus status, int page, int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC, "lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
+		Page<Invoice> invoices;
 		if(type == AccountType.COMPANY) {
-			Page<Invoice> invoices = invoiceRepository.findAllByClientId(id, pageable);
-			return mapToListDto(invoices.getContent());
+			if(status == PaymentStatus.ALL) {
+			invoices = invoiceRepository.findAllByClientId(id, pageable);
+			}else {
+				invoices = invoiceRepository.findAllByClientIdAndPaid(id, status, pageable);
+			}
 		}
 		else {
-			Page<Invoice> invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED, pageable);
-			return mapToListDto(invoices.getContent());
+			 invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED, pageable);
 		}
+		return mapToListDto(invoices.getContent());
 	}
 	
 	private List<InvoiceDto> mapToListDto(List<Invoice> invoices){
@@ -276,7 +289,8 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 	}
 
 	public List<InvoiceDto> getAllMyInvoicesAsClientAndStatus(Long id, Status status, AccountType type, int page,int pageSize) {
-		Pageable pageable = PageRequest.of(page, pageSize);
+		Sort sort = Sort.by(Sort.Direction.DESC,"lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		if(type == AccountType.USER) {
 			Page<Invoice> invoices = invoiceRepository.findAllByPersonIdAndStatus(id, status, pageable);
 			List<InvoiceDto> dto = mapToListDto(invoices.getContent());

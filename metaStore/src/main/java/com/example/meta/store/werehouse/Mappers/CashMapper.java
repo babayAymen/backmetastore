@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import com.example.meta.store.werehouse.Dtos.CashDto;
 import com.example.meta.store.werehouse.Entities.Cash;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CashMapper {
 //
 //	Cash mapToDto(CashDto dto);

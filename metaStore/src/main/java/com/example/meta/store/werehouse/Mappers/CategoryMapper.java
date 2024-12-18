@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import com.example.meta.store.werehouse.Dtos.CategoryDto;
 import com.example.meta.store.werehouse.Entities.Category;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
 

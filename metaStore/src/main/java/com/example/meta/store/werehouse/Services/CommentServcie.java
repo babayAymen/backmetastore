@@ -5,6 +5,11 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -52,8 +57,10 @@ public class CommentServcie extends BaseService<Comment, Long> {
 		}
 	}
 
-	public List<CommentDto> getAllCommentsByArticleId(Long articleId) {
-		List<Comment> comments = commentRepository.findAllByArticleId(articleId);
+	public Page<CommentDto> getAllCommentsByArticleId(Long articleId, int page , int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
+		Page<Comment> comments = commentRepository.findAllByArticleId(articleId, pageable);
 		if(comments.isEmpty()) {
 			throw new RecordNotFoundException("there is no comment yet");
 		}
@@ -62,6 +69,7 @@ public class CommentServcie extends BaseService<Comment, Long> {
 			CommentDto commentDto = commentMapper.mapToDto(i);
 			commentsDto.add(commentDto);
 		}
-		return commentsDto;
+		
+		return new PageImpl<>(commentsDto, pageable, comments.getTotalElements());
 	}
 }

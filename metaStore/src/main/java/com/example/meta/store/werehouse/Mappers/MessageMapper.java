@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import com.example.meta.store.werehouse.Dtos.MessageDto;
 import com.example.meta.store.werehouse.Entities.Message;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface MessageMapper {
 
 	Message mapToEntity(MessageDto dto);

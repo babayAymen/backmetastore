@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,7 +45,7 @@ public class SubCategoryController {
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	
 	@GetMapping("getbycompany/{id}")
-	public List<SubCategoryDto> getSubCategoryByCompany(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
+	public Page<SubCategoryDto> getSubCategoryByCompany(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
 		return subCategoryService.getSubCategoryByCompany(id, page , pageSize);
 		
 	}
@@ -56,12 +57,25 @@ public class SubCategoryController {
 		Company company = companyService.getCompany();
 		return subCategoryService.upDateSubCategory(sousCategoryDto,company,file);
 	}
+
+	@PutMapping("update_without_image")
+	public ResponseEntity<SubCategoryDto> upDateSubCategoryWithoutImage(
+			@RequestParam("sousCategory") String sousCategoryDto) throws JsonMappingException, JsonProcessingException{
+		Company company = companyService.getCompany();
+		return subCategoryService.upDateSubCategory(sousCategoryDto,company,null);
+	}
 	
 	@PostMapping("add")
 	public ResponseEntity<SubCategoryDto> insertSubCategory(@RequestParam("sousCategory") String sousCategoryDto,
 			@RequestParam(value = "file",required=false) MultipartFile file) throws JsonMappingException, JsonProcessingException{
 		Company company = companyService.getCompany();
 		return subCategoryService.insertSubCategory(sousCategoryDto,company,file);
+	}
+
+	@PostMapping("add_without_image")
+	public ResponseEntity<SubCategoryDto> insertSubCategoryWithoutImage(@RequestParam("sousCategory") String sousCategoryDto) throws JsonMappingException, JsonProcessingException{
+		Company company = companyService.getCompany();
+		return subCategoryService.insertSubCategory(sousCategoryDto,company,null);
 	}
 	
 	@GetMapping("l/{name}")

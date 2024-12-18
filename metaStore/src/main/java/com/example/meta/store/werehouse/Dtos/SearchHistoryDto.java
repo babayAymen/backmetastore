@@ -22,7 +22,7 @@ public class SearchHistoryDto extends BaseDto<Long> implements Serializable {
 	
 	private CompanyDto company;
 
-	private ArticleCompanyDto article;
+	private ArticleCompanyWithoutTroubleDto article;
 
 	private UserDto user;
 	

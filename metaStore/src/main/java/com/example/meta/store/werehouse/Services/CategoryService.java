@@ -7,8 +7,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -64,7 +66,8 @@ public class CategoryService extends BaseService<Category, Long>{
 		}
 		category.setCompany(company);
 		super.insert(category);
-		return new ResponseEntity<CategoryDto>(HttpStatus.ACCEPTED);
+		CategoryDto response = categoryMapper.mapToDto(category);
+		return  ResponseEntity.ok(response);
 	}
 	
 	public CategoryDto getByLibelleAndCompanyId(Company company, String name) {
@@ -96,7 +99,8 @@ public class CategoryService extends BaseService<Category, Long>{
 			}
 			categ.setCompany(company);
 			categoryRepository.save(categ);
-			return ResponseEntity.ok(categoryDto);
+			CategoryDto response = categoryMapper.mapToDto(categ);
+			return ResponseEntity.ok(response);
 			
 	}
 	
@@ -144,22 +148,17 @@ public class CategoryService extends BaseService<Category, Long>{
 		
 	}
 
-	public List<CategoryDto> getCategoriesByPage(int page, int pageSize, Long id) {
-		Pageable pageable = PageRequest.of(page, pageSize);
+	public Page<CategoryDto> getCategoriesByPage(int page, int pageSize, Long id) {
+	    Sort sort = Sort.by(Sort.Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		Page<Category> categories = categoryRepository.findAllByCompanyId(id,pageable);
-		List<CategoryDto> categoriesDto = new ArrayList<>();
-		if(categories.isEmpty()) {
-			return categoriesDto;
-		}else
-		{
-		for(Category i : categories) {
-			CategoryDto categoryDto = categoryMapper.mapToDto(i);
-			categoriesDto.add(categoryDto);
+		List<CategoryDto> categoriesDto = categories.stream()
+				.map(categoryMapper::mapToDto)
+				.toList();
+		logger.warn("category size " +categories.getSize()+" tot page "+categories.getTotalPages());
+		return new PageImpl<>(categoriesDto, pageable, categories.getTotalElements());
 		}
-		logger.warn(categoriesDto.size()+" entity size");
-		return categoriesDto;
-		}
-	}
+	
 	
 	
 

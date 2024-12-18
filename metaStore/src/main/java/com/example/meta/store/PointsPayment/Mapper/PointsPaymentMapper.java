@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import com.example.meta.store.PointsPayment.Dto.PointsPaymentDto;
 import com.example.meta.store.PointsPayment.Entity.PointsPayment;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface PointsPaymentMapper {
 	
 	PointsPayment mapToEntity(PointsPaymentDto dto);

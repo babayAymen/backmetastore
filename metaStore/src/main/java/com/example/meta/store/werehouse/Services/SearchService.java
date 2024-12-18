@@ -7,8 +7,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -113,7 +115,7 @@ public class SearchService extends BaseService<SearchHistory, Long> {
 	
 	
 	
-	public void saveHistory(SearchCategory category, Long itemId, User meUser, Company meCompany) {
+	public SearchHistoryDto saveHistory(SearchCategory category, Long itemId, User meUser, Company meCompany) {
 		SearchHistory history = new SearchHistory();
 		Optional<SearchHistory> hist = null;
 		switch (category) {
@@ -170,33 +172,32 @@ public class SearchService extends BaseService<SearchHistory, Long> {
 		}
 		history.setSearchCategory(category);
 		searchHistoryRepository.save(history);
+		SearchHistoryDto response = searchHistoryMapper.mapToDto(history);
 		logger.warn("c bon saved");
+		return response;
 		
 		
 	}
 	
-	public List<SearchHistoryDto> getSearchHistory(Long id, AccountType type, int page , int pageSize) {
-		Pageable pageable = PageRequest.of(page, pageSize);
+	public Page<SearchHistoryDto> getSearchHistory(Long id, AccountType type, int page , int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC,"lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		switch (type) {
 		case USER: {
 			Page<SearchHistory> histories = searchHistoryRepository.findAllByMeUserId(id, pageable);
-			List<SearchHistoryDto> dtos = new ArrayList<>();
-			for(SearchHistory i : histories) {
-				SearchHistoryDto searchDto = searchHistoryMapper.mapToDto(i);
-				dtos.add(searchDto);
-			}
+			List<SearchHistoryDto> dtos = histories.stream().map(searchHistoryMapper::mapToDto).toList();
+//			for(SearchHistory i : histories) {
+//				SearchHistoryDto searchDto = searchHistoryMapper.mapToDto(i);
+//				dtos.add(searchDto);
+//			}
 			logger.warn(dtos.size()+" size");
-			return dtos;
+			return new PageImpl<>(dtos, pageable, histories.getTotalElements()) ;
 		}
 		case COMPANY: {
 			Page<SearchHistory>  histories = searchHistoryRepository.findAllByMeCompanyId(id, pageable);
-			List<SearchHistoryDto> dtos = new ArrayList<>();
-			for(SearchHistory i : histories) {
-				SearchHistoryDto searchDto = searchHistoryMapper.mapToDto(i);
-				dtos.add(searchDto);
-			}
+			List<SearchHistoryDto> dtos = histories.stream().map(searchHistoryMapper::mapToDto).toList();
 			logger.warn(dtos.size()+" size");
-			return dtos;
+			return new PageImpl<>(dtos, pageable, histories.getTotalElements());
 		}
 		default:
 			throw new IllegalArgumentException("Unexpected value: " + type);

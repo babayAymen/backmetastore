@@ -27,27 +27,27 @@ public class ArticleCompanyDto extends BaseDto<Long> implements Serializable{
 	
 	private Double sellingPrice;
 		
-	private CategoryDto category;
+	private Long commentNumber;
+	private PrivacySetting isVisible;
+	private Boolean isEnabledToComment;
+	private Boolean isFav;
+	private Long likeNumber;
+	private OnlyCategoryDto category;
 	
-	private SubCategoryDto subCategory;
+	private SubCategoryWithOnlyCategoryDto subCategory;
 	
 	private CompanyDto provider;
 	
 	private CompanyDto company;
 	
 	private Unit unit;
-	
-	private PrivacySetting isVisible;
-	
-	private Boolean isEnabledToComment;
-	
 	private Set<SubArticleRelationDto> subArticle;
-
-	private Boolean isFav;
-	
-	private Long likeNumber;
-	
-	private Long commentNumber;
-	
 	private ArticleDto article;
+	
+	
+	
+
+	
+	
+	
 }

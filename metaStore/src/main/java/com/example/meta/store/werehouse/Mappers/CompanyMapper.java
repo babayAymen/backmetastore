@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import com.example.meta.store.werehouse.Dtos.CompanyDto;
 import com.example.meta.store.werehouse.Entities.Company;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CompanyMapper {
 
 

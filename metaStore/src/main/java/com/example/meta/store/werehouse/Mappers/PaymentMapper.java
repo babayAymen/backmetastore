@@ -9,7 +9,7 @@ import com.example.meta.store.werehouse.Dtos.CheckDto;
 import com.example.meta.store.werehouse.Dtos.PaymentDto;
 import com.example.meta.store.werehouse.Entities.Payment;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface PaymentMapper {
 
 	Payment mapCashToPayment(CashDto dto);

@@ -6,5 +6,7 @@ public enum PaymentStatus {
 	
 	PAID,
 	
-	INCOMPLETE
+	INCOMPLETE,
+	
+	ALL
 }

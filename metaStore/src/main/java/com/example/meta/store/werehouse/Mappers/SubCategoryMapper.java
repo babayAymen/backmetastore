@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import com.example.meta.store.werehouse.Dtos.SubCategoryDto;
 import com.example.meta.store.werehouse.Entities.SubCategory;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface SubCategoryMapper {
 
 	SubCategory mapToEntity(SubCategoryDto dto);

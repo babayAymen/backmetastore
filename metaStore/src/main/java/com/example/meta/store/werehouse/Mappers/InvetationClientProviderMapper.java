@@ -7,7 +7,7 @@ import com.example.meta.store.werehouse.Dtos.InvetationDto;
 import com.example.meta.store.werehouse.Dtos.WorkerDto;
 import com.example.meta.store.werehouse.Entities.Invetation;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface InvetationClientProviderMapper {
 
 	Invetation mapToEntity(InvetationDto dto);

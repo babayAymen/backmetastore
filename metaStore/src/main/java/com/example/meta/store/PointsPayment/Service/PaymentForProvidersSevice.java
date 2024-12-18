@@ -106,9 +106,9 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	}
 	
 	public Page<PaymentForProvidersDto> getAllMyPayments(Long id , int page , int pageSize){
-		Sort sort = Sort.by(Sort.Direction.ASC,"id");
+		Sort sort = Sort.by(Sort.Direction.DESC,"id");
 		Pageable pageable = PageRequest.of(page, pageSize,sort);
-			Page<PaymentForProviders>paymentForProviders = paymentForProvidersRepository.getPaymentForProvidersAsCompany(id, pageable);
+			Page<PaymentForProviders> paymentForProviders = paymentForProvidersRepository.getPaymentForProvidersAsCompany(id, pageable);
 			  List<PaymentForProvidersDto> paymentForProvidersDto = paymentForProviders.stream()
 				        .map(paymentForProvidersMapper::mapToDto)
 				        .toList();

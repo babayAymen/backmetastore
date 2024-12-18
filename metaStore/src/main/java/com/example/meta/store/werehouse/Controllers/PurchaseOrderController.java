@@ -128,7 +128,7 @@ public class PurchaseOrderController {
 			Company company = companyService.getCompany();
 			if(company.getId() == id ||  company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 				return purchaseOrderService.getAllMyOrdersNotAcceptedAsProvider(id,page, pageSize);
-		}
+			}
 		}
 		if(authenticationFilter.accountType == AccountType.USER) {
 			User user = userService.getUser();

@@ -24,7 +24,7 @@ public class CommentDto extends BaseDto<Long> implements Serializable{
 
     private CompanyDto company;
 
-    private ArticleCompanyDto article;
+    private ArticleCompanyWithoutTroubleDto article;
 	
 	  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 		private LocalDateTime createdDate;

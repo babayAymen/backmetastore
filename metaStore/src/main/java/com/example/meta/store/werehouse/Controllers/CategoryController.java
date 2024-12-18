@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -44,9 +45,14 @@ public class CategoryController {
 	private final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
 	  @GetMapping("/get/{companyId}")
-	    public List<CategoryDto> getPagingCategoryByCompany(@PathVariable Long companyId,@RequestParam int pageSize, @RequestParam int page) {
-		  logger.warn("get page category ");
+	    public Page<CategoryDto> getPagingCategoryByCompany(@PathVariable Long companyId,@RequestParam int pageSize, @RequestParam int page) {
 	        return categoryService.getCategoriesByPage(page, pageSize, companyId);
+	    }
+
+
+	  @GetMapping("/get_all/{companyId}")
+	    public List<CategoryDto> getPagingCategoryByCompanyId(@PathVariable Long companyId,@RequestParam int pageSize, @RequestParam int page) {
+	        return categoryService.getCategoriesByPage(page, pageSize, companyId).toList();
 	    }
 
 	@PostMapping("/add")
@@ -57,6 +63,17 @@ public class CategoryController {
 		Company company = companyService.getCompany();
 		return categoryService.insertCategory(categoryDto,company,file);
 	}
+	
+
+	@PostMapping("/add_without_image")
+	public ResponseEntity<CategoryDto> insertCategoryWithoutImage(
+			@RequestParam("categoryDto") String categoryDto) throws JsonMappingException, JsonProcessingException
+	{
+		Company company = companyService.getCompany();
+		return categoryService.insertCategory(categoryDto,company,null);
+	}
+	
+	
 	
 	@GetMapping("/getbycompany/{companyId}")
 	public List<CategoryDto> getCategoryByCompany(@PathVariable Long companyId){
@@ -69,6 +86,13 @@ public class CategoryController {
 			@RequestParam(value="file", required=false) MultipartFile file) throws JsonMappingException, JsonProcessingException{
 		Company company = companyService.getCompany();
 		return categoryService.upDateCategory(categoryDto,company,file);
+	}
+
+	@PutMapping("/update_without_image")
+	public ResponseEntity<CategoryDto> upDateCategoryWithoutImage(
+			@RequestParam String categoryDto) throws JsonMappingException, JsonProcessingException{
+		Company company = companyService.getCompany();
+		return categoryService.upDateCategory(categoryDto,company,null);
 	}
 
 	@DeleteMapping("/delete/{id}")

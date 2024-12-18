@@ -17,7 +17,7 @@ import lombok.Setter;
 public class PurchaseOrderLineDto extends BaseDto<Long> implements Serializable {
 
 	
-	private ArticleCompanyDto article;
+	private ArticleCompanyWithoutTroubleDto article;
 	
 	private Double quantity;
 	

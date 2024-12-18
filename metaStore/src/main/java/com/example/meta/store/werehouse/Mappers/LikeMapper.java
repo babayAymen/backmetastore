@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import com.example.meta.store.werehouse.Dtos.LikeDto;
 import com.example.meta.store.werehouse.Entities.Like;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface LikeMapper {
 
 	Like mapToEntity(LikeDto dto);

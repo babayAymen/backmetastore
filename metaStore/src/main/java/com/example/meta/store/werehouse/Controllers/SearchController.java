@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.BeanDefinitionDsl.Role;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,21 +66,22 @@ public class SearchController {
 	}
 	
 	@GetMapping("save_history/{category}/{id}")
-	public void saveHistory(@PathVariable SearchCategory category, @PathVariable Long id) {
+	public SearchHistoryDto saveHistory(@PathVariable SearchCategory category, @PathVariable Long id) {
 		AccountType type = authenticationFilter.accountType;
 		if(type == AccountType.USER) {			
 		User user = userService.getUser();
-		searchService.saveHistory(category,id,user, null);
+		 return searchService.saveHistory(category,id,user, null);
 		}
 		if(type == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
-			searchService.saveHistory(category,id,null, company);
+			return searchService.saveHistory(category,id,null, company);
 
 		}
+		else return null;
 	}
 	
 	@GetMapping("get_search_history/{id}")
-	public List<SearchHistoryDto> getSearchHistory(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
+	public Page<SearchHistoryDto> getSearchHistory(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
 		AccountType type = authenticationFilter.accountType;
 		if(type == AccountType.USER) {			
 		User user = userService.getUser();

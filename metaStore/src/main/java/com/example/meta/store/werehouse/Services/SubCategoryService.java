@@ -7,8 +7,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -50,8 +52,9 @@ public class SubCategoryService extends BaseService<SubCategory, Long>{
 	private final Logger logger = LoggerFactory.getLogger(SubCategoryService.class);
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	
-	public List<SubCategoryDto> getSubCategoryByCompany(Long id, int page , int pageSize) {
-		Pageable pageable = PageRequest.of(page, pageSize);
+	public Page<SubCategoryDto> getSubCategoryByCompany(Long id, int page , int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		Page<SubCategory> subCategorys = subCategoryRepository.findAllByCompanyId(id, pageable);
 		List<SubCategoryDto> subCategorysDto = new ArrayList<>();
 		for(SubCategory i : subCategorys.getContent()) {
@@ -59,7 +62,7 @@ public class SubCategoryService extends BaseService<SubCategory, Long>{
 			subCategorysDto.add(subCategoryDto);
 		}
 		logger.warn(id+" sub category size : "+subCategorysDto.size());
-		return subCategorysDto;
+		return new PageImpl<>(subCategorysDto, pageable, subCategorys.getTotalElements());
 	}
 
 
@@ -86,7 +89,8 @@ public class SubCategoryService extends BaseService<SubCategory, Long>{
 		}
 		categ.setCompany(company);
 		subCategoryRepository.save(categ);
-		return ResponseEntity.ok(subCategoryDto);		
+		SubCategoryDto response = subCategoryMapper.mapToDto(categ);
+		return ResponseEntity.ok(response);		
 	}
 	
 	public SubCategory getDefaultSubCategory(Company company) {
@@ -108,7 +112,8 @@ public class SubCategoryService extends BaseService<SubCategory, Long>{
 		}
 		subCategory.setCompany(company);
 		super.insert(subCategory);
-		return new ResponseEntity<SubCategoryDto>(HttpStatus.ACCEPTED);
+		SubCategoryDto response = subCategoryMapper.mapToDto(subCategory);
+		return  ResponseEntity.ok(response);
 	}
 	
 	public ResponseEntity<SubCategoryDto> getSubCategoryById(String name, Company company) {

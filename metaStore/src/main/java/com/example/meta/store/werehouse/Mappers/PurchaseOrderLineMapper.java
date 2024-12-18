@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import com.example.meta.store.werehouse.Dtos.PurchaseOrderLineDto;
 import com.example.meta.store.werehouse.Entities.PurchaseOrderLine;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface PurchaseOrderLineMapper {
 
 	PurchaseOrderLine mapToEntity(PurchaseOrderLineDto dto);

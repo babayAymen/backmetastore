@@ -25,6 +25,8 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 
 	Page<Invoice> findAllByProviderId(Long providerId, Pageable pageable);
 	
+	Page<Invoice> findAllByProviderIdAndPaid(Long providerId , PaymentStatus status , Pageable pageable);
+	
 	Page<Invoice> findAllByClientId(Long clientId, Pageable pageable);
 	
 	@Query("SELECT i FROM Invoice i WHERE (i.client.id = :companyId) OR (i.provider.id = :companyId)")
@@ -76,6 +78,8 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 	Page<Invoice> findByProviderIdAndStatus(Long companyId, Status status, Pageable pageable);
 
 	Page<Invoice> findByClientIdAndPaid(Long companyId, PaymentStatus status, Pageable pageable);
+
+	Page<Invoice> findAllByClientIdAndPaid(Long id, PaymentStatus status, Pageable pageable);
 
 
 

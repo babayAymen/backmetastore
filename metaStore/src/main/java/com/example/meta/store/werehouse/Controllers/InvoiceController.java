@@ -60,14 +60,14 @@ public class InvoiceController {
 	}
 	
 	@GetMapping("getMyInvoiceAsProvider/{id}")
-	public List<InvoiceDto> getMyInvoiceAsProvider(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
+	public List<InvoiceDto> getMyInvoiceAsProvider(@PathVariable Long id, @RequestParam PaymentStatus status, @RequestParam int page , @RequestParam int pageSize){
 		Company company = null;
 		List<InvoiceDto> invoiceList = new ArrayList<>();
 		switch (authenticationFilter.accountType) {
 		case COMPANY: {
 			 company = companyService.getCompany();
 				if(company.getId() == id ||  company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-					invoiceList = invoiceService.getMyInvoiceAsProvider(id, null, page, pageSize);
+					invoiceList = invoiceService.getMyInvoiceAsProvider(id, null, status, page, pageSize);
 				}
 			break;
 		}
@@ -77,7 +77,7 @@ public class InvoiceController {
 		case WORKER :{
 			company = getHisCompany().get();
 			User user = userService.getUser();
-			invoiceList = invoiceService.getMyInvoiceAsProvider(company.getId(),user.getId(), page , pageSize);
+			invoiceList = invoiceService.getMyInvoiceAsProvider(company.getId(),user.getId(), status, page , pageSize);
 			break;
 		}
 		default:
@@ -135,20 +135,19 @@ public class InvoiceController {
 	}
 	
 	@GetMapping("getMyInvoiceAsClient/{id}")
-	public List<InvoiceDto> getInvoicesAsClient(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
-		logger.warn("id is: "+id);
+	public List<InvoiceDto> getInvoicesAsClient(@PathVariable Long id,@RequestParam PaymentStatus status, @RequestParam int page , @RequestParam int pageSize){
 		AccountType type = authenticationFilter.accountType;
 		if(type == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-			return invoiceService.getInvoicesAsClient(id,type, page, pageSize);			
+			return invoiceService.getInvoicesAsClient(id,type,status, page, pageSize);			
 		}else {
 			throw new NotPermissonException("you don't have permission for that");
 		}
 		
 		}
 		User user = userService.getUser();
-		return invoiceService.getInvoicesAsClient(user.getId(), type, page, pageSize);
+		return invoiceService.getInvoicesAsClient(user.getId(), type,status, page, pageSize);
 	}
 	
 //	@GetMapping("getnotaccepted")
@@ -201,7 +200,6 @@ public class InvoiceController {
 
 	@GetMapping("get_by_status_as_client/{id}")
 	public List<InvoiceDto> getAllMyInvoicesAsClientAndStatus(@PathVariable Long id , @RequestParam Status status, @RequestParam int page , @RequestParam int pageSize){
-
 		AccountType type = authenticationFilter.accountType;
 		if(type == AccountType.USER) {
 			User user = userService.getUser();

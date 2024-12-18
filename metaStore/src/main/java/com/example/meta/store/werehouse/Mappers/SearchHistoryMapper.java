@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import com.example.meta.store.werehouse.Dtos.SearchHistoryDto;
 import com.example.meta.store.werehouse.Entities.SearchHistory;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface SearchHistoryMapper {
 
 	SearchHistory mapToEntity(SearchHistoryDto dto);

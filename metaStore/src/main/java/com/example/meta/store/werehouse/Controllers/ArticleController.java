@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +23,7 @@ import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
 import com.example.meta.store.Base.Security.Entity.User;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.ArticleCompanyDto;
+import com.example.meta.store.werehouse.Dtos.ArticleCompanyWithoutTroubleDto;
 import com.example.meta.store.werehouse.Dtos.ArticleDto;
 import com.example.meta.store.werehouse.Dtos.CommentDto;
 import com.example.meta.store.werehouse.Entities.ArticleCompany;
@@ -57,14 +59,14 @@ public class ArticleController {
 	
 	/////////////////////////////////////// real work ////////////////////////////////////////////////////////
 	@GetMapping("getrandom")
-	public List<ArticleCompanyDto> findRandomArticles( @RequestParam int offset, @RequestParam int pageSize){
+	public List<ArticleCompanyDto> findRandomArticles( @RequestParam CompanyCategory category , @RequestParam int offset, @RequestParam int pageSize){
 		User user = userService.getUser();
 		logger.warn("account type in random article fun "+authenticationFilter.accountType);
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company myCompany = companyService.getCompany();
-			return articleService.findRandomArticlesPub(myCompany, user,offset, pageSize);
+			return articleService.findRandomArticlesPub(myCompany, user,offset, pageSize, category);
 		}
-		return articleService.findRandomArticlesPub(null, user,offset, pageSize);
+		return articleService.findRandomArticlesPub(null, user,offset, pageSize, category);
 	}
 	
 	@GetMapping("getrandom/{categname}")
@@ -171,26 +173,27 @@ public class ArticleController {
 		 articleService.deleteSubArticle(id,companyId);
 	}
 	
-	@PostMapping("sendComment/{articleId}")
-	public void sendComment(@RequestBody String comment, @PathVariable Long articleId) {
-		ArticleCompany article = articleService.findByArticleCompanyId(articleId);
+	@PostMapping("sendComment")
+	public void sendComment(@RequestBody CommentDto comment) {
+		logger.warn("comment is : "+comment);
+		ArticleCompany article = articleService.findByArticleCompanyId(comment.getArticle().getId());
 		article.setCommentNumber(article.getCommentNumber()+1);
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company company = companyService.getCompany();
-			commentService.addComment(article, comment, null, company);
+			commentService.addComment(article, comment.getContent(), null, company);
 			return;
 		}
 		User user = userService.getUser();
-		commentService.addComment(article, comment, user, null);
+		commentService.addComment(article, comment.getContent(), user, null);
 	}
 	
 	@GetMapping("get_comments/{articleId}")
-	public List<CommentDto> getAllComments(@PathVariable Long articleId){
-		return commentService.getAllCommentsByArticleId(articleId);
+	public Page<CommentDto> getAllComments(@PathVariable Long articleId, @RequestParam int page , @RequestParam int pageSize){
+		return commentService.getAllCommentsByArticleId(articleId, page, pageSize);
 	}
 	
 	@GetMapping("search/{id}")
-	public List<ArticleCompanyDto> getByNameContaining(@PathVariable Long id ,@RequestParam String search , @RequestParam SearchType searchType, @RequestParam int page , @RequestParam int pageSize){
+	public List<ArticleCompanyWithoutTroubleDto> getByNameContaining(@PathVariable Long id ,@RequestParam String search , @RequestParam SearchType searchType, @RequestParam int page , @RequestParam int pageSize){
 			Long companyId = null;
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company company  = companyService.getCompany();	

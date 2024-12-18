@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import com.example.meta.store.werehouse.Dtos.CommandLineDto;
 import com.example.meta.store.werehouse.Entities.CommandLine;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CommandLineMapper {
 
 

@@ -17,30 +17,25 @@ import com.example.meta.store.werehouse.Enums.CompanyCategory;
 public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany, Long>{
 
 	
-//	@Query(value = "SELECT a FROM ArticleCompany a WHERE "
-//			+ " ((a.isVisible = 2)"
-//			+ " AND (a.company.longitude BETWEEN :longitude - 0.057615 AND :longitude + 0.057615) "
-//		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907)) "
-//			+ " ORDER BY random() LIMIT 10 "
-//			)
 	@Query(value = "SELECT a FROM ArticleCompany a WHERE"
 			+ " (((a.isVisible = 2)"
 			+ " OR (a.isVisible = 1 AND EXISTS (SELECT 1 FROM ClientProviderRelation cc WHERE"
 			+ "  cc.person.id = :userId AND cc.provider.id = a.company.id))))"
 			+ " AND (a.company.longitude BETWEEN :longitude - 0.057615 AND :longitude + 0.057615) "
-		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907) "
+		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907) AND a.article.category = :category "
 		   	)
-	Page<ArticleCompany> findRandomArticles(Long userId, Double longitude, Double latitude, Pageable pageable );
+	Page<ArticleCompany> findRandomArticles(Long userId, Double longitude, Double latitude,CompanyCategory category, Pageable pageable );
 
 	@Query(value = "SELECT a FROM ArticleCompany a WHERE"
-			+ " (a.company.id = :myCompanyId) "
+			+ " ((a.company.id = :myCompanyId) "
 			+ " OR (((a.isVisible = 2)"
 			+ " OR (a.isVisible = 1 AND EXISTS (SELECT 1 FROM ClientProviderRelation cc WHERE"
 			+ "  cc.client.id = :myCompanyId AND cc.provider.id = a.company.id))))"
 			+ " AND (a.company.longitude BETWEEN :longitude - 0.057615 AND :longitude + 0.057615) "
-		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907) "
+		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907))"
+		    + " AND a.article.category = :category  "
 		   	)
-	Page<ArticleCompany> findRandomArticlesPro( Long myCompanyId, Double longitude, Double latitude, Pageable pageable);
+	Page<ArticleCompany> findRandomArticlesPro( Long myCompanyId, Double longitude, Double latitude,CompanyCategory category, Pageable pageable);
 	
 	@Query("SELECT a FROM ArticleCompany a WHERE ((a.isVisible = 2) "
 			+ " OR (a.isVisible = 1 AND ((EXISTS (SELECT 1 FROM ClientProviderRelation cc WHERE"

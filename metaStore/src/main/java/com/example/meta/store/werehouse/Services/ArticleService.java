@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,7 @@ import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Entity.User;
 import com.example.meta.store.Base.Service.BaseService;
 import com.example.meta.store.werehouse.Dtos.ArticleCompanyDto;
+import com.example.meta.store.werehouse.Dtos.ArticleCompanyWithoutTroubleDto;
 import com.example.meta.store.werehouse.Dtos.ArticleDto;
 import com.example.meta.store.werehouse.Entities.Article;
 import com.example.meta.store.werehouse.Entities.ArticleCompany;
@@ -75,34 +77,31 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 	
 
 	/////////////////////////////////////// real work ////////////////////////////////////////////////////////
-	public List<ArticleCompanyDto> findRandomArticlesPub( Company myCompany, User user, int offset, int pageSize) {
+	public List<ArticleCompanyDto> findRandomArticlesPub( Company myCompany, User user, int offset, int pageSize, CompanyCategory category) {
 		Pageable pageable = PageRequest.of(offset, pageSize);
 		Page<ArticleCompany> articles;
 		Boolean isFav = false;
 		if(myCompany == null) {
-			articles = articleCompanyRepository.findRandomArticles(user.getId(),user.getLongitude(), user.getLatitude(), pageable);
+			articles = articleCompanyRepository.findRandomArticles(user.getId(),user.getLongitude(), user.getLatitude(), category, pageable);
 		}
 		else {
-			articles = articleCompanyRepository.findRandomArticlesPro(myCompany.getId(), myCompany.getLongitude(), myCompany.getLatitude(), pageable);	 
-		}
-		if(articles.isEmpty()) {
-			throw new RecordNotFoundException("No Article");
+			articles = articleCompanyRepository.findRandomArticlesPro(myCompany.getId(), myCompany.getLongitude(), myCompany.getLatitude(), category, pageable);	 
 		}
 			List<ArticleCompanyDto> articlesDto = new ArrayList<>();
 			for(ArticleCompany i:articles) {
+				logger.warn("id : "+i.getId());
 				if(myCompany == null) {
 					isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),user.getId());
 				}
 				else {
 					isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),myCompany.getId());
-					logger.warn("is fav is : "+isFav+" for article id : "+i.getId());
 				}
 			ArticleCompanyDto dto = articleCompanyMapper.mapToDto(i);
-			
-				dto.setIsFav(isFav);
+			dto.setIsFav(isFav);
 			articlesDto.add(dto);
 	}
-			logger.warn("size article return "+articlesDto.size());
+			logger.warn("category is : "+category);
+			logger.warn("size article return "+articlesDto.size()+" article "+articles.getSize());
 			return articlesDto;
 	}
 	
@@ -382,10 +381,11 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 
 		
 	/////////////////////////////////////// future work ////////////////////////////////////////////////////////
-	public List<ArticleCompanyDto> getByNameContaining( Long providerId, Long userId,String articlenamecontaining, int page , int pageSize) {
-		Pageable pageable = PageRequest.of(page, pageSize);				
+	public List<ArticleCompanyWithoutTroubleDto> getByNameContaining( Long providerId, Long userId,String articlenamecontaining, int page , int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC,"lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);				
 		Page<ArticleCompany> article = articleCompanyRepository.findAllByLibelleAndProviderIdContaining(articlenamecontaining,providerId, userId,pageable);
-		List<ArticleCompanyDto> articleDto = new ArrayList<>();
+		List<ArticleCompanyWithoutTroubleDto> articleDto = new ArrayList<>();
 			if(!article.isEmpty()) {
 			Boolean isFav = false;
 			for(ArticleCompany i : article.getContent()) {
@@ -395,7 +395,7 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		else {
 			isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),providerId);
 		}
-			ArticleCompanyDto artDto =  articleCompanyMapper.mapToDto(i);
+		ArticleCompanyWithoutTroubleDto artDto =  articleCompanyMapper.mapToArticleCompanyWithoutTroubleDto(i);
 			artDto.setIsFav(isFav);
 			articleDto.add(artDto);
 	}
@@ -729,14 +729,23 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		return articleCompanyDto;
 	}
 
-	public List<ArticleCompanyDto> getMyArticleContaining(Long id, String search, int page, int pageSize) {
-		Pageable pageable = PageRequest.of(page, pageSize);
+	public List<ArticleCompanyWithoutTroubleDto> getMyArticleContaining(Long id, String search, int page, int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC,"lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		Page<ArticleCompany> article = articleCompanyRepository.findAllByCompanyIdAndLibelleContaining(id , search , pageable);
-		List<ArticleCompanyDto> response = mapArticleCompanyListToDto(article.getContent());
+		List<ArticleCompanyWithoutTroubleDto> response = mapListToArticleCompanyWithoutTroubleDto(article.getContent());
 		return response;
 	}
 
 
+	private List<ArticleCompanyWithoutTroubleDto> mapListToArticleCompanyWithoutTroubleDto(List<ArticleCompany> articles){
+		List<ArticleCompanyWithoutTroubleDto> articlesDto = new ArrayList<>();
+		for(ArticleCompany i : articles) {
+			ArticleCompanyWithoutTroubleDto articleDto = articleCompanyMapper.mapToArticleCompanyWithoutTroubleDto(i);
+			articlesDto.add(articleDto);
+		}
+		return articlesDto;
+	}
 
 	private List<ArticleCompanyDto> mapArticleCompanyListToDto(List<ArticleCompany> articles){
 		List<ArticleCompanyDto> articlesDto = new ArrayList<>();

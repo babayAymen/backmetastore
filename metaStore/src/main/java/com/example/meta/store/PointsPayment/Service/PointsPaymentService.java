@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -66,7 +67,8 @@ public class PointsPaymentService extends BaseService<PointsPayment, Long> {
 	}
 
 	public List<PointsPaymentDto> getAllMyPointsPayment(Long companyId, Long userId, int page , int pageSize) {
-		Pageable pageable = PageRequest.of(page, pageSize);
+		Sort sort = Sort.by(Sort.Direction.DESC, "lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		List<PointsPaymentDto> pointsPaymentDto = new ArrayList<>();
 		logger.warn("company id : "+companyId + " user id : "+userId);
 		Page<PointsPayment> pointsPayment = pointPaymentRepository.findAllByCompanyIdOrUserId(companyId, userId, pageable);

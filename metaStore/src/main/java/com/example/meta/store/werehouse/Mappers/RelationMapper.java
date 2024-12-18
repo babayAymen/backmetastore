@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import com.example.meta.store.werehouse.Dtos.SubArticleRelationDto;
 import com.example.meta.store.werehouse.Entities.SubArticle;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface RelationMapper {
 
 	SubArticle mapToEntity(SubArticleRelationDto dto);

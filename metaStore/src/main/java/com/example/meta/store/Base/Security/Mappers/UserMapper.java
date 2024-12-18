@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 
 import com.example.meta.store.Base.Security.Dto.UserDto;
 import com.example.meta.store.Base.Security.Entity.User;
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UserMapper {
 	
 	

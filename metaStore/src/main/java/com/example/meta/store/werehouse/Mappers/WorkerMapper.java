@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import com.example.meta.store.werehouse.Dtos.WorkerDto;
 import com.example.meta.store.werehouse.Entities.Worker;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface WorkerMapper {
 
 	Worker mapToEntity(WorkerDto dto);
