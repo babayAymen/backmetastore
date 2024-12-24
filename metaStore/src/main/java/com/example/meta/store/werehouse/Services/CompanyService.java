@@ -22,6 +22,7 @@ import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Entity.RegisterRequest;
 import com.example.meta.store.Base.Security.Entity.Role;
 import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.RoleService;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.Base.Service.BaseService;
@@ -31,6 +32,7 @@ import com.example.meta.store.werehouse.Dtos.CompanyDto;
 import com.example.meta.store.werehouse.Entities.Category;
 import com.example.meta.store.werehouse.Entities.ClientProviderRelation;
 import com.example.meta.store.werehouse.Entities.Company;
+import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.InvoiceType;
 import com.example.meta.store.werehouse.Enums.PrivacySetting;
 import com.example.meta.store.werehouse.Enums.SearchType;
@@ -57,8 +59,6 @@ public class CompanyService extends BaseService<Company, Long> {
 	private final ClientCompanyRMapper clientProviderRelationMapper;
 	
 	private final CompanyMapper companyMapper;
-
-	private final RoleService roleService;
 
 	private final UserService userService;
 
@@ -95,11 +95,11 @@ public class CompanyService extends BaseService<Company, Long> {
 			String newFileName = imageService.insertImag(file, user.getId(), "company");
 			company1.setLogo(newFileName);
 		}
-		Set<Role> role = new HashSet<>();
-		ResponseEntity<Role> role2 = roleService.getById((long) 1);
-		role.add(role2.getBody());
-		role.addAll(user.getRoles());
-		user.setRoles(role);
+//		Set<Role> role = new HashSet<>();
+//		ResponseEntity<Role> role2 = roleService.getById((long) 1);
+//		role.add(role2.getBody());
+//		role.addAll(user.getRoles());
+		user.setRole(RoleEnum.ADMIN);
 		userService.save(user);
 		companyRepository.save(company1);
 		ClientProviderRelation relation = new ClientProviderRelation();
@@ -255,19 +255,31 @@ public class CompanyService extends BaseService<Company, Long> {
 		return ResponseEntity.ok(companyDto);
 	}
 	
-	public CompanyDto getMe(Company company, Long id) {
-		Company companyReturnd = company;
-//		if(!company.getId().equals(id)) {
-//			Company branshe = companyRepository.findById(id)
-//					.orElseThrow(() -> new RecordNotFoundException("there is no company with id: "+id));
-//			companyReturnd = branshe;
-//		}
-		CompanyDto companyDto = companyMapper.mapToDto(companyReturnd);
+	public CompanyDto getMe(User user) {
+		Optional<Company> companyReturnd = Optional.empty();
+		logger.warn("role is "+user.getRole());
+		if(user.getRole() == RoleEnum.ADMIN) {
+			companyReturnd = companyRepository.findByUserId(user.getId());
+		}
+		if(user.getRole() == RoleEnum.WORKER) {
+			 companyReturnd = workerService.findCompanyByWorkerId(user.getId());
+		}
+		if(user.getRole() == RoleEnum.PARENT) {
+			
+		}
+		CompanyDto companyDto = companyMapper.mapToDto(companyReturnd.get());
 		logger.warn("return c bon company");
 		return companyDto;
 	}
 	
-	
+	public Company getCompanyByid(Long companyId){
+
+		Optional<Company> company = companyRepository.findById(companyId);
+		if (company.isEmpty()) {
+			throw new RecordNotFoundException("you do not have a company");
+		}
+		return company.get();
+	}
 	
 	public List<CompanyDto> getAllCompany() {
 		List<Company> companies = super.getAll();

@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
 import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.ClientProviderRelationDto;
 import com.example.meta.store.werehouse.Dtos.CompanyDto;
@@ -25,6 +26,7 @@ import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.SearchType;
 import com.example.meta.store.werehouse.Services.CompanyService;
+import com.example.meta.store.werehouse.Services.WorkerService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,6 +38,8 @@ public class CompanyController {
 	private final CompanyService companyService;
 	
 	private final UserService userService;
+	
+	private final WorkerService workerService;
 
 	private final JwtAuthenticationFilter authenticationFilter;
 	
@@ -74,22 +78,22 @@ public class CompanyController {
 	
 	@GetMapping("me")
 	public CompanyDto getMe() {
-		Company company = companyService.getCompany();
-		return companyService.getMe(company,company.getId());
+		User user = userService.getUser();
+		return companyService.getMe(user);
 	}
 	
-	@GetMapping("mycompany/{id}")
-	public CompanyDto getMe(@PathVariable Long id) {
-		Company company = companyService.getCompany();
-		if(!company.getId().equals(id) && id != 0) {
-			boolean exists = company.getBranches().stream()
-					.anyMatch(branch -> branch.getId().equals(id));
-			if(!exists) {
-				throw new RecordNotFoundException("you don't have a company");
-			}
-		}
-		return companyService.getMe(company,id);
-	}
+//	@GetMapping("mycompany/{id}")
+//	public CompanyDto getMe(@PathVariable Long id) {
+//		Company company = companyService.getCompany();
+//		if(!company.getId().equals(id) && id != 0) {
+//			boolean exists = company.getBranches().stream()
+//					.anyMatch(branch -> branch.getId().equals(id));
+//			if(!exists) {
+//				throw new RecordNotFoundException("you don't have a company");
+//			}
+//		}
+//		return companyService.getMe(company,id);
+//	}
 	
 //	@GetMapping("/rate/{id}/{rate}")
 //	public void rateCompany(@PathVariable long id, @PathVariable double rate) {
@@ -124,14 +128,19 @@ public class CompanyController {
 	
 	@GetMapping("get_companies_containing/{id}")
 	public List<CompanyDto> getAllCompaniesContaining(@PathVariable Long id, @RequestParam String search , @RequestParam SearchType searchType, @RequestParam int page , @RequestParam int pageSize ){
+		User user = userService.getUser();
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
-			Company company = companyService.getCompany();
+			Company company = new Company();
+			if(user.getRole() == RoleEnum.WORKER) {
+				company = workerService.findCompanyByWorkerId(user.getId()).get();
+			}else {				
+				company = companyService.getCompany();
+			}
 			if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 				return companyService.getAllCompaniesContainig(null,company, search, page , pageSize, searchType);
 			}
 		}
 		if(authenticationFilter.accountType == AccountType.USER) {
-			User user = userService.getUser();
 			return companyService.getAllCompaniesContainig(user,null, search, page , pageSize, searchType);	
 		}
 		return null;

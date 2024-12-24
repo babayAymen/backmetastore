@@ -15,12 +15,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
+import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.CommandLineDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.InvoiceMode;
 import com.example.meta.store.werehouse.Services.CommandLineService;
 import com.example.meta.store.werehouse.Services.CompanyService;
+import com.example.meta.store.werehouse.Services.WorkerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +40,9 @@ public class CommandLineController {
 		
 	private final CompanyService companyService;
 	
+	private final UserService userService;
+	
+	private final WorkerService workerService;
 
 	private final Logger logger = LoggerFactory.getLogger(CommandLineController.class);
 
@@ -45,7 +52,13 @@ public class CommandLineController {
 			@RequestParam Long invoiceCode, @RequestParam String type, @PathVariable Long clientid, @RequestParam Double discount,
 			@RequestParam AccountType clientType,@RequestParam InvoiceMode invoiceMode)
 					throws JsonProcessingException {
-		Company company = companyService.getCompany();
+		User user = userService.getUser();
+		Company company = new Company();
+		if(user.getRole() == RoleEnum.WORKER) {
+			company = workerService.findCompanyByWorkerId(user.getId()).get();
+		}else {
+			company = companyService.getCompany();
+		}
 		return commandLineService.insertLine(commandLinesDto, company,clientid,discount,type,clientType,invoiceMode);
 		
 	}

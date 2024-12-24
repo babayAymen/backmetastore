@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
 import com.example.meta.store.Base.Security.Entity.User;
 import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.aymen.service.AymenService;
+import com.example.meta.store.werehouse.Enums.AccountType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +31,7 @@ public class AymenController {
 	@GetMapping("make_as_point_seller/{status}/{companyId}")
 	public void makeCompanyAsPointSeller(@PathVariable Boolean status, @PathVariable Long companyId) {
 		User user = userService.getUser();
-		if(user.getRoles().stream().anyMatch(role -> role.getName().equals(RoleEnum.AYMEN))) {
+		if(user.getAccountType() == AccountType.META) {
 			aymenService.makeCompanyAsPointSeller(companyId, status);
 		}
 	}

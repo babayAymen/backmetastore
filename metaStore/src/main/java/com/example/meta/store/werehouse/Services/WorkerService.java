@@ -125,11 +125,13 @@ public class WorkerService extends BaseService<Worker, Long> {
 		if(worker1.isPresent())  {
 			throw new RecordIsAlreadyExist("is already worker");
 		}
+		Worker workerUser = workerMapper.mapToEntity(workerDto);
 
 		Worker worker = new Worker();
 		
 		worker = workerMapper.mapToEntity(workerDto);
 		worker.setCompany(company);
+		worker.setUser(workerUser.getUser());
 		worker.setRemainingday(worker.getTotdayvacation());
 		if(workerDto.getUser() != null) {
 			User user = userService.findByUserName(workerDto.getName());
@@ -206,6 +208,11 @@ public class WorkerService extends BaseService<Worker, Long> {
 	public Long findCompanyIdByUserId(Long userId) {
 		Long companyId = workerRepository.findCompanyIdByUserId(userId);
 		return companyId;
+	}
+
+	public Optional<Company> findCompanyByWorkerId(Long id) {
+		Optional<Company> company = workerRepository.findCompanyByUserId(id);
+		return company;
 	}
 	
 

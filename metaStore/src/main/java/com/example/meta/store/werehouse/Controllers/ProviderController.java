@@ -57,12 +57,17 @@ public class ProviderController {
 	@GetMapping("get_all_my/{id}")
 	public List<ClientProviderRelationDto> getAllMy(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
 		logger.warn("c bon je lil provider");
-		Company company = companyService.getCompany();
-		Long companyId = company.getId();
-		if(company.getId() != id && company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-			companyId = id;
+		User user = userService.getUser();
+		Company company = new Company();
+		if(user.getRole() == RoleEnum.WORKER) {
+			company = workerService.findCompanyByWorkerId(user.getId()).get();
+		}else {	
+		 company = companyService.getCompany();
 		}
-		return providerService.getAllMyProvider(companyId, page, pageSize);
+		if(company.getId() != id && company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
+		return providerService.getAllMyProvider(id, page, pageSize);
+		}
+		return null;
 	}
 	
 	

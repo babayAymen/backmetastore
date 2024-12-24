@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -71,13 +72,14 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 	
 	private final SubCategoryService subCategoryService;
 	
-	private final InvoiceRepository invoiceRepository;
+	private final MessageService msgRepository;
 	
 	private final Logger logger = LoggerFactory.getLogger(ArticleService.class);
 	
 
 	/////////////////////////////////////// real work ////////////////////////////////////////////////////////
-	public List<ArticleCompanyDto> findRandomArticlesPub( Company myCompany, User user, int offset, int pageSize, CompanyCategory category) {
+	public Page<ArticleCompanyDto> findRandomArticlesPub( Company myCompany, User user, int offset, int pageSize, CompanyCategory category) {
+		msgRepository.sendWSMessage( "hello from server");
 		Pageable pageable = PageRequest.of(offset, pageSize);
 		Page<ArticleCompany> articles;
 		Boolean isFav = false;
@@ -89,24 +91,23 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		}
 			List<ArticleCompanyDto> articlesDto = new ArrayList<>();
 			for(ArticleCompany i:articles) {
-				logger.warn("id : "+i.getId());
 				if(myCompany == null) {
 					isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),user.getId());
 				}
 				else {
 					isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),myCompany.getId());
 				}
-			ArticleCompanyDto dto = articleCompanyMapper.mapToDto(i);
-			dto.setIsFav(isFav);
-			articlesDto.add(dto);
+				ArticleCompanyDto dto = articleCompanyMapper.mapToDto(i);
+				dto.setIsFav(isFav);
+				articlesDto.add(dto);
 	}
-			logger.warn("category is : "+category);
-			logger.warn("size article return "+articlesDto.size()+" article "+articles.getSize());
-			return articlesDto;
+			logger.warn("size article return "+articlesDto.size()+" article "+articles.getTotalElements()+" company id : ");
+			return new PageImpl<>(articlesDto, pageable, articles.getTotalElements());
 	}
 	
 	public List<ArticleCompanyDto> getAllArticleByCompanyId(Long providerId,Long myClientId,Long myCompanyId, int offset, int pageSize) {
-
+logger.warn("hello from server");
+		msgRepository.sendWSMessage( "hello from server");
 		Boolean isFav = false;
 		Pageable pageable = PageRequest.of(offset, pageSize);
 		Page<ArticleCompany> articles;
@@ -177,7 +178,7 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		
 	}
 	
-	public List<ArticleCompanyDto> getAllProvidersArticleByProviderId( Long id, int offset, int pageSize) {
+	public Page<ArticleCompanyDto> getAllProvidersArticleByProviderId( Long id, int offset, int pageSize) {
 		List<ArticleCompanyDto> articlesDto = new ArrayList<ArticleCompanyDto>();
 		Pageable pageable = PageRequest.of(offset,pageSize);
 		Page<ArticleCompany> articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByCreatedDateDesc(id,pageable);
@@ -190,7 +191,7 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 			}
 		}
 		logger.warn("articledto size : "+articlesDto.size());
-		return articlesDto;
+		return new PageImpl<>(articlesDto, pageable, articles.getTotalElements());
 	}
 	
 	public List<ArticleCompanyDto> getAllArticleByCategoryId(Long categoryId, Long companyId,User user, Company client) {

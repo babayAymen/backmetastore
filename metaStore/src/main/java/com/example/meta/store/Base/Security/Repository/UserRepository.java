@@ -16,8 +16,8 @@ public interface UserRepository extends BaseRepository<User, Long> {
 
 	Optional<User> findByUsername(String username);
 	
-	@Query("SELECT u FROM User u JOIN u.roles r WHERE u.username like %:username% AND r.id = 2")
-	List<User> searchByName(String username);
+//	@Query("SELECT u FROM User u WHERE u.username like %:username%")
+//	List<User> searchByName(String username);
 
 	Optional<User> findByEmail(String email);
 

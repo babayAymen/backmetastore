@@ -1,6 +1,7 @@
 package com.example.meta.store.Base.AppConfig;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.RoleService;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Entities.Delivery;
+import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Services.DeliveryService;
 
 
@@ -35,29 +37,18 @@ public class StartUpApp implements CommandLineRunner {
 	
 	@Override
 	public void run(String... args) throws Exception {
-
-		if(roleService.findAll().isEmpty()) {
-		insertRole(RoleEnum.ADMIN);
-		insertRole(RoleEnum.USER);
-		insertRole(RoleEnum.WORKER);
-		insertRole(RoleEnum.AYMEN);
-		Set<Role> adminRole = new HashSet<>();
-		adminRole.add(roleService.findByName(RoleEnum.AYMEN));
-		insertUser(adminRole);
+		Optional<User> user = appUserService.findById(1L);
+		if(user.isEmpty()) {
+		insertUser();
 		insertDelivery();
 		}
 	}
 	
 
-	public ResponseEntity<?> insertRole(RoleEnum rol){
-		Role role = new Role();
-		role.setName(rol);
-		return roleService.insert(role);
-	}
 	
-	public ResponseEntity<?> insertUser(Set<Role> roles){
+	public ResponseEntity<?> insertUser(){
 		
-		User user = new User("+21697396321","aymen babay","aymen1@gmail.com",passwordEncoder.encode("password_meta_2024"),roles);
+		User user = new User("+21697396321","aymen babay","aymen1@gmail.com",passwordEncoder.encode("password_meta_2024"),RoleEnum.USER, AccountType.META);
 		
 		return appUserService.insert(user);
 	}

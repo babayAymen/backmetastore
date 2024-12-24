@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.meta.store.Base.Repository.BaseRepository;
+import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Entities.Worker;
 
 public interface WorkerRepository extends BaseRepository<Worker, Long> {
@@ -29,6 +30,9 @@ public interface WorkerRepository extends BaseRepository<Worker, Long> {
 	Long findCompanyIdByUserId(Long userId);
 
 	boolean existsByNameAndCompanyId(String name, Long companyId);
+
+	@Query("SELECT w.company FROM Worker w WHERE w.user.id = :id")
+	Optional<Company> findCompanyByUserId(Long id);
 
 
 }

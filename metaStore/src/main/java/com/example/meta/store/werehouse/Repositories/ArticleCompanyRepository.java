@@ -22,7 +22,7 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 			+ " OR (a.isVisible = 1 AND EXISTS (SELECT 1 FROM ClientProviderRelation cc WHERE"
 			+ "  cc.person.id = :userId AND cc.provider.id = a.company.id))))"
 			+ " AND (a.company.longitude BETWEEN :longitude - 0.057615 AND :longitude + 0.057615) "
-		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907) AND a.article.category = :category "
+		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907) AND a.article.category = :category AND a.isDeleted = false "
 		   	)
 	Page<ArticleCompany> findRandomArticles(Long userId, Double longitude, Double latitude,CompanyCategory category, Pageable pageable );
 
@@ -33,7 +33,7 @@ public interface ArticleCompanyRepository extends BaseRepository<ArticleCompany,
 			+ "  cc.client.id = :myCompanyId AND cc.provider.id = a.company.id))))"
 			+ " AND (a.company.longitude BETWEEN :longitude - 0.057615 AND :longitude + 0.057615) "
 		    + " AND (a.company.latitude BETWEEN :latitude - 0.042907 AND :latitude + 0.042907))"
-		    + " AND a.article.category = :category  "
+		    + " AND a.article.category = :category AND a.isDeleted = false "
 		   	)
 	Page<ArticleCompany> findRandomArticlesPro( Long myCompanyId, Double longitude, Double latitude,CompanyCategory category, Pageable pageable);
 	

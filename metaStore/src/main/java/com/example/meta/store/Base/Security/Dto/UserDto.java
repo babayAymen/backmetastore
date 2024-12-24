@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.example.meta.store.Base.Entity.BaseDto;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
+import com.example.meta.store.werehouse.Enums.AccountType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,4 +44,7 @@ public class UserDto extends BaseDto<Long> implements Serializable {
 	private double longitude;
 	
 	private double latitude;
+	
+	private RoleEnum role;
+	private AccountType accountType;
 }

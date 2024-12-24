@@ -6,7 +6,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Admin;
 import org.springframework.context.support.BeanDefinitionDsl.Role;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +24,7 @@ import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
 import com.example.meta.store.Base.Security.Entity.User;
 import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
+import com.example.meta.store.werehouse.Dtos.CompanyDto;
 import com.example.meta.store.werehouse.Dtos.InvoiceDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.AccountType;
@@ -55,29 +58,43 @@ public class InvoiceController {
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	@GetMapping("getlastinvoice")
 	public Long getLastInvoiceCode() {
-		Company company = companyService.getCompany();
+		User user = userService.getUser();
+		Company company = new Company();
+		if(user.getRole() == RoleEnum.WORKER) {
+			company = workerService.findCompanyByWorkerId(user.getId()).get();
+		}else {
+			company = companyService.getCompany();
+		}
 		return invoiceService.getLastInvoice(company.getId());
 	}
 	
 	@GetMapping("getMyInvoiceAsProvider/{id}")
 	public List<InvoiceDto> getMyInvoiceAsProvider(@PathVariable Long id, @RequestParam PaymentStatus status, @RequestParam int page , @RequestParam int pageSize){
-		Company company = null;
 		List<InvoiceDto> invoiceList = new ArrayList<>();
 		switch (authenticationFilter.accountType) {
 		case COMPANY: {
-			 company = companyService.getCompany();
+			User user = userService.getUser();
+			Company company = new Company();
+			switch(user.getRole()) {
+			case WORKER: {
+				company = workerService.findCompanyByWorkerId(user.getId()).get();
+				invoiceList = invoiceService.getMyInvoicesAsProviderAndLastModifiedBy(id, user.getId(), status , page , pageSize);
+				break;
+			}default :
+					company = companyService.getCompany();
 				if(company.getId() == id ||  company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 					invoiceList = invoiceService.getMyInvoiceAsProvider(id, null, status, page, pageSize);
+				}
 				}
 			break;
 		}
 		case USER: {
 			break;
 		}
-		case WORKER :{
-			company = getHisCompany().get();
-			User user = userService.getUser();
-			invoiceList = invoiceService.getMyInvoiceAsProvider(company.getId(),user.getId(), status, page , pageSize);
+		case META :{
+//			company = getHisCompany().get();
+//			User user = userService.getUser();
+//			invoiceList = invoiceService.getMyInvoiceAsProvider(company.getId(),user.getId(), status, page , pageSize);
 			break;
 		}
 		default:
@@ -135,7 +152,7 @@ public class InvoiceController {
 	}
 	
 	@GetMapping("getMyInvoiceAsClient/{id}")
-	public List<InvoiceDto> getInvoicesAsClient(@PathVariable Long id,@RequestParam PaymentStatus status, @RequestParam int page , @RequestParam int pageSize){
+	public Page<InvoiceDto> getInvoicesAsClient(@PathVariable Long id,@RequestParam PaymentStatus status, @RequestParam int page , @RequestParam int pageSize){
 		AccountType type = authenticationFilter.accountType;
 		if(type == AccountType.COMPANY) {
 			Company company = companyService.getCompany();

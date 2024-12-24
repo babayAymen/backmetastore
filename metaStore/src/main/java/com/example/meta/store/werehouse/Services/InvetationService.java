@@ -15,6 +15,7 @@ import com.example.meta.store.Base.ErrorHandler.NotPermissonException;
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Entity.Role;
 import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.RoleService;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.Base.Service.BaseService;
@@ -63,10 +64,10 @@ public class InvetationService extends BaseService<Invetation, Long> {
 			case COMPANY_SEND_WORKER_USER :
 			case USER_SEND_WORKER_COMPANY :	
 				WorkerDto workerDto = invetationClientProviderMapper.mapInvetationToWorker(invetation);
-				Set<Role> role = new HashSet<>();
-				ResponseEntity<Role> role2 = roleService.getById((long) 3);
-				role.add(role2.getBody());
-				invetation.getClient().setRoles(role);
+//				Set<Role> role = new HashSet<>();
+//				ResponseEntity<Role> role2 = roleService.getById((long) 3);
+//				role.add(role2.getBody());
+				invetation.getClient().setRole(RoleEnum.WORKER);
 				userService.save(invetation.getClient());
 				workerService.insertWorker(workerDto, invetation.getCompanySender());
 				break;

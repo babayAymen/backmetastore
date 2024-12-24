@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.werehouse.Controllers.CompanyController;
 import com.example.meta.store.werehouse.Enums.AccountType;
 
@@ -33,6 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	public String userName;
 	
 	public AccountType accountType;
+	
+	public RoleEnum role ;
 
 	private final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 	@Override

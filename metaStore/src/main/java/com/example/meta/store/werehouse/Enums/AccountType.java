@@ -6,12 +6,11 @@ public enum AccountType {
 
 	    USER,
 	    
-	    AYMEN,
-	    
-	    WORKER,
+	    META,
 	    
 	    NULL,
 	    
+	    SELLER,
 	    
 	    
 }

@@ -28,4 +28,6 @@ public interface SearchHistoryRepository extends BaseRepository<SearchHistory, L
 
 	Page<SearchHistory> findAllByMeCompanyId(Long id, Pageable pageable);
 
+	Page<SearchHistory> findAllByMeCompanyIdAndLastModifiedBy(Long meCompanyId, Long lastModifiedBy, Pageable pageable);
+
 }

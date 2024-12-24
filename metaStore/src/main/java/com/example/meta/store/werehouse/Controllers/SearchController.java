@@ -10,6 +10,7 @@ import org.springframework.context.support.BeanDefinitionDsl.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +48,8 @@ public class SearchController {
 	private final UserService userService;
 	
 	private final CompanyService companyService;
+	
+	private final WorkerService workerService;
 
 	private final JwtAuthenticationFilter authenticationFilter;
 	
@@ -58,7 +61,12 @@ public class SearchController {
 	public List<UserDto> getAllUserContaining(@PathVariable String search, @PathVariable SearchType type, @PathVariable SearchCategory category){
 		User user = userService.getUser();
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
-		Company company = companyService.getCompany();
+			Company company = new Company();
+			if(user.getRole() == RoleEnum.WORKER) {
+					company = workerService.findCompanyByWorkerId(user.getId()).get();
+			}else {
+					company = companyService.getCompany();
+			}
 		return searchService.getAllUserContaining(search, type,category,company,user);
 		}
 
@@ -68,29 +76,45 @@ public class SearchController {
 	@GetMapping("save_history/{category}/{id}")
 	public SearchHistoryDto saveHistory(@PathVariable SearchCategory category, @PathVariable Long id) {
 		AccountType type = authenticationFilter.accountType;
-		if(type == AccountType.USER) {			
 		User user = userService.getUser();
+		if(type == AccountType.USER) {			
 		 return searchService.saveHistory(category,id,user, null);
 		}
 		if(type == AccountType.COMPANY) {
-			Company company = companyService.getCompany();
+			Company company = new Company();
+			if(user.getRole() == RoleEnum.WORKER) {
+				company = workerService.findCompanyByWorkerId(user.getId()).get();
+			}else {
+				company = companyService.getCompany();
+			}
 			return searchService.saveHistory(category,id,null, company);
 
 		}
 		else return null;
 	}
 	
+	@DeleteMapping("delete_history/{id}")
+	public void deleteSearch(@PathVariable Long id) {
+		searchService.deleteSearch(id);
+	}
+	
 	@GetMapping("get_search_history/{id}")
 	public Page<SearchHistoryDto> getSearchHistory(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
 		AccountType type = authenticationFilter.accountType;
-		if(type == AccountType.USER) {			
 		User user = userService.getUser();
-		return searchService.getSearchHistory(user.getId(), type, page , pageSize);
+		logger.warn("type"+type);
+		if(type == AccountType.USER || type == AccountType.META) {			
+		return searchService.getSearchHistory(user.getId(), user, type, page , pageSize);
 		}
 		if(type == AccountType.COMPANY) {
-			Company company = companyService.getCompany();
+			Company company = new Company();
+			if(user.getRole() == RoleEnum.ADMIN || user.getRole() == RoleEnum.PARENT) {
+			company = companyService.getCompany();
+			}else {
+				company = workerService.findCompanyByWorkerId(user.getId()).get();
+			}
 			if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {				
-			return searchService.getSearchHistory(id,type, page , pageSize );
+			return searchService.getSearchHistory(id,user, type, page , pageSize );
 			}
 		}
 		return null;

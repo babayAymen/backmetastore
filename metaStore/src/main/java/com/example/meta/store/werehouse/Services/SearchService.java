@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Dto.UserDto;
 import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.Base.Service.BaseService;
 import com.example.meta.store.werehouse.Controllers.SearchController;
@@ -179,22 +180,34 @@ public class SearchService extends BaseService<SearchHistory, Long> {
 		
 	}
 	
-	public Page<SearchHistoryDto> getSearchHistory(Long id, AccountType type, int page , int pageSize) {
+	public void deleteSearch(Long id) {
+		searchHistoryRepository.deleteById(id);
+	}
+	
+	public Page<SearchHistoryDto> getSearchHistory(Long id, User user , AccountType type, int page , int pageSize) {
 		Sort sort = Sort.by(Sort.Direction.DESC,"lastModifiedDate");
 		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		switch (type) {
 		case USER: {
 			Page<SearchHistory> histories = searchHistoryRepository.findAllByMeUserId(id, pageable);
 			List<SearchHistoryDto> dtos = histories.stream().map(searchHistoryMapper::mapToDto).toList();
-//			for(SearchHistory i : histories) {
-//				SearchHistoryDto searchDto = searchHistoryMapper.mapToDto(i);
-//				dtos.add(searchDto);
-//			}
+			logger.warn(dtos.size()+" size");
+			return new PageImpl<>(dtos, pageable, histories.getTotalElements()) ;
+		}
+		case META: {
+			Page<SearchHistory> histories = searchHistoryRepository.findAllByMeUserId(id, pageable);
+			List<SearchHistoryDto> dtos = histories.stream().map(searchHistoryMapper::mapToDto).toList();
 			logger.warn(dtos.size()+" size");
 			return new PageImpl<>(dtos, pageable, histories.getTotalElements()) ;
 		}
 		case COMPANY: {
-			Page<SearchHistory>  histories = searchHistoryRepository.findAllByMeCompanyId(id, pageable);
+			Page<SearchHistory> histories = Page.empty();
+			if(user.getRole() == RoleEnum.WORKER) {
+				logger.warn("company id : "+id + " and user id is : "+user.getId());
+				histories = searchHistoryRepository.findAllByMeCompanyIdAndLastModifiedBy(id , user.getId() , pageable);
+			}else {
+			 histories = searchHistoryRepository.findAllByMeCompanyId(id, pageable);
+			}
 			List<SearchHistoryDto> dtos = histories.stream().map(searchHistoryMapper::mapToDto).toList();
 			logger.warn(dtos.size()+" size");
 			return new PageImpl<>(dtos, pageable, histories.getTotalElements());

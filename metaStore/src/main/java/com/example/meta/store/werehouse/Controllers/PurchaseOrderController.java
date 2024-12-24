@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.meta.store.Base.ErrorHandler.NotPermissonException;
+import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
 import com.example.meta.store.Base.Security.Entity.User;
 import com.example.meta.store.Base.Security.Enums.RoleEnum;
@@ -43,6 +44,8 @@ public class PurchaseOrderController {
 	
 	private final CompanyService companyService;
 	
+	private final WorkerService workerService;
+	
 	private final JwtAuthenticationFilter authenticationFilter;
 	
 	private final Logger logger = LoggerFactory.getLogger(PurchaseOrderController.class);
@@ -65,14 +68,13 @@ public class PurchaseOrderController {
 	
 	
 	@PostMapping()
-	public void addPurchaseOrder(@RequestBody List<PurchaseOrderLineDto> purchaseOrderDto) {
+	public List<PurchaseOrderLineDto> addPurchaseOrder(@RequestBody List<PurchaseOrderLineDto> purchaseOrderDto) {
 		User user = userService.getUser();
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company client = companyService.getCompany();
-			purchaseOrderService.addPurchaseOrder(purchaseOrderDto,client,user);
-		 return;
+		return	purchaseOrderService.addPurchaseOrder(purchaseOrderDto,client,user);
 		}
-		purchaseOrderService.addPurchaseOrder(purchaseOrderDto,null,user);
+		return purchaseOrderService.addPurchaseOrder(purchaseOrderDto,null,user);
 	}
 	
 	
@@ -103,8 +105,14 @@ public class PurchaseOrderController {
 	
 	@GetMapping("{id}/{status}/{isall}")
 	public Double OrderResponse(@PathVariable Long id, @PathVariable Status status, @PathVariable Boolean isall) {
+		User user = userService.getUser();
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
-			Company company = companyService.getCompany();
+			Company company = new Company();
+			if(user.getRole() == RoleEnum.WORKER) {
+				company = workerService.findCompanyByWorkerId(user.getId()).get();
+			}else {				
+				company = companyService.getCompany();
+			}
 			return purchaseOrderService.OrderResponse(id,status,company, isall);
 		}
 		return purchaseOrderService.OrderResponse(id,status,null, isall);
@@ -124,14 +132,21 @@ public class PurchaseOrderController {
 
 	@GetMapping("get_all_my_orders_not_accepted/{id}")
 	public List<PurchaseOrderLineDto> getAllMyOrdersNotAccepted(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
+		User user = userService.getUser();
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
-			Company company = companyService.getCompany();
-			if(company.getId() == id ||  company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-				return purchaseOrderService.getAllMyOrdersNotAcceptedAsProvider(id,page, pageSize);
+			Company company = new Company();
+			if(user.getRole() != RoleEnum.WORKER) {
+			 company = companyService.getCompany();
+			if(company.getId() != id &&  company.getBranches().stream().anyMatch(branche -> !branche.getId().equals(id))) {
+				throw new RecordNotFoundException("you do not have permission to do that! ");
 			}
+			}else {
+				company = workerService.findCompanyByWorkerId(user.getId()).get();
+			}
+			
+			return purchaseOrderService.getAllMyOrdersNotAcceptedAsProvider(id,page, pageSize);
 		}
 		if(authenticationFilter.accountType == AccountType.USER) {
-			User user = userService.getUser();
 			return purchaseOrderService.getAllMyOrdersNotAcceptedAsClient(user.getId(), page,pageSize);
 		}
 		logger.warn("return null for getAllMyOrdersNotAccepted id: "+id+" andaccount type : "+authenticationFilter.accountType);

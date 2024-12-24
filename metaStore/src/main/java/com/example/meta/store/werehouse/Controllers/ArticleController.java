@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
 import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.ArticleCompanyDto;
 import com.example.meta.store.werehouse.Dtos.ArticleCompanyWithoutTroubleDto;
@@ -34,6 +35,7 @@ import com.example.meta.store.werehouse.Enums.SearchType;
 import com.example.meta.store.werehouse.Services.ArticleService;
 import com.example.meta.store.werehouse.Services.CommentServcie;
 import com.example.meta.store.werehouse.Services.CompanyService;
+import com.example.meta.store.werehouse.Services.WorkerService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,18 +55,26 @@ public class ArticleController {
 	private final CommentServcie commentService;
 	
 	private final JwtAuthenticationFilter authenticationFilter;
+	
+	private final WorkerService workerService;
 
 	private final Logger logger = LoggerFactory.getLogger(ArticleController.class);
 	
 	
 	/////////////////////////////////////// real work ////////////////////////////////////////////////////////
 	@GetMapping("getrandom")
-	public List<ArticleCompanyDto> findRandomArticles( @RequestParam CompanyCategory category , @RequestParam int offset, @RequestParam int pageSize){
+	public Page<ArticleCompanyDto> findRandomArticles( @RequestParam CompanyCategory category , @RequestParam int offset, @RequestParam int pageSize){
 		User user = userService.getUser();
-		logger.warn("account type in random article fun "+authenticationFilter.accountType);
+		logger.warn("account type "+authenticationFilter.accountType);
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
-			Company myCompany = companyService.getCompany();
-			return articleService.findRandomArticlesPub(myCompany, user,offset, pageSize, category);
+			Company myCompany = new Company();
+		if(user.getRole() == RoleEnum.ADMIN) {
+			 myCompany = companyService.getCompany();
+		}
+		if(user.getRole() == RoleEnum.WORKER) {
+			myCompany = workerService.findCompanyByWorkerId(user.getId()).get();
+		}
+		return articleService.findRandomArticlesPub(myCompany, user,offset, pageSize, category);
 		}
 		return articleService.findRandomArticlesPub(null, user,offset, pageSize, category);
 	}
@@ -94,9 +104,15 @@ public class ArticleController {
 			}
 	}
 	
-	@GetMapping("getAllMyArticle/{id}/{offset}/{pageSize}")
-	public List<ArticleCompanyDto> getAllMyArticle(@PathVariable Long id, @PathVariable int offset, @PathVariable int pageSize) {
-		Company company = companyService.getCompany();
+	@GetMapping("get_all_my_article/{id}")
+	public Page<ArticleCompanyDto> getAllMyArticle(@PathVariable Long id, @RequestParam int offset, @RequestParam int pageSize) {
+		User user = userService.getUser();
+		Company company = new Company();
+		if(user.getRole() == RoleEnum.WORKER) {
+			company = workerService.findCompanyByWorkerId(user.getId()).get();
+		}else {			
+			company = companyService.getCompany();
+		}
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 		return articleService.getAllProvidersArticleByProviderId(id,offset, pageSize);
 		}
@@ -194,17 +210,20 @@ public class ArticleController {
 	
 	@GetMapping("search/{id}")
 	public List<ArticleCompanyWithoutTroubleDto> getByNameContaining(@PathVariable Long id ,@RequestParam String search , @RequestParam SearchType searchType, @RequestParam int page , @RequestParam int pageSize){
-			Long companyId = null;
+		User user = userService.getUser();
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
-			Company company  = companyService.getCompany();	
-			companyId = company.getId();
+			Company company  = new Company();
+			if(user.getRole() == RoleEnum.WORKER) {
+				company = workerService.findCompanyByWorkerId(user.getId()).get();
+			}else {
+				company = companyService.getCompany();
+			}
 			if((company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) && searchType == SearchType.MY) {
 				return articleService.getMyArticleContaining(id, search, page , pageSize);
 			}
 			
 		}
-		User user = userService.getUser();
-		return articleService.getByNameContaining(companyId , user.getId(), search , page, pageSize );
+		return articleService.getByNameContaining(null , user.getId(), search , page, pageSize );
 	}
 	
 	@GetMapping("get_articles_by_category/{id}")
@@ -215,7 +234,13 @@ public class ArticleController {
 	
 	@GetMapping("get_by_barcode")
 	public ArticleCompanyDto getArticleByBarcode(@RequestParam String barcode){
-		Company company = companyService.getCompany();
+		User user = userService.getUser();
+		Company company = new Company();
+		if(user.getRole() == RoleEnum.WORKER) {
+			company = workerService.findCompanyByWorkerId(user.getId()).get();
+		}else {
+			company = companyService.getCompany();
+		}
 		return articleService.getArticleByBarcode(company.getId(), barcode);
 	}
 	

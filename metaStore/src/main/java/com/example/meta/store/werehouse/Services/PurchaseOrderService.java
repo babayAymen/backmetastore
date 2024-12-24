@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.RecordIsAlreadyExist;
@@ -63,11 +64,12 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	private final Logger logger = LoggerFactory.getLogger(PurchaseOrderService.class);
 
 	
-	public void addPurchaseOrder(List<PurchaseOrderLineDto> purchaseOrderDto, Company client, User user) {
+	public List<PurchaseOrderLineDto> addPurchaseOrder(List<PurchaseOrderLineDto> purchaseOrderDto, Company client, User user) {
 	    Company company = new Company();
+	    List<PurchaseOrderLineDto> purchaseOrdersLineDto = new ArrayList<>();
 	    PurchaseOrder purchaseOrder = null;
 	    Long id = null;
-    Collections.sort(purchaseOrderDto, Comparator.comparing(dto -> dto.getArticle().getCompany().getId()));
+	    Collections.sort(purchaseOrderDto, Comparator.comparing(dto -> dto.getArticle().getCompany().getId()));
 	    for (PurchaseOrderLineDto i : purchaseOrderDto) {
 	        PurchaseOrderLine purchaseOrderLine = purchaseOrderLineMapper.mapToEntity(i);
 	        if (company.getId() != null && company.getId() == purchaseOrderLine.getArticle().getCompany().getId()) {
@@ -92,24 +94,21 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	        purchaseOrderLine.setStatus(Status.INWAITING);
 	        purchaseOrderRepository.save(purchaseOrder);
 	        purchaseOrderLineRepository.save(purchaseOrderLine);
+	        PurchaseOrderLineDto dto = purchaseOrderLineMapper.mapToDto(purchaseOrderLine);
+	        purchaseOrdersLineDto.add(dto);
 	        id = purchaseOrder.getId();
 	        BigDecimal sellingPrice = new BigDecimal(purchaseOrderLine.getArticle().getSellingPrice());
 	        BigDecimal qte = new BigDecimal(purchaseOrderLine.getQuantity());
-//	        BigDecimal buye = qte.multiply(sellingPrice.multiply(new BigDecimal("0.9"))).divide(new BigDecimal("3.0"), RoundingMode.HALF_UP);
-
 	        BigDecimal buye = qte.multiply(sellingPrice);
-	        logger.warn(buye+" buy is , qte is :"+purchaseOrderLine.getQuantity()+" selling price : "+purchaseOrderLine.getArticle().getSellingPrice());
 	       if(client == null) {
-
 	    	    BigDecimal newBalance = new BigDecimal(user.getBalance()).subtract(buye);
 	    	    user.setBalance(newBalance.setScale(2, RoundingMode.HALF_UP).doubleValue());
 	       }else {
-
 	    	    BigDecimal newBalance = new BigDecimal(client.getBalance()).subtract(buye);
 	    	    client.setBalance(newBalance.setScale(2, RoundingMode.HALF_UP).doubleValue());
-	    	   
 	       }
 	    }
+	    return purchaseOrdersLineDto;
 	}
 
 
@@ -329,7 +328,8 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	}
 
 	public List<PurchaseOrderLineDto> getAllMyOrdersNotAcceptedAsProvider(Long id, int page, int pageSize) {
-		Pageable pageable  = PageRequest.of(page, pageSize);
+		Sort sort = Sort.by(Sort.Order.desc("purchaseorder.person"), Sort.Order.desc("lastModifiedDate"));
+		Pageable pageable  = PageRequest.of(page, pageSize, sort);
 		Page<PurchaseOrderLine> purchaseOrderLines = purchaseOrderLineRepository.findAllNotAcceptedAsProvider(id, Status.INWAITING, pageable);
 		List<PurchaseOrderLineDto> purchaseOrderLinesDto = new ArrayList<>();
 		
@@ -344,6 +344,7 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 
 
 	public List<PurchaseOrderLineDto> getAllMyOrdersNotAcceptedAsClient(Long id, int page, int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC,"lastModifiedDate");
 		Pageable pageable  = PageRequest.of(page, pageSize);
 		Page<PurchaseOrderLine> purchaseOrderLines = purchaseOrderLineRepository.findAllNotAcceptedAsClient(id, Status.INWAITING, pageable);
 		List<PurchaseOrderLineDto> purchaseOrderLinesDto = new ArrayList<>();

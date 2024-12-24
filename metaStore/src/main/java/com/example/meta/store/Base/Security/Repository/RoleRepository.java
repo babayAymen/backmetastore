@@ -15,10 +15,10 @@ public interface RoleRepository extends BaseRepository<Role, Long> {
 
 	Optional<Role> findByName(RoleEnum name);
 	
-    @Query(value = "SELECT r.* FROM role r " +
-            "INNER JOIN user_roles ur ON r.id = ur.role_id " +
-            "INNER JOIN user u ON ur.user_id = u.id " +
-            "WHERE u.id = :userId", nativeQuery = true)
-    Set<Role> findRolesByUserId(@Param("userId") Long userId);
+//    @Query(value = "SELECT r.* FROM role r " +
+//            "INNER JOIN user_roles ur ON r.id = ur.role_id " +
+//            "INNER JOIN user u ON ur.user_id = u.id " +
+//            "WHERE u.id = :userId", nativeQuery = true)
+//    Set<Role> findRolesByUserId(@Param("userId") Long userId);
 
 }

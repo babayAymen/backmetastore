@@ -157,7 +157,8 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 
 
 	public List<PaymentForProviderPerDayDto> getAllMyProfits(Long id, int page , int pageSize) {
-		Pageable pageable = PageRequest.of(page, pageSize);
+		Sort sort = Sort.by(Sort.Direction.DESC, "lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		Page<PaymentForProviderPerDay> paymentPerDay = paymentForProviderPerDayRepository.findByProviderId(id, pageable);
 		if(paymentPerDay.isEmpty()) {
 			throw new RecordNotFoundException("there is no profit yet");

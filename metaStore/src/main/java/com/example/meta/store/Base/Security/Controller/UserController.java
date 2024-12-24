@@ -76,7 +76,6 @@ public class UserController {
 	
 	@PostMapping("/authentication")
 	public ResponseEntity<AuthenticationResponse> authentication(@RequestBody AuthenticationRequest request){
-		logger.warn("it's ok "+request.getUsername()+" password "+request.getPassword());
 		return ResponseEntity.ok(userService.authenticate(request));
 	}
 	
@@ -127,10 +126,10 @@ public class UserController {
 		 return userService.checkUserName(username);
 	 }
 	 
-	 @GetMapping("/get/{username}")
-	 public List<UserDto> getByUserName(@PathVariable String username) {
-		 return userService.getByUserName(username);
-	 }
+//	 @GetMapping("/get/{username}")
+//	 public List<UserDto> getByUserName(@PathVariable String username) {
+//		 return userService.getByUserName(username);
+//	 }
 	 
 	 @GetMapping("get_user_containing/{search}")
 	 public List<UserDto> getAllUsersContaining(@PathVariable String search){

@@ -155,7 +155,7 @@ public class CategoryService extends BaseService<Category, Long>{
 		List<CategoryDto> categoriesDto = categories.stream()
 				.map(categoryMapper::mapToDto)
 				.toList();
-		logger.warn("category size " +categories.getSize()+" tot page "+categories.getTotalPages());
+		logger.warn("category element " +categories.getTotalElements()+" tot page "+categories.getTotalPages() +" company id : "+ id);
 		return new PageImpl<>(categoriesDto, pageable, categories.getTotalElements());
 		}
 	

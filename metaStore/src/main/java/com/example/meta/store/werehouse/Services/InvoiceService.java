@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -115,7 +116,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		return invoicesDto;
 	}
 	
-	public List<InvoiceDto> getInvoicesAsClient(Long id, AccountType type,PaymentStatus status, int page, int pageSize) {
+	public Page<InvoiceDto> getInvoicesAsClient(Long id, AccountType type,PaymentStatus status, int page, int pageSize) {
 		Sort sort = Sort.by(Sort.Direction.DESC, "lastModifiedDate");
 		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		Page<Invoice> invoices;
@@ -129,7 +130,8 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		else {
 			 invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED, pageable);
 		}
-		return mapToListDto(invoices.getContent());
+		List<InvoiceDto> response = invoices.stream().map(invoiceMapper::mapToDto).toList();
+		return new PageImpl<>(response, pageable, invoices.getTotalElements());
 	}
 	
 	private List<InvoiceDto> mapToListDto(List<Invoice> invoices){
@@ -310,6 +312,15 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		List<InvoiceDto> dto = mapToListDto(invoices.getContent());
 		logger.warn("getAllMyInvoicesAsProviderAndStatus "+dto.size());
 		return dto;	
+	}
+
+	public List<InvoiceDto> getMyInvoicesAsProviderAndLastModifiedBy(Long companyId, Long workerId, PaymentStatus status, int page,
+			int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC,"lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
+			Page<Invoice> invoices = invoiceRepository.findByProviderIdAndLastModifiedBy(companyId , workerId , pageable);
+			List<InvoiceDto> invoicesDto = mapToListDto(invoices.getContent());
+		return invoicesDto;
 	}
 
 

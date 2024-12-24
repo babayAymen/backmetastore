@@ -37,7 +37,7 @@ public class RoleService  extends BaseService<Role, Long> {
 		return super.insert(role);
 	}
 	
-	public Set<Role> FindRoleByUserId(Long id){
-		return roleRepository.findRolesByUserId(id);
-	}
+//	public Set<Role> FindRoleByUserId(Long id){
+//		return roleRepository.findRolesByUserId(id);
+//	}
 }

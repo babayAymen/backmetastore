@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
 import com.example.meta.store.Base.Security.Dto.UserDto;
 import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.ClientProviderRelationDto;
 import com.example.meta.store.werehouse.Dtos.CompanyDto;
@@ -29,6 +30,7 @@ import com.example.meta.store.werehouse.Enums.SearchCategory;
 import com.example.meta.store.werehouse.Enums.SearchType;
 import com.example.meta.store.werehouse.Services.ClientService;
 import com.example.meta.store.werehouse.Services.CompanyService;
+import com.example.meta.store.werehouse.Services.WorkerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
@@ -45,12 +47,13 @@ public class ClientController {
 	private final CompanyService companyService;
 	
 	private final UserService userService;
+	
+	private final WorkerService workerService;
 
 	private final JwtAuthenticationFilter authenticationFilter;
 
 	private final Logger logger = LoggerFactory.getLogger(ClientController.class);
 	
-	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	@DeleteMapping("{id}")
 	public ResponseEntity<String> deleteById(@PathVariable Long id) {
 		Company company = companyService.getCompany();
@@ -59,7 +62,13 @@ public class ClientController {
 	
 	@GetMapping("get_all_my/{id}")
 	public List<ClientProviderRelationDto> getAllMyClient(@PathVariable Long id, @RequestParam int page , @RequestParam int pageSize){
-		Company company = companyService.getCompany();
+		User user = userService.getUser();
+		Company company = new Company();
+		if(user.getRole() == RoleEnum.WORKER) {
+			company = workerService.findCompanyByWorkerId(user.getId()).get();
+		}else {			
+			company = companyService.getCompany();
+		}
 		if(company.getId() != id && company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 			company = companyService.getById(id).getBody();
 		}
@@ -101,8 +110,13 @@ public class ClientController {
 	
 	@GetMapping("get_all_my_client_containing/{id}")
 	public List<ClientProviderRelationDto> getAllMyCointaining( @PathVariable Long id,@RequestParam SearchType searchType,@RequestParam String search, @RequestParam int page , @RequestParam int pageSize){
-			logger.warn("atsdrgh");
-		Company company = companyService.getCompany();
+			User user = userService.getUser();
+			Company company = new Company();
+			if(user.getRole() == RoleEnum.WORKER) {
+				company = workerService.findCompanyByWorkerId(user.getId()).get();
+			}else {				
+				company = companyService.getCompany();
+			}
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 			return clientService.getAllMyContaining(search,id, page, pageSize);
 		}
@@ -114,7 +128,13 @@ public class ClientController {
 	@GetMapping("get_all_client_person_containing/{id}")
 	public List<UserDto> getAllClientsPersonContaining( @PathVariable Long id,@RequestParam SearchType searchType,@RequestParam String search, @RequestParam int page , @RequestParam int pageSize){
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
-		Company company = companyService.getCompany();
+			User user = userService.getUser();
+			Company company = new Company();
+			if(user.getRole() == RoleEnum.WORKER) {
+				company = workerService.findCompanyByWorkerId(user.getId()).get();
+			}else {
+				company = companyService.getCompany();
+			}
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 			if(searchType == SearchType.CLIENT) {
 				return clientService.getAllMyPersonContaining(search, id, page, pageSize);

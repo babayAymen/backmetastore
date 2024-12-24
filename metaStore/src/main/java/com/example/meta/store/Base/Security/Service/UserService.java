@@ -27,6 +27,7 @@ import com.example.meta.store.Base.Security.Entity.AuthenticationResponse;
 import com.example.meta.store.Base.Security.Entity.RegisterRequest;
 import com.example.meta.store.Base.Security.Entity.Role;
 import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Mappers.UserMapper;
 import com.example.meta.store.Base.Security.Repository.UserRepository;
 import com.example.meta.store.werehouse.Entities.Company;
@@ -95,14 +96,13 @@ public class UserService {
 	
 
 	public User register(RegisterRequest request) {
-		Set<Role> role = new HashSet<>();
-		ResponseEntity<Role> role1 = null;
-		if(request.getType().equals(AccountType.USER)) {			
-		role1 = roleService.getById(2L);
-		}else {
-			role1 = roleService.getById(1L);
+//		Set<Role> role = new HashSet<>();
+//		ResponseEntity<Role> role1 = null;
+		RoleEnum role = RoleEnum.USER;
+		if(request.getType().equals(AccountType.COMPANY)) {			
+		role = RoleEnum.ADMIN;
 		}
-		role.add(role1.getBody());
+//		role.add(role1.getBody());
 		Optional<User> userr = userRepository.findByUsername(request.getUsername());
 		if(userr.isPresent()) {
 			throw new RecordIsAlreadyExist("This User Name Is Already Uses Please Take Another One ");
@@ -114,7 +114,8 @@ public class UserService {
 				.address(request.getAddress())
 				.email(request.getEmail())
 				.password(passwordEncoder.encode(request.getPassword()))
-				.roles( role)
+				.role(role)
+				.accountType(request.getType())
 				.longitude(request.getLongitude())
 				.latitude(request.getLatitude())
 				.balance(0.0)
@@ -139,7 +140,6 @@ public class UserService {
 				new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 		var user = userRepository.findByUsername(request.getUsername()).orElseThrow();
 var jwtToken = jwtService.generateToken(user);
-		
 		return AuthenticationResponse.builder().token(jwtToken).build();
 	
 	}
@@ -161,19 +161,19 @@ var jwtToken = jwtService.generateToken(user);
 		return userRepository.existsByUsername(username);
 	}
 
-	public List<UserDto> getByUserName(String username) {
-		List<User> users = userRepository.searchByName(username);
-		if(users.isEmpty()) {
-			throw new RecordNotFoundException("there is no user with name "+username+" or maybe is already worker for another company");
-		}
-		List<UserDto> usersDto = new ArrayList<>();
-		for(User i : users) {
-			
-		UserDto appUserDto = userMapper.mapToDto(i);
-		usersDto.add(appUserDto);
-		}
-		return usersDto;
-	}
+//	public List<UserDto> getByUserName(String username) {
+//		List<User> users = userRepository.findAllByUsernameContaining(username);
+//		if(users.isEmpty()) {
+//			throw new RecordNotFoundException("there is no user with name "+username+" or maybe is already worker for another company");
+//		}
+//		List<UserDto> usersDto = new ArrayList<>();
+//		for(User i : users) {
+//			
+//		UserDto appUserDto = userMapper.mapToDto(i);
+//		usersDto.add(appUserDto);
+//		}
+//		return usersDto;
+//	}
 
 	public AuthenticationResponse refreshToken(String token) {
 		User user = userRepository.findByUsername(authenticationFilter.userName).get();

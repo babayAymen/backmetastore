@@ -21,5 +21,6 @@ public interface InvetationClientProviderMapper {
    @Mapping(source = "client.address", target = "address")
    @Mapping(source = "client.email", target = "email")
    @Mapping(source = "client.phone", target = "phone")
+   @Mapping(source = "client", target = "user")
 	WorkerDto mapInvetationToWorker(Invetation entity);
 }

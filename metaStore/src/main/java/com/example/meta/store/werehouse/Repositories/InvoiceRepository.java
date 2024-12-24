@@ -52,11 +52,7 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 	static boolean existsByClientId(Long id) {
 		return false;
 	}
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//	Boolean existsByPersonIdAndProviderIdAndIsEnabledToComment(Long myUserId, Long providerId, boolean b);
-//
-//	Boolean existsByClientIdAndProviderIdAndIsEnabledToComment(Long myCompanyId, Long providerId, boolean b);
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Boolean existsByPersonIdAndProviderId(Long myUserId, Long providerId);
 
@@ -66,11 +62,9 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 
 	Page<Invoice> findAllByClientIdAndStatus(Long companyId, Status status, Pageable pageable);
 
-//	List<Invoice> findByProviderIdAndClientIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
 
 	List<Invoice> findByProviderIdAndClientId(Long id, Long id2);
 
-//	List<Invoice> findByProviderIdAndPersonIdAndIsEnabledToComment(Long id, Long id2, Boolean isEnabled);
 	List<Invoice> findByProviderIdAndPersonId(Long id, Long id2);
 
 	Page<Invoice> findByProviderIdAndPaid(Long companyId, PaymentStatus status, Pageable pageable);
@@ -80,6 +74,8 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 	Page<Invoice> findByClientIdAndPaid(Long companyId, PaymentStatus status, Pageable pageable);
 
 	Page<Invoice> findAllByClientIdAndPaid(Long id, PaymentStatus status, Pageable pageable);
+
+	Page<Invoice> findByProviderIdAndLastModifiedBy(Long companyId, Long workerId, Pageable pageable);
 
 
 

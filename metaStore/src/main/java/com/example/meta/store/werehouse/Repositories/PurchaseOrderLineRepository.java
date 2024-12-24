@@ -31,7 +31,7 @@ public interface PurchaseOrderLineRepository extends BaseRepository<PurchaseOrde
 	@Query("SELECT p FROM PurchaseOrderLine p WHERE p.purchaseorder.person.id = :id AND p.status = :status")
 	Page<PurchaseOrderLine> findAllNotAcceptedAsClient(Long id, Status status, Pageable pageable);
 
-	@Query("SELECT p FROM PurchaseOrderLine p WHERE p.purchaseorder.company.id = :id AND p.status = :status")
+	@Query("SELECT p FROM PurchaseOrderLine p WHERE (p.purchaseorder.company.id = :id OR p.purchaseorder.client.id = :id) AND p.status = :status")
 	Page<PurchaseOrderLine> findAllNotAcceptedAsProvider(Long id, Status status, Pageable pageable);
 
 

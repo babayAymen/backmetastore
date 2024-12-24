@@ -10,7 +10,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.JWTExpired;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.werehouse.Enums.AccountType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -24,6 +28,8 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
+	private final Logger logger = LoggerFactory.getLogger(JwtService.class);
+
 	private static final String SECRET_KEY = "2A472D4B6150645367556B58703273357638792F423F4528482B4D6251655468";
 	
 	public String extractUserName(String token) {
@@ -33,6 +39,12 @@ public class JwtService {
 	public AccountType extractAccountType(String token) {
 	    String type = extractClaim(token, claims -> claims.get("Account-Type", String.class));
 	    return AccountType.valueOf(type);
+	}
+	
+	public RoleEnum extractRole(String token) {// a determiner
+		String role = extractClaim(token, claims -> claims.get("Authorization", String.class));
+		logger.warn("role is "+role);
+		return RoleEnum.valueOf(role);
 	}
 	
 	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

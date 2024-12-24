@@ -13,7 +13,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.meta.store.Base.Entity.BaseEntity;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.werehouse.Entities.ClientProviderRelation;
+import com.example.meta.store.werehouse.Enums.AccountType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -65,10 +67,11 @@ public class User extends BaseEntity<Long> implements UserDetails, Serializable 
 		    @OneToMany(mappedBy = "person")
 		    private Set<ClientProviderRelation> companiesR;
 			
-			@ManyToMany(fetch = FetchType.EAGER)
-			@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name ="userId"), 
-			inverseJoinColumns = @JoinColumn(name="roleId"))
-			private Set<Role> roles = new HashSet<>();
+//			@ManyToMany(fetch = FetchType.EAGER)
+//			@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name ="userId"), 
+//			inverseJoinColumns = @JoinColumn(name="roleId"))
+			private RoleEnum role;
+			private AccountType accountType;
 		
 			private Double balance;
 			
@@ -81,9 +84,13 @@ public class User extends BaseEntity<Long> implements UserDetails, Serializable 
 
 			@Override
 			public Collection<? extends GrantedAuthority> getAuthorities() {
-			    return roles.stream()
-			            .map(role -> new SimpleGrantedAuthority(role.getName().toString()))
-			            .collect(Collectors.toList());
+
+			    return Set.of(new SimpleGrantedAuthority(role.name()));
+//			    return role 
+//			    		.stream()
+//			            .map(role -> new SimpleGrantedAuthority(role.getName().toString()))
+//			            .collect(Collectors.toList())
+			            
 			}
 			
 			@Override
@@ -120,14 +127,15 @@ public class User extends BaseEntity<Long> implements UserDetails, Serializable 
 				return true;
 			}
 
-			public User(String phone, String username, String email, String password, Set<Role> roles) {
+			public User(String phone, String username, String email, String password, RoleEnum role, AccountType type) {
 				super();
 				this.phone = phone;
 				this.username = username;
 				this.email = email;
 				this.password = password;
-				this.roles = roles;
+				this.role = role;
 				this.balance = 0.0;
+				this.accountType = type;
 			}
 
 			

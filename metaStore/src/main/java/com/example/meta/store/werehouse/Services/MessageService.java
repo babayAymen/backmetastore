@@ -56,9 +56,9 @@ public class MessageService extends BaseService<Message, Long> {
 
 	private final Logger logger = LoggerFactory.getLogger(MessageService.class);
 	
-	public void sendWSMessage(String userId , Message message) {
-		logger.warn("sending message to user {} with payload {}",userId,message);
-		messagingTemplate.convertAndSendToUser(userId, "/notifications", message);
+	public void sendWSMessage( String message) {
+		logger.warn("sending message to user {} with payload {}",message);
+		messagingTemplate.convertAndSend("/topic/public", message);
 	}
 	
 	public void sendMessage(String message, User receiver, User me, MessageType type) {
