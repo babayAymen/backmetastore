@@ -78,7 +78,7 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 	
 
 	/////////////////////////////////////// real work ////////////////////////////////////////////////////////
-	public Page<ArticleCompanyDto> findRandomArticlesPub( Company myCompany, User user, int offset, int pageSize, CompanyCategory category) {
+	public Page<ArticleCompanyWithoutTroubleDto> findRandomArticlesPub( Company myCompany, User user, int offset, int pageSize, CompanyCategory category) {
 		msgRepository.sendWSMessage( "hello from server");
 		Pageable pageable = PageRequest.of(offset, pageSize);
 		Page<ArticleCompany> articles;
@@ -89,15 +89,10 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 		else {
 			articles = articleCompanyRepository.findRandomArticlesPro(myCompany.getId(), myCompany.getLongitude(), myCompany.getLatitude(), category, pageable);	 
 		}
-			List<ArticleCompanyDto> articlesDto = new ArrayList<>();
+			List<ArticleCompanyWithoutTroubleDto> articlesDto = new ArrayList<>();
 			for(ArticleCompany i:articles) {
-				if(myCompany == null) {
-					isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),user.getId());
-				}
-				else {
-					isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),myCompany.getId());
-				}
-				ArticleCompanyDto dto = articleCompanyMapper.mapToDto(i);
+				isFav = checkIsFav(i.getId(),user , myCompany);
+				ArticleCompanyWithoutTroubleDto dto = articleCompanyMapper.mapToArticleCompanyWithoutTroubleDto(i);
 				dto.setIsFav(isFav);
 				articlesDto.add(dto);
 	}
@@ -105,34 +100,36 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 			return new PageImpl<>(articlesDto, pageable, articles.getTotalElements());
 	}
 	
-	public List<ArticleCompanyDto> getAllArticleByCompanyId(Long providerId,Long myClientId,Long myCompanyId, int offset, int pageSize) {
-logger.warn("hello from server");
-		msgRepository.sendWSMessage( "hello from server");
-		Boolean isFav = false;
-		Pageable pageable = PageRequest.of(offset, pageSize);
-		Page<ArticleCompany> articles;
-		if(providerId == myCompanyId) {
-			articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByCreatedDateDesc(myCompanyId,pageable);			
-		}else {			
-		 articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByLibelleASC(myCompanyId,myClientId,providerId,pageable);
+	private Boolean checkIsFav(Long articleId , User user , Company company) {
+		if(company == null) {
+			return articleCompanyRepository.existsByIdAndUsersId(articleId,user.getId());
 		}
-		if(articles.isEmpty()) {
-			throw new RecordNotFoundException("there is no article");
+		else {
+			return articleCompanyRepository.existsByIdAndCompaniesId(articleId,company.getId());
 		}
-		List<ArticleCompanyDto> articlesDto = new ArrayList<>();
-		for(ArticleCompany i : articles) {
-			if(myCompanyId == null) {
-				isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),myClientId);
-			}
-			else {
-				isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),myCompanyId);
-			}
-			ArticleCompanyDto articleDto = articleCompanyMapper.mapToDto(i);
-			articleDto.setIsFav(isFav);
-			articlesDto.add(articleDto);
-		}
-		return articlesDto;
 	}
+	
+//	public List<ArticleCompanyDto> getAllArticleByCompanyId(Long providerId,User user,Long myCompanyId, int offset, int pageSize) {
+//		Boolean isFav = false;
+//		Pageable pageable = PageRequest.of(offset, pageSize);
+//		Page<ArticleCompany> articles;
+//		if(providerId == myCompanyId) {
+//			articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByCreatedDateDesc(myCompanyId,pageable);			
+//		}else {			
+//		 articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByLibelleASC(myCompanyId,myClientId,providerId,pageable);
+//		}
+//		if(articles.isEmpty()) {
+//			throw new RecordNotFoundException("there is no article");
+//		}
+//		List<ArticleCompanyDto> articlesDto = new ArrayList<>();
+//		for(ArticleCompany i : articles) {
+//			isFav = checkIsFav(i.getId(), null, null)
+//			ArticleCompanyDto articleDto = articleCompanyMapper.mapToDto(i);
+//			articleDto.setIsFav(isFav);
+//			articlesDto.add(articleDto);
+//		}
+//		return articlesDto;
+//	}
 	
 
 	//by the article to client 
@@ -178,14 +175,16 @@ logger.warn("hello from server");
 		
 	}
 	
-	public Page<ArticleCompanyDto> getAllProvidersArticleByProviderId( Long id, int offset, int pageSize) {
+	public Page<ArticleCompanyDto> getAllProvidersArticleByProviderId( Long providerId, int offset, int pageSize) {
 		List<ArticleCompanyDto> articlesDto = new ArrayList<ArticleCompanyDto>();
 		Pageable pageable = PageRequest.of(offset,pageSize);
-		Page<ArticleCompany> articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByCreatedDateDesc(id,pageable);
+		Page<ArticleCompany> articles = articleCompanyRepository.findAllByCompanyIdAndIsDeletedFalseOrderByCreatedDateDesc(providerId,pageable);
 		if(articles != null) {
 			List<ArticleCompany> articlesContent = articles.getContent();
 			for(ArticleCompany i : articlesContent) {
 				ArticleCompanyDto articleDto = articleCompanyMapper.mapToDto(i);
+				var isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),providerId);
+				articleDto.setIsFav(isFav);
 			articlesDto.add(articleDto);
 			
 			}
@@ -343,11 +342,14 @@ logger.warn("hello from server");
 				if(provider.getIsVisible() == PrivacySetting.CLIENT && articleDto.getIsVisible() == PrivacySetting.PUBLIC) {
 						updatedArticle.setIsVisible(PrivacySetting.CLIENT);
 					}
-			}else {			
+			}else {
 				updatedArticle.setIsVisible(article1.getIsVisible());
 			}
-			article1 = articleCompanyRepository.save(updatedArticle); // a verifier 
-			return ResponseEntity.ok().body(articleDto);
+			article1 = articleCompanyRepository.save(updatedArticle);
+			var isFav = articleCompanyRepository.existsByIdAndCompaniesId(article1.getId(),provider.getId());
+			ArticleCompanyDto response = articleCompanyMapper.mapToDto(article1);
+			response.setIsFav(isFav);
+			return ResponseEntity.ok().body(response);
 			}
 	
 		
@@ -374,11 +376,6 @@ logger.warn("hello from server");
 		}
 		
 		
-		
-		
-		
-		
-		
 
 		
 	/////////////////////////////////////// future work ////////////////////////////////////////////////////////
@@ -390,12 +387,12 @@ logger.warn("hello from server");
 			if(!article.isEmpty()) {
 			Boolean isFav = false;
 			for(ArticleCompany i : article.getContent()) {
-		if(providerId == null) {
-			isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),userId);
-		}
-		else {
-			isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),providerId);
-		}
+				if(providerId == null) {
+					isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),userId);
+				}
+				else {
+					isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),providerId);
+				}
 		ArticleCompanyWithoutTroubleDto artDto =  articleCompanyMapper.mapToArticleCompanyWithoutTroubleDto(i);
 			artDto.setIsFav(isFav);
 			articleDto.add(artDto);
@@ -633,11 +630,9 @@ logger.warn("hello from server");
 		for(ArticleCompany i : articlesCompany) {
 			if(company == null) {
 				isFav = articleCompanyRepository.existsByIdAndUsersId(i.getId(),user.getId());
-			//	isEnabledToComment = isEnabledToComment(user.getId(), null, i.getCompany().getId());
 			}
 			else {
 				isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),company.getId());
-			//	isEnabledToComment = isEnabledToComment(null,company.getId(), i.getCompany().getId());
 			}
 			ArticleCompanyDto articleCompanyDto = articleCompanyMapper.mapToDto(i);
 			articleCompanyDto.setIsFav(isFav);
@@ -647,15 +642,7 @@ logger.warn("hello from server");
 		return articlesCompanyDto;
 	}
 
-	private Boolean isEnabledToCommen(Long myUserId, Long myCompanyId, Long providerId) {
-		Boolean exists = false;
-		if(myCompanyId == null) {
-		//	exists = invoiceRepository.existsByPersonIdAndProviderIdAndIsEnabledToComment(myUserId, providerId, true);
-		}else {
-		//	exists = invoiceRepository.existsByClientIdAndProviderIdAndIsEnabledToComment(myCompanyId, providerId, true);	
-		}
-		return exists;
-	}
+
 	
 	public void addButcherArticles() {
 		List<Article> articles = new ArrayList<>();
@@ -727,6 +714,8 @@ logger.warn("hello from server");
 			throw new RecordNotFoundException("there is no 	article with barcode : "+barcode+" company id "+id);
 		}
 		ArticleCompanyDto articleCompanyDto = articleCompanyMapper.mapToDto(article);
+		var isFav = articleCompanyRepository.existsByIdAndCompaniesId(article.getId(),id);
+		articleCompanyDto.setIsFav(isFav);
 		return articleCompanyDto;
 	}
 
@@ -734,15 +723,17 @@ logger.warn("hello from server");
 		Sort sort = Sort.by(Sort.Direction.DESC,"lastModifiedDate");
 		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		Page<ArticleCompany> article = articleCompanyRepository.findAllByCompanyIdAndLibelleContaining(id , search , pageable);
-		List<ArticleCompanyWithoutTroubleDto> response = mapListToArticleCompanyWithoutTroubleDto(article.getContent());
+		List<ArticleCompanyWithoutTroubleDto> response = mapListToArticleCompanyWithoutTroubleDto(article.getContent(),id);
 		return response;
 	}
 
 
-	private List<ArticleCompanyWithoutTroubleDto> mapListToArticleCompanyWithoutTroubleDto(List<ArticleCompany> articles){
+	private List<ArticleCompanyWithoutTroubleDto> mapListToArticleCompanyWithoutTroubleDto(List<ArticleCompany> articles, Long id){
 		List<ArticleCompanyWithoutTroubleDto> articlesDto = new ArrayList<>();
 		for(ArticleCompany i : articles) {
+			var isFav = articleCompanyRepository.existsByIdAndCompaniesId(i.getId(),id);
 			ArticleCompanyWithoutTroubleDto articleDto = articleCompanyMapper.mapToArticleCompanyWithoutTroubleDto(i);
+			articleDto.setIsFav(isFav);
 			articlesDto.add(articleDto);
 		}
 		return articlesDto;
@@ -776,6 +767,7 @@ logger.warn("hello from server");
 		articlesCompany.addAll(articleCompany.getContent());
 		}
 		List<ArticleCompanyDto> response = mapArticleCompanyListToDto(articlesCompany);
+		logger.warn("response in get article by categ or sub categ is : "+response.size());
 		return response;
 	}
 

@@ -32,6 +32,7 @@ import com.example.meta.store.PointsPayment.Entity.PointsPayment;
 import com.example.meta.store.PointsPayment.Mapper.PointsPaymentMapper;
 import com.example.meta.store.PointsPayment.Service.PaymentForProvidersSevice;
 import com.example.meta.store.PointsPayment.Service.PointsPaymentService;
+import com.example.meta.store.aymen.dto.ReglementForProviderDto;
 import com.example.meta.store.werehouse.Dtos.PaymentDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.AccountType;
@@ -65,6 +66,12 @@ public class PointsPaymentController {
 		pointsPaymentService.sendPoints(pointPaymentDto,company);
 		
 	}
+	
+	@PostMapping("send_reglement")
+	public void sendReglement(@RequestBody ReglementForProviderDto reglement) {
+		pointsPaymentService.sendReglement(reglement);
+	}
+	
 	
 	@GetMapping("get_all_my/{companyId}")
 	public List<PointsPaymentDto> getAllMyPointsPayment(@PathVariable Long companyId, @RequestParam int page , @RequestParam int pageSize){
@@ -115,9 +122,20 @@ public class PointsPaymentController {
 	
 	@GetMapping("get_all_my_profits/{id}")
 	public List<PaymentForProviderPerDayDto> getAllMyProfits(@PathVariable Long id , @RequestParam int page , @RequestParam int pageSize){
+		if(authenticationFilter.accountType == AccountType.COMPANY) {
+			
 		Company company = companyService.getCompany();
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 		return paymentForProvidersSevice.getAllMyProfits(id, page , pageSize);
+		}
+		}
+		else {
+			User user  = userService.getUser();
+			if(user.getId() == 1L) {
+				logger.warn("id is : "+ id);
+				return paymentForProvidersSevice.getAllMyProfits(id, page , pageSize);
+
+			}
 		}
 		return null;
 	}
@@ -128,6 +146,14 @@ public class PointsPaymentController {
 		Company company = companyService.getCompany();
 		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 			return paymentForProvidersSevice.getAllMyProfitsPerDay(beginDay, finalDay, id, page , pageSize);			
+		}
+		return null;
+	}
+	
+	@GetMapping("get_all_my_reglement_by_payment_id/{paymentId}")
+	public Page<ReglementForProviderDto> getAllReglementByPaymentId(@PathVariable Long paymentId, @RequestParam int page , @RequestParam int pageSize ){
+		if(authenticationFilter.accountType == AccountType.META) {
+			return paymentForProvidersSevice.getAllReglementByPaymentId(paymentId , page , pageSize);
 		}
 		return null;
 	}

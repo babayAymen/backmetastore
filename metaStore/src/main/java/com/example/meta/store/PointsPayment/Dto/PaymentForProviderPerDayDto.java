@@ -8,15 +8,19 @@ import com.example.meta.store.werehouse.Dtos.CompanyDto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class PaymentForProviderPerDayDto extends BaseDto<Long> implements Serializable {
 
-	private CompanyDto provider;
+	private CompanyDto receiver;
 	
-	private Boolean payed;
+	private Boolean isPayed;
 	
 	private Double amount;
+	
+	private Double rest;
 
 }

@@ -12,16 +12,18 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class InvetationDto extends BaseDto<Long>{
 
 	private UserDto client;
 		
 	private CompanyDto companySender;
 
-	private CompanyDto companyReciver;
+	private CompanyDto companyReceiver;
 	
 	private Double salary;
 	

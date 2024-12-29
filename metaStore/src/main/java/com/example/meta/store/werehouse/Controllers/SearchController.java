@@ -87,10 +87,13 @@ public class SearchController {
 			}else {
 				company = companyService.getCompany();
 			}
+
+			if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {	
 			return searchService.saveHistory(category,id,null, company);
+			}
 
 		}
-		else return null;
+		 return null;
 	}
 	
 	@DeleteMapping("delete_history/{id}")

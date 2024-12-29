@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
@@ -44,15 +46,12 @@ public class WorkerController {
 	private final Logger logger = LoggerFactory.getLogger(WorkerController.class);
 	
 	@GetMapping("/getbycompany/{id}")
-	public ResponseEntity<List<WorkerDto>> getWorkerByCompany(@PathVariable Long id){
+	public Page<WorkerDto> getWorkerByCompany(@PathVariable Long id, @RequestParam int page, @RequestParam int pageSize){
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 		Company company = companyService.getCompany();
-		if(company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
-			company = companyService.getById(id).getBody();
-		}
-		if(company.getId() != id) {
-		return workerService.getWorkerByCompany(company);
-		}
+		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
+			return workerService.getWorkerByCompany(company,page, pageSize);
+			}
 		}
 		return null;
 	}

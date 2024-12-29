@@ -98,10 +98,10 @@ public class ClientService extends BaseService<Company, Long>{
 		if(clientCompany.getClient().isVirtual()) {
 			super.deleteById(clientCompany.getClient().getId());
 		}else
-		invetationClientProviderRepository.deleteByCompanyReciverIdAndCompanySenderId(clientCompany.getClient().getId(), company.getId());
+		invetationClientProviderRepository.deleteByCompanyReceiverIdAndCompanySenderId(clientCompany.getClient().getId(), company.getId());
 		}else {	
 			clientCompanyRRepository.deleteById(id);
-			invetationClientProviderRepository.deleteByClientIdAndCompanyReciverIdOrCompanySenderId(clientCompany.getPerson().getId(), company.getId(), company.getId());
+			invetationClientProviderRepository.deleteByClientIdAndCompanyReceiverIdOrCompanySenderId(clientCompany.getPerson().getId(), company.getId(), company.getId());
 		}
 		return ResponseEntity.ok("delete successful");
 		
@@ -228,31 +228,31 @@ public class ClientService extends BaseService<Company, Long>{
 		boolean existRelation = false;
 		switch (invetation.getType()) {
 		case COMPANY_SEND_CLIENT_COMPANY: {
-			Optional<ClientProviderRelation> r = clientCompanyRRepository.findByClientIdAndProviderId(invetation.getCompanySender().getId(),invetation.getCompanyReciver().getId());
+			Optional<ClientProviderRelation> r = clientCompanyRRepository.findByClientIdAndProviderId(invetation.getCompanySender().getId(),invetation.getCompanyReceiver().getId());
 			if(r.isPresent()) {
 				existRelation = true;
 			}
-			relation.setProvider(invetation.getCompanyReciver());
+			relation.setProvider(invetation.getCompanyReceiver());
 			relation.setClient(invetation.getCompanySender());
 			break;
 		}
 		case USER_SEND_CLIENT_COMPANY: {
-			Optional<ClientProviderRelation> r = clientCompanyRRepository.findByProviderIdAndPersonId(invetation.getCompanyReciver().getId(),invetation.getClient().getId());
+			Optional<ClientProviderRelation> r = clientCompanyRRepository.findByProviderIdAndPersonId(invetation.getCompanyReceiver().getId(),invetation.getClient().getId());
 			if(r.isPresent()) {
 				existRelation = true;
 			}
-			relation.setProvider(invetation.getCompanyReciver());
+			relation.setProvider(invetation.getCompanyReceiver());
 			relation.setPerson(invetation.getClient());
 			break;
 		}
 			
 		case COMPANY_SEND_PROVIDER_COMPANY: {
-			Optional<ClientProviderRelation> r = clientCompanyRRepository.findByClientIdAndProviderId(invetation.getCompanyReciver().getId(),invetation.getCompanySender().getId());
+			Optional<ClientProviderRelation> r = clientCompanyRRepository.findByClientIdAndProviderId(invetation.getCompanyReceiver().getId(),invetation.getCompanySender().getId());
 			if(r.isPresent()) {
 				existRelation = true;
 			}
 			relation.setProvider(invetation.getCompanySender());
-			relation.setClient(invetation.getCompanyReciver());
+			relation.setClient(invetation.getCompanyReceiver());
 			break;
 		}
 		case COMPANY_SEND_PROVIDER_USER: {

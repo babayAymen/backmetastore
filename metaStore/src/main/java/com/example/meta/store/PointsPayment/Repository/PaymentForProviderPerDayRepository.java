@@ -17,18 +17,18 @@ import com.example.meta.store.PointsPayment.Entity.PaymentForProviderPerDay;
 public interface PaymentForProviderPerDayRepository extends BaseRepository<PaymentForProviderPerDay, Long>{
 	
 	
-	@Query("SELECT p FROM PaymentForProviderPerDay p WHERE p.provider.id = :id AND FUNCTION('DATE', p.createdDate) = :now")
+	@Query("SELECT p FROM PaymentForProviderPerDay p WHERE p.receiver.id = :id AND FUNCTION('DATE', p.createdDate) = :now")
 	Optional<PaymentForProviderPerDay> findByProviderIdAndCreatedDate(@Param("id") Long id, @Param("now") LocalDate now);
 
 
-    @Query("SELECT SUM(p.amount) FROM PaymentForProviderPerDay p WHERE p.provider.id = :id AND p.lastModifiedDate BETWEEN :startDate AND :endDate")
+    @Query("SELECT SUM(p.amount) FROM PaymentForProviderPerDay p WHERE p.receiver.id = :id AND p.lastModifiedDate BETWEEN :startDate AND :endDate")
     BigDecimal getSumAmountByDate(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Long id);
 
 
-	Page<PaymentForProviderPerDay> findByProviderId(Long id, Pageable pageable);
+	Page<PaymentForProviderPerDay> findByReceiverId(Long id, Pageable pageable);
 
 
-	@Query("SELECT p FROM PaymentForProviderPerDay p WHERE p.provider.id = :id AND p.lastModifiedDate BETWEEN :date AND :findate")
+	@Query("SELECT p FROM PaymentForProviderPerDay p WHERE p.receiver.id = :id AND p.lastModifiedDate BETWEEN :date AND :findate")
 	Page<PaymentForProviderPerDay> findByProviderIdAndDate(LocalDateTime date, LocalDateTime findate, Long id, Pageable pageable);
 }
 

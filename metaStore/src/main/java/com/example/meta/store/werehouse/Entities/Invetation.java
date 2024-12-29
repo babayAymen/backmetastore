@@ -36,7 +36,7 @@ public class Invetation extends BaseEntity<Long> {
 	
 	@ManyToOne()
 	@JoinColumn(name="company_reciver_id")
-	private Company companyReciver;
+	private Company companyReceiver;
 	
 	private Double salary;
 	

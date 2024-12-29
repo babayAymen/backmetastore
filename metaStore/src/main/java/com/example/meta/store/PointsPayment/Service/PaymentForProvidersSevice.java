@@ -31,6 +31,10 @@ import com.example.meta.store.PointsPayment.Mapper.PaymentForProviderPerDayMappe
 import com.example.meta.store.PointsPayment.Mapper.PaymentForProvidersMapper;
 import com.example.meta.store.PointsPayment.Repository.PaymentForProviderPerDayRepository;
 import com.example.meta.store.PointsPayment.Repository.PaymentForProvidersRepository;
+import com.example.meta.store.aymen.dto.ReglementForProviderDto;
+import com.example.meta.store.aymen.entity.ReglementForProvider;
+import com.example.meta.store.aymen.mapper.ReglementForProviderMapper;
+import com.example.meta.store.aymen.repository.ReglementForProviderRepository;
 import com.example.meta.store.werehouse.Controllers.ArticleController;
 import com.example.meta.store.werehouse.Dtos.PaymentDto;
 import com.example.meta.store.werehouse.Entities.Company;
@@ -51,6 +55,7 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	private final PaymentForProvidersRepository paymentForProvidersRepository;
 
 	private final PaymentForProvidersMapper paymentForProvidersMapper;
+	private final ReglementForProviderMapper reglementForProviderMapper;
 	
 	private final JwtAuthenticationFilter authenticationFilter;
 	
@@ -59,6 +64,7 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	private final UserService userService;
 	
 	private final PaymentForProviderPerDayRepository paymentForProviderPerDayRepository;
+	private final ReglementForProviderRepository reglementForProviderRepository;
 	
 	private final PaymentForProviderPerDayMapper paymentForProviderPerDayMapper;
 	
@@ -75,8 +81,8 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 				paymentForProviderPerDayRepository.findByProviderIdAndCreatedDate(purchaseOrder.getPurchaseorder().getCompany().getId(),LocalDate.now());
 		if(perday.isEmpty()) {			
 		PaymentForProviderPerDay paymentForProviderPerDay = new PaymentForProviderPerDay();
-		paymentForProviderPerDay.setProvider(purchaseOrder.getPurchaseorder().getCompany());
-		paymentForProviderPerDay.setPayed(false);
+		paymentForProviderPerDay.setReceiver(purchaseOrder.getPurchaseorder().getCompany());
+		paymentForProviderPerDay.setIsPayed(false);
 		paymentForProviderPerDay.setAmount(giveenespece);
 		paymentForProviderPerDayRepository.save(paymentForProviderPerDay);
 		}else {
@@ -159,7 +165,7 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 	public List<PaymentForProviderPerDayDto> getAllMyProfits(Long id, int page , int pageSize) {
 		Sort sort = Sort.by(Sort.Direction.DESC, "lastModifiedDate");
 		Pageable pageable = PageRequest.of(page, pageSize, sort);
-		Page<PaymentForProviderPerDay> paymentPerDay = paymentForProviderPerDayRepository.findByProviderId(id, pageable);
+		Page<PaymentForProviderPerDay> paymentPerDay = paymentForProviderPerDayRepository.findByReceiverId(id, pageable);
 		if(paymentPerDay.isEmpty()) {
 			throw new RecordNotFoundException("there is no profit yet");
 		}
@@ -190,6 +196,17 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 				dtos.add(dto);
 		}
 		return dtos;
+	}
+
+
+	public Page<ReglementForProviderDto> getAllReglementByPaymentId(Long paymentId, int page, int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC, "lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
+		Page<ReglementForProvider> reglementForProvider = reglementForProviderRepository.findAllByPaymentForProviderPerDayId(paymentId , pageable);
+		List<ReglementForProviderDto> reglementForProviderDto = reglementForProvider.stream()
+				.map(reglementForProviderMapper::mapToDto)
+				.toList();
+		return new PageImpl<>(reglementForProviderDto, pageable, reglementForProvider.getTotalElements());
 	}
 }
 

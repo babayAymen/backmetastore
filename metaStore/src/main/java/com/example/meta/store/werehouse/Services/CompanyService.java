@@ -350,19 +350,17 @@ public class CompanyService extends BaseService<Company, Long> {
 		User user = userService.getUser();
 		Company company = findCompanyIdByUserId(user.getId()).orElseThrow(() -> new RecordNotFoundException("you dont have a company"));
 			return company;
-		
-//		Long companyId = workerService.getCompanyIdByUserName(user.getUsername());
-//		if(companyId != null) {			
-//		ResponseEntity<Company> company2 = getById(companyId);
-//		return Optional.of(company2.getBody());
-//		}
-//		return Optional.empty();
 	}
 
 	public void makeCompanyAsPointSeller(Long companyId, Boolean status) {
 		Company company = this.getById(companyId).getBody();
 		company.setIsPointsSeller(status);
 		
+	}
+	
+	public void makeCompanyAsMetaSeller(Long companyId , Boolean status) {
+		Company company = this.getById(companyId).getBody();
+		company.setMetaSeller(status);
 	}
 
 	public void updateLocation(Double latitude, Double longitude) {

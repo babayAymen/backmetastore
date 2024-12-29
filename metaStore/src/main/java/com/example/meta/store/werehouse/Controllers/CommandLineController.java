@@ -48,7 +48,7 @@ public class CommandLineController {
 
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
 	@PostMapping("{type}/{clientid}")
-	public ResponseEntity<InputStreamResource> addCommandLine(@RequestBody  List<CommandLineDto> commandLinesDto,
+	public List<CommandLineDto> addCommandLine(@RequestBody  List<CommandLineDto> commandLinesDto,
 			@RequestParam Long invoiceCode, @RequestParam String type, @PathVariable Long clientid, @RequestParam Double discount,
 			@RequestParam AccountType clientType,@RequestParam InvoiceMode invoiceMode)
 					throws JsonProcessingException {
@@ -72,3 +72,21 @@ public class CommandLineController {
 
 
 }
+
+
+
+//@PostMapping("{type}/{clientid}")
+//public ResponseEntity<InputStreamResource> addCommandLine(@RequestBody  List<CommandLineDto> commandLinesDto,
+//		@RequestParam Long invoiceCode, @RequestParam String type, @PathVariable Long clientid, @RequestParam Double discount,
+//		@RequestParam AccountType clientType,@RequestParam InvoiceMode invoiceMode)
+//				throws JsonProcessingException {
+//	User user = userService.getUser();
+//	Company company = new Company();
+//	if(user.getRole() == RoleEnum.WORKER) {
+//		company = workerService.findCompanyByWorkerId(user.getId()).get();
+//	}else {
+//		company = companyService.getCompany();
+//	}
+//	return commandLineService.insertLine(commandLinesDto, company,clientid,discount,type,clientType,invoiceMode);
+	
+//}

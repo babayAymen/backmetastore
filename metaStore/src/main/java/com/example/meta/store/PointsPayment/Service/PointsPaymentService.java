@@ -18,9 +18,15 @@ import com.example.meta.store.Base.Security.Entity.User;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.Base.Service.BaseService;
 import com.example.meta.store.PointsPayment.Dto.PointsPaymentDto;
+import com.example.meta.store.PointsPayment.Entity.PaymentForProviderPerDay;
 import com.example.meta.store.PointsPayment.Entity.PointsPayment;
 import com.example.meta.store.PointsPayment.Mapper.PointsPaymentMapper;
+import com.example.meta.store.PointsPayment.Repository.PaymentForProviderPerDayRepository;
 import com.example.meta.store.PointsPayment.Repository.PointPaymentRepository;
+import com.example.meta.store.aymen.dto.ReglementForProviderDto;
+import com.example.meta.store.aymen.entity.ReglementForProvider;
+import com.example.meta.store.aymen.mapper.ReglementForProviderMapper;
+import com.example.meta.store.aymen.repository.ReglementForProviderRepository;
 import com.example.meta.store.werehouse.Controllers.ArticleController;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Services.CompanyService;
@@ -34,14 +40,18 @@ public class PointsPaymentService extends BaseService<PointsPayment, Long> {
 
 
 	private final PointsPaymentMapper pointsPaymentMapper;
+	private final ReglementForProviderMapper reglementForProviderMapper;
 	
 	private final PointPaymentRepository pointPaymentRepository;
+	private final ReglementForProviderRepository reglementForProviderRepository;
+	private final PaymentForProviderPerDayRepository paymentForProviderPerDayRepository;
 	
 	private final CompanyService companyService;
 	
 	private final UserService userService;
 
 	private final PaymentForAymentService paymentForAymentService;
+	
 
 	private final Logger logger = LoggerFactory.getLogger(PointsPaymentService.class);
 	
@@ -93,4 +103,31 @@ public class PointsPaymentService extends BaseService<PointsPayment, Long> {
 		BigDecimal val4 = val.add(val3);
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
+
+	public void sendReglement(ReglementForProviderDto reglementDto) {
+		logger.warn(reglementDto+"");
+		ReglementForProvider reglement = reglementForProviderMapper.mapToEntity(reglementDto);
+		reglementForProviderRepository.save(reglement);
+		PaymentForProviderPerDay paymentForProviderPerDay = paymentForProviderPerDayRepository.findById(reglement.getPaymentForProviderPerDay().getId()).get();
+			BigDecimal paymentAmount = new BigDecimal(paymentForProviderPerDay.getRest());
+			BigDecimal reglementAmount = new BigDecimal(reglement.getAmount());
+			BigDecimal deff = paymentAmount.subtract(reglementAmount);
+			var compere = paymentAmount.compareTo(reglementAmount);
+			if(compere == 1) {
+				paymentForProviderPerDay.setRest(deff.setScale(2,RoundingMode.HALF_UP).doubleValue());
+			}else {
+				paymentForProviderPerDay.setRest(0.0);
+				paymentForProviderPerDay.setIsPayed(true);
+			}
+			paymentForProviderPerDayRepository.save(paymentForProviderPerDay);
+			
+		
+	}
 }
+
+
+
+
+
+
+

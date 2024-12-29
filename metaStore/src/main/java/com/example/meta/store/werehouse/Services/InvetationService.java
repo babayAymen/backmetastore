@@ -8,6 +8,10 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -64,15 +68,12 @@ public class InvetationService extends BaseService<Invetation, Long> {
 			case COMPANY_SEND_WORKER_USER :
 			case USER_SEND_WORKER_COMPANY :	
 				WorkerDto workerDto = invetationClientProviderMapper.mapInvetationToWorker(invetation);
-//				Set<Role> role = new HashSet<>();
-//				ResponseEntity<Role> role2 = roleService.getById((long) 3);
-//				role.add(role2.getBody());
 				invetation.getClient().setRole(RoleEnum.WORKER);
 				userService.save(invetation.getClient());
 				workerService.insertWorker(workerDto, invetation.getCompanySender());
 				break;
 			case COMPANY_SEND_PARENT_COMPANY:
-				companyService.acceptedInvetation(invetation.getCompanySender(),invetation.getCompanyReciver());
+				companyService.acceptedInvetation(invetation.getCompanySender(),invetation.getCompanyReceiver());
 				break;
 			case COMPANY_SEND_PROVIDER_COMPANY:
 			case COMPANY_SEND_PROVIDER_USER:
@@ -100,38 +101,29 @@ public class InvetationService extends BaseService<Invetation, Long> {
 		invetationClientProviderRepository.save(invetation);		
 	}
 
-	public List<InvetationDto> getInvetation(Long clientId, Long companyId) {
-		List<Invetation> invetations =	invetationClientProviderRepository.findAllByClientIdOrCompanyIdOrUserId(clientId,companyId);	
+	public Page<InvetationDto> getInvetation(Long companyId, int page , int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Invetation> invetations =	invetationClientProviderRepository.findAllByClientIdOrCompanyIdOrUserId(companyId, pageable);	
 		List<InvetationDto> invetationsDto = new ArrayList<>();
 		for(Invetation i : invetations) {
 			InvetationDto dto =  invetationClientProviderMapper.mapToDto(i);
 			invetationsDto.add(dto);
-			if(dto.getClient() != null) {
-			logger.warn(i.getClient().getImage()+" image user invetation");
-			logger.warn(dto.getClient().getImage()+" image user invetation");
-			}
 		}
-		return invetationsDto;
+		logger.warn("response "+invetationsDto.get(0));
+		return new PageImpl<>(invetationsDto, pageable, invetations.getTotalElements());
 	}
-//	
-//	public void sendWorkerInvetation(Company company, Worker worker) {
-//		Invetation invet = invetationClientProviderRepository.findByWorkerId(worker.getId());
-//		if(invet != null) {
-//			throw new RecordNotFoundException("this user is already worker");
-//		}
-//		Invetation invetation = new Invetation();
-//		invetation.setCompanySender(company);
-//		invetation.setWorker(worker.getUser());
-//		invetation.setDepartment(worker.getDepartment());
-//		invetation.setSalary(worker.getSalary());
-//		invetation.setJobtitle(worker.getJobtitle());
-//		invetation.setTotdayvacation(worker.getTotdayvacation());
-//		invetation.setStatusvacation(worker.isStatusvacation());
-//		invetation.setStatus(Status.INWAITING);
-//		invetation.setType(Type.WORKER);
-//		invetationClientProviderRepository.save(invetation);
-//		
-//	}
+	
+	public Page<InvetationDto> getInvitationAsUser(Long clientId, int page , int pageSize){
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Invetation> invetations =	invetationClientProviderRepository.findAllByClientId(clientId, pageable);	
+		List<InvetationDto> invetationsDto = new ArrayList<>();
+		for(Invetation i : invetations) {
+			InvetationDto dto =  invetationClientProviderMapper.mapToDto(i);
+			invetationsDto.add(dto);
+		}
+		return new PageImpl<>(invetationsDto, pageable, invetations.getTotalElements());
+	}
+
 	
 	public void cancelRequestOrDeleteFriend(Long clientId, Company provider, Long id) {
 		Invetation invetation = super.getById(id).getBody();
@@ -146,15 +138,6 @@ public class InvetationService extends BaseService<Invetation, Long> {
 			return;
 		}
 	}
-//	
-//	public void sendParentInvetation(Company company, Company reciver) {
-//		Invetation invetation = new Invetation();
-//		invetation.setCompanySender(company);
-//		invetation.setCompanyReciver(reciver);
-//		invetation.setType(Type.PARENT);
-//		invetation.setStatus(Status.INWAITING);
-//		invetationClientProviderRepository.save(invetation);
-//	}
 
 	public void addInvitation(Long id, Type type, Company company, User user) {
 		Invetation invetation = new Invetation();
@@ -164,7 +147,7 @@ public class InvetationService extends BaseService<Invetation, Long> {
 		case USER_SEND_CLIENT_COMPANY: {
 			ResponseEntity<Company> provider = companyService.getById(id);
 			if(provider.getBody() != null) {
-			invetation.setCompanyReciver(provider.getBody());
+			invetation.setCompanyReceiver(provider.getBody());
 			invetation.setClient(user);
 			}
 			
@@ -173,7 +156,7 @@ public class InvetationService extends BaseService<Invetation, Long> {
 		case COMPANY_SEND_CLIENT_COMPANY: {
 			ResponseEntity<Company> provider = companyService.getById(id);
 			if(provider.getBody() != null) {
-			invetation.setCompanyReciver(provider.getBody());
+			invetation.setCompanyReceiver(provider.getBody());
 			invetation.setCompanySender(company);
 			}
 			
@@ -182,7 +165,7 @@ public class InvetationService extends BaseService<Invetation, Long> {
 		case USER_SEND_WORKER_COMPANY: {
 			ResponseEntity<Company> provider = companyService.getById(id);
 			if(provider.getBody() != null) {
-			invetation.setCompanyReciver(provider.getBody());
+			invetation.setCompanyReceiver(provider.getBody());
 			invetation.setClient(user);
 			}
 			
@@ -208,7 +191,7 @@ public class InvetationService extends BaseService<Invetation, Long> {
 			ResponseEntity<Company> provider = companyService.getById(id);
 			if(provider.getBody() != null) {
 			invetation.setCompanySender(company);
-			invetation.setCompanyReciver(provider.getBody());
+			invetation.setCompanyReceiver(provider.getBody());
 			}	
 			break;
 		}
@@ -216,7 +199,7 @@ public class InvetationService extends BaseService<Invetation, Long> {
 			ResponseEntity<Company> provider = companyService.getById(id);
 			if(provider.getBody() != null) {
 			invetation.setCompanySender(company);
-			invetation.setCompanyReciver(provider.getBody());
+			invetation.setCompanyReceiver(provider.getBody());
 			}
 			break;
 		}

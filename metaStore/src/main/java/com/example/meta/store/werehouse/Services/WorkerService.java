@@ -9,6 +9,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -70,9 +75,9 @@ public class WorkerService extends BaseService<Worker, Long> {
 		return workerRepository.findByNameAndCompanyId(libelle, companyId);
 	}
 
-	public List<Worker> getAllByCompanyId(Long companyId) {
-		return workerRepository.findAllByCompanyId(companyId);
-	}
+//	public List<Worker> getAllByCompanyId(Long companyId) {
+//		return workerRepository.findAllByCompanyId(companyId);
+//	}
 
 	public ResponseEntity<Worker> getByNameAndCompanyId(String name, Long companyId) {
 		Optional<Worker> categ = workerRepository.findByNameAndCompanyId(name,companyId);
@@ -97,8 +102,10 @@ public class WorkerService extends BaseService<Worker, Long> {
 		return null;
 	}
 
-	public ResponseEntity<List<WorkerDto>> getWorkerByCompany(Company company) {
-		List<Worker> workers = getAllByCompanyId(company.getId());
+	public Page<WorkerDto> getWorkerByCompany(Company company, int page , int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC, "lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
+		Page<Worker> workers = workerRepository.findAllByCompanyId(company.getId(), pageable);
 		if(workers.isEmpty()) {
 			throw new RecordNotFoundException("there is no worker");
 		}
@@ -107,7 +114,7 @@ public class WorkerService extends BaseService<Worker, Long> {
 			WorkerDto workerDto = workerMapper.mapToDto(i);
 			workersDto.add(workerDto);
 		}
-		return ResponseEntity.ok(workersDto);
+		return new PageImpl<>(workersDto, pageable, workers.getTotalElements());
 	}
 
 	public ResponseEntity<WorkerDto> getWorkerById(String name, Company company) {

@@ -59,7 +59,7 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 
 
 	/////////////////////////////////////////////////////// real work ///////////////////////////////////////////////////
-	public ResponseEntity<InputStreamResource> insertLine(List<CommandLineDto> commandLinesDto, Company company, 
+	public List<CommandLineDto> insertLine(List<CommandLineDto> commandLinesDto, Company company, 
 			Long clientId, Double discount, String type, AccountType clientType, InvoiceMode invoiceMode) {
 		List<CommandLine> commandLines = new ArrayList<>();
 		Invoice invoice = new Invoice() ;
@@ -126,10 +126,11 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 		invoiceService.insert(invoice);
 		inventoryService.impacteInvoice(company,commandLines);
 		clientCompany.setMvt(mvt);
-		if (type.equals("pdf-save-clien") ) {	
-			return invoiceService.export(company,commandLines);
-		}
-		return null;
+//		if (type.equals("pdf-save-clien") ) {	
+//			return invoiceService.export(company,commandLines);
+//		}
+		
+		return mapToListDto(commandLines);
 	}
 	
 	
@@ -178,7 +179,14 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 	    return val4.setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 
-
+	private List<CommandLineDto> mapToListDto(List<CommandLine> list){
+		List<CommandLineDto> dtos = new ArrayList<>();
+		for(CommandLine i : list) {			
+		CommandLineDto dto = commandLineMapper.mapToDto(i);
+		dtos.add(dto);
+		}
+		return dtos;
+	}
 
 
 }

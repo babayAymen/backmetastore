@@ -91,7 +91,7 @@ public class ProviderService extends BaseService<Company, Long> {
 			super.deleteById(providerCompany.getProvider().getId());
 			return;
 		}
-		invetationClientProviderRepository.deleteByCompanyReciverIdAndCompanySenderId(providerCompany.getProvider().getId(), myCompany.getId());
+		invetationClientProviderRepository.deleteByCompanyReceiverIdAndCompanySenderId(providerCompany.getProvider().getId(), myCompany.getId());
 		
 		
 	} 

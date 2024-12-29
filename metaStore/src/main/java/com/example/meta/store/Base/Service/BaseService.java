@@ -32,7 +32,7 @@ public class BaseService<T extends BaseEntity<ID>,ID extends Number> {
 		if(entity.isPresent()) {
 			return ResponseEntity.ok(entity.get());
 		}else {
-			throw new RecordNotFoundException("there is no record with id: "+id);
+			throw new RecordNotFoundException("in base service there is no record with id: "+id);
 		}
 	}
 	

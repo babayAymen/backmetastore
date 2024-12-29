@@ -64,7 +64,7 @@ public class ProviderController {
 		}else {	
 		 company = companyService.getCompany();
 		}
-		if(company.getId() != id && company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
+		if(company.getId() == id || company.getBranches().stream().anyMatch(branche -> branche.getId().equals(id))) {
 		return providerService.getAllMyProvider(id, page, pageSize);
 		}
 		return null;

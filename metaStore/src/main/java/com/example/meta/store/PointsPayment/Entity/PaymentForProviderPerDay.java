@@ -23,12 +23,14 @@ import lombok.Setter;
 public class PaymentForProviderPerDay extends BaseEntity<Long> implements Serializable {
 
 	@ManyToOne
-	@JoinColumn(name = "providerId")
-	private Company provider;
+	@JoinColumn(name = "receiverId")
+	private Company receiver;
 	
-	private Boolean payed;
+	private Boolean isPayed;
 	
 	private Double amount;
+	
+	private Double rest;
 	
 	
 }

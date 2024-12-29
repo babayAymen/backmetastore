@@ -63,9 +63,8 @@ public class ArticleController {
 	
 	/////////////////////////////////////// real work ////////////////////////////////////////////////////////
 	@GetMapping("getrandom")
-	public Page<ArticleCompanyDto> findRandomArticles( @RequestParam CompanyCategory category , @RequestParam int offset, @RequestParam int pageSize){
+	public Page<ArticleCompanyWithoutTroubleDto> findRandomArticles( @RequestParam CompanyCategory category , @RequestParam int offset, @RequestParam int pageSize){
 		User user = userService.getUser();
-		logger.warn("account type "+authenticationFilter.accountType);
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
 			Company myCompany = new Company();
 		if(user.getRole() == RoleEnum.ADMIN) {
@@ -93,16 +92,16 @@ public class ArticleController {
 		return articlesCompanyDto;
 	}
 	
-	@GetMapping("get_all_articles/{id}")
-	public List<ArticleCompanyDto> getAllArticleByProviderId(@PathVariable Long id, @RequestParam int offset, @RequestParam int pageSize){
-			if(authenticationFilter.accountType == AccountType.COMPANY) {				 
-				Company client = companyService.getCompany();
-				return articleService.getAllArticleByCompanyId(id,null,client.getId() ,offset, pageSize);
-			}else {
-				User user = userService.getUser();
-				return articleService.getAllArticleByCompanyId(id,user.getId(),null ,offset, pageSize);
-			}
-	}
+//	@GetMapping("get_all_articles/{id}")
+//	public List<ArticleCompanyDto> getAllArticleByProviderId(@PathVariable Long id, @RequestParam int offset, @RequestParam int pageSize){
+//			if(authenticationFilter.accountType == AccountType.COMPANY) {				 
+//				Company client = companyService.getCompany();
+//				return articleService.getAllArticleByCompanyId(id,null,client ,offset, pageSize);
+//			}else {
+//				User user = userService.getUser();
+//				return articleService.getAllArticleByCompanyId(id,user,null ,offset, pageSize);
+//			}
+//	}
 	
 	@GetMapping("get_all_my_article/{id}")
 	public Page<ArticleCompanyDto> getAllMyArticle(@PathVariable Long id, @RequestParam int offset, @RequestParam int pageSize) {
@@ -251,14 +250,18 @@ public class ArticleController {
 	
 	@GetMapping("get_company_article_by_category_or_subcategory/{companyId}")
 	public List<ArticleCompanyDto> companyArticlesByCategoryOrSubCategory(@PathVariable Long companyId, @RequestParam Long categoryId , @RequestParam Long subCategoryId, @RequestParam int page, @RequestParam int pageSize){
+		User user = userService.getUser();
 		Long clientId = null;
 		Long userId = null;
 		if(authenticationFilter.accountType == AccountType.COMPANY) {
+			if(user.getRole() == RoleEnum.WORKER) {
+				clientId = workerService.findCompanyByWorkerId(user.getId()).get().getId();
+			}else {				
 			Company company = companyService.getCompany();
 			clientId = company.getId();
+			}
 		}
 		if(authenticationFilter.accountType == AccountType.USER) {
-			User user = userService.getUser();
 			userId = user.getId();
 		}
 		return articleService.companyArticlesByCategoryOrSubCategory(companyId ,categoryId, subCategoryId,clientId , userId, page , pageSize);

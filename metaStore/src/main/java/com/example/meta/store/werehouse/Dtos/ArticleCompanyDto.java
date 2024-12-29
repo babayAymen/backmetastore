@@ -32,9 +32,9 @@ public class ArticleCompanyDto extends BaseDto<Long> implements Serializable{
 	private Boolean isEnabledToComment;
 	private Boolean isFav;
 	private Long likeNumber;
-	private OnlyCategoryDto category;
+	private CategoryDto category;
 	
-	private SubCategoryWithOnlyCategoryDto subCategory;
+	private SubCategoryDto subCategory;
 	
 	private CompanyDto provider;
 	
