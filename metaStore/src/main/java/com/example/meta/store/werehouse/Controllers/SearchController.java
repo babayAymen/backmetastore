@@ -25,13 +25,16 @@ import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.ClientProviderRelationDto;
 import com.example.meta.store.werehouse.Dtos.CompanyDto;
+import com.example.meta.store.werehouse.Dtos.InvoiceDto;
 import com.example.meta.store.werehouse.Dtos.SearchHistoryDto;
 import com.example.meta.store.werehouse.Entities.ClientProviderRelation;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.SearchCategory;
+import com.example.meta.store.werehouse.Enums.SearchPaymentEnum;
 import com.example.meta.store.werehouse.Enums.SearchType;
 import com.example.meta.store.werehouse.Services.CompanyService;
+import com.example.meta.store.werehouse.Services.InvoiceService;
 import com.example.meta.store.werehouse.Services.SearchService;
 import com.example.meta.store.werehouse.Services.WorkerService;
 
@@ -50,6 +53,8 @@ public class SearchController {
 	private final CompanyService companyService;
 	
 	private final WorkerService workerService;
+	
+	private final InvoiceService invoiceService;
 
 	private final JwtAuthenticationFilter authenticationFilter;
 	
@@ -121,6 +126,12 @@ public class SearchController {
 			}
 		}
 		return null;
+	}
+	
+	@GetMapping("search_invoice/{id}")
+	public List<InvoiceDto> searchInvoice(@PathVariable Long id , @RequestParam SearchPaymentEnum type , @RequestParam String text,
+			@RequestParam int page , @RequestParam int pageSize){
+		return invoiceService.searchInvoice(id, type, text, page, pageSize);
 	}
 
 }

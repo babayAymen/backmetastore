@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.meta.store.werehouse.Dtos.CheckDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Entities.Payment;
+import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.PaymentMode;
 import com.example.meta.store.werehouse.Enums.PaymentStatus;
 import com.example.meta.store.werehouse.Enums.Status;
@@ -35,8 +36,11 @@ public class CheckService{
 		Payment check = paymentMapper.mapCheckToPayment(checkDto);
 		if(checkDto.getInvoice().getProvider().getId() == client.getId()) {
 			check.setStatus(Status.ACCEPTED);
-			
-			clientService.paymentInpact(check.getInvoice().getClient().getId(),check.getInvoice().getProvider().getId(),check.getAmount(), check.getInvoice());
+			if(check.getInvoice().getClient() != null)
+			clientService.paymentInpact(checkDto.getInvoice().getClient().getId(),check.getInvoice().getProvider().getId(),check.getAmount(), checkDto.getInvoice().getId(), AccountType.COMPANY);
+			else
+				clientService.paymentInpact(checkDto.getInvoice().getClient().getId(),check.getInvoice().getProvider().getId(),check.getAmount(), checkDto.getInvoice().getId(), AccountType.USER);
+
 		}else {
 			check.setStatus(Status.INWAITING);			
 		}

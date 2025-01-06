@@ -43,6 +43,8 @@ public class WorkerDto extends BaseDto<Long> implements Serializable {
 	
 	private UserDto user;
 
+	private boolean isVirtual;
+
 	private CompanyDto company;
 	
 	  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")

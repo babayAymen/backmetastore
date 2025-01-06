@@ -9,6 +9,7 @@ import com.example.meta.store.Base.Service.BaseService;
 import com.example.meta.store.werehouse.Dtos.BillDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Entities.Payment;
+import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.PaymentMode;
 import com.example.meta.store.werehouse.Enums.PaymentStatus;
 import com.example.meta.store.werehouse.Enums.Status;
@@ -37,8 +38,11 @@ public class BillService{
 		Payment bill = paymentMapper.mapBillToPayment(billDto);
 		if(billDto.getInvoice().getProvider().getId() == client.getId()) {
 			bill.setStatus(Status.ACCEPTED);
-			
-			clientService.paymentInpact(bill.getInvoice().getClient().getId(),bill.getInvoice().getProvider().getId(),bill.getAmount(), bill.getInvoice());
+			if(bill.getInvoice().getClient() != null)
+			clientService.paymentInpact(billDto.getInvoice().getClient().getId(),bill.getInvoice().getProvider().getId(),bill.getAmount(), billDto.getInvoice().getId() , AccountType.COMPANY);
+			else
+				clientService.paymentInpact(billDto.getInvoice().getClient().getId(),bill.getInvoice().getProvider().getId(),bill.getAmount(), billDto.getInvoice().getId() , AccountType.USER);
+
 		}else {
 			bill.setStatus(Status.INWAITING);
 		}

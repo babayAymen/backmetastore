@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.meta.store.werehouse.Dtos.BankTransferDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Entities.Payment;
+import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.PaymentMode;
 import com.example.meta.store.werehouse.Enums.PaymentStatus;
 import com.example.meta.store.werehouse.Enums.Status;
@@ -35,8 +36,10 @@ public class BankTransferService{
 		Payment bankTransfer = paymentMapper.mapBanktransferToPayment(bankTransferDto);
 		if(bankTransferDto.getInvoice().getProvider().getId() == client.getId()) {
 			bankTransfer.setStatus(Status.ACCEPTED);
-			
-			clientService.paymentInpact(bankTransfer.getInvoice().getClient().getId(),bankTransfer.getInvoice().getProvider().getId(),bankTransfer.getAmount(), bankTransfer.getInvoice());
+			if(bankTransfer.getInvoice().getClient() != null)
+			clientService.paymentInpact(bankTransferDto.getInvoice().getClient().getId(),bankTransfer.getInvoice().getProvider().getId(),bankTransfer.getAmount(), bankTransferDto.getInvoice().getId(), AccountType.COMPANY);
+			else
+				clientService.paymentInpact(bankTransferDto.getInvoice().getClient().getId(),bankTransfer.getInvoice().getProvider().getId(),bankTransfer.getAmount(), bankTransferDto.getInvoice().getId(), AccountType.USER);
 		}else {		
 			bankTransfer.setStatus(Status.INWAITING);
 		}

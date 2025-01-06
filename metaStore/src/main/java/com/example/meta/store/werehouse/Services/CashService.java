@@ -6,8 +6,10 @@ import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.werehouse.Dtos.CashDto;
+import com.example.meta.store.werehouse.Dtos.PaymentDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Entities.Payment;
+import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.PaymentMode;
 import com.example.meta.store.werehouse.Enums.PaymentStatus;
 import com.example.meta.store.werehouse.Enums.Status;
@@ -31,22 +33,29 @@ public class CashService {
 
 	private final Logger logger = LoggerFactory.getLogger(CashService.class);
 	
-	public void invoiceCashPayment(Company client, CashDto cashDto) {
-		if(cashDto.getInvoice().getClient().getId() != client.getId() && cashDto.getInvoice().getProvider().getId() != client.getId()) {
+	public PaymentDto invoiceCashPayment(Company client, CashDto cashDto) {
+		logger.warn("invoice id from dto "+cashDto.getInvoice().getId());
+		PaymentDto response = new PaymentDto();
+		if(cashDto.getInvoice().getClient() != null && cashDto.getInvoice().getClient().getId() != client.getId() && cashDto.getInvoice().getProvider().getId() != client.getId()) {
 			throw new PermissionDeniedDataAccessException("you don't have permission to do that", null);
 		}
 		if(cashDto.getInvoice().getPaid() != PaymentStatus.PAID && cashDto.getInvoice().getStatus() == Status.ACCEPTED) {			
 		Payment cash = paymentMapper.mapCashToPayment(cashDto);
 		if(cashDto.getInvoice().getProvider().getId() == client.getId()) {
 			cash.setStatus(Status.ACCEPTED);
-			
-			clientService.paymentInpact(cash.getInvoice().getClient().getId(),cash.getInvoice().getProvider().getId(),cash.getAmount(), cash.getInvoice());
+			if(cash.getInvoice().getClient() != null)
+			clientService.paymentInpact(cashDto.getInvoice().getClient().getId(),cash.getInvoice().getProvider().getId(),cash.getAmount(), cashDto.getInvoice().getId(), AccountType.COMPANY);
+			else
+				clientService.paymentInpact(cashDto.getInvoice().getPerson().getId(),cash.getInvoice().getProvider().getId(),cash.getAmount(), cashDto.getInvoice().getId(), AccountType.USER);
+				
 		}else {		
 			cash.setStatus(Status.INWAITING);
 		}
 		cash.setType(PaymentMode.CASH);
 		paymentRepository.save(cash);
+		response = paymentMapper.mapToDto(cash);
 	}
+		return response;
 	}
 
 }

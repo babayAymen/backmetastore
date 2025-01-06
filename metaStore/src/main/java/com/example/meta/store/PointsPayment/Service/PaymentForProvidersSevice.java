@@ -84,11 +84,14 @@ public class PaymentForProvidersSevice extends BaseService<PaymentForProviders, 
 		paymentForProviderPerDay.setReceiver(purchaseOrder.getPurchaseorder().getCompany());
 		paymentForProviderPerDay.setIsPayed(false);
 		paymentForProviderPerDay.setAmount(giveenespece);
+		paymentForProviderPerDay.setRest(giveenespece);
 		paymentForProviderPerDayRepository.save(paymentForProviderPerDay);
 		}else {
 			PaymentForProviderPerDay per = perday.get();
 			Double sum = sumWithTwoValue(perday.get().getAmount(), giveenespece);
 			per.setAmount(sum);
+			Double rest = sumWithTwoValue(perday.get().getRest(), giveenespece);
+			per.setRest(rest);
 		}
 		
 	}

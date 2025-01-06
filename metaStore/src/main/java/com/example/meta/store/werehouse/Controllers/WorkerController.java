@@ -73,7 +73,7 @@ public class WorkerController {
 	public ResponseEntity<WorkerDto> insertWorker(@RequestBody @Valid WorkerDto workerDto){
 		logger.warn("insert worker");
 		Company company = companyService.getCompany();
-		return workerService.insertWorker(workerDto,company);
+		return workerService.insertWorker(workerDto,company, true);
 	}
 	
 	@PutMapping("/update")

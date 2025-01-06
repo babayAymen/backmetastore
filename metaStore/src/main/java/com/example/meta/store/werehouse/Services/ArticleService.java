@@ -79,7 +79,6 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 
 	/////////////////////////////////////// real work ////////////////////////////////////////////////////////
 	public Page<ArticleCompanyWithoutTroubleDto> findRandomArticlesPub( Company myCompany, User user, int offset, int pageSize, CompanyCategory category) {
-		msgRepository.sendWSMessage( "hello from server");
 		Pageable pageable = PageRequest.of(offset, pageSize);
 		Page<ArticleCompany> articles;
 		Boolean isFav = false;
@@ -601,9 +600,6 @@ public class ArticleService extends BaseService<ArticleCompany, Long>{
 			
 		Pageable pageable = PageRequest.of(offset, pageSize);
 		Page<Article> articles = articleRepository.finAllByCategoryAndCompanyId(category,id,  pageable );
-		if(articles.isEmpty()) {
-			throw new RecordNotFoundException("you have added all articles");
-		}
 		List<ArticleDto> articlesDto = new ArrayList<>();
 		for(Article i : articles) {
 			ArticleDto articleDto = articleMapper.mapToDto(i);

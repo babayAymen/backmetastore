@@ -127,7 +127,7 @@ public class WorkerService extends BaseService<Worker, Long> {
 		
 	}
 
-	public ResponseEntity<WorkerDto> insertWorker(@Valid WorkerDto workerDto, Company company) {
+	public ResponseEntity<WorkerDto> insertWorker(@Valid WorkerDto workerDto, Company company, boolean isVirtual) {
 		Optional<Worker> worker1 = workerRepository.findByNameAndCompanyId(workerDto.getName(),company.getId());
 		if(worker1.isPresent())  {
 			throw new RecordIsAlreadyExist("is already worker");
@@ -138,6 +138,7 @@ public class WorkerService extends BaseService<Worker, Long> {
 		
 		worker = workerMapper.mapToEntity(workerDto);
 		worker.setCompany(company);
+		worker.setVirtual(isVirtual);
 		worker.setUser(workerUser.getUser());
 		worker.setRemainingday(worker.getTotdayvacation());
 		if(workerDto.getUser() != null) {

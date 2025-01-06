@@ -70,7 +70,7 @@ public class InvetationService extends BaseService<Invetation, Long> {
 				WorkerDto workerDto = invetationClientProviderMapper.mapInvetationToWorker(invetation);
 				invetation.getClient().setRole(RoleEnum.WORKER);
 				userService.save(invetation.getClient());
-				workerService.insertWorker(workerDto, invetation.getCompanySender());
+				workerService.insertWorker(workerDto, invetation.getCompanySender(), false);
 				break;
 			case COMPANY_SEND_PARENT_COMPANY:
 				companyService.acceptedInvetation(invetation.getCompanySender(),invetation.getCompanyReceiver());

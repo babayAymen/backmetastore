@@ -26,30 +26,17 @@ public class InvoiceDto extends BaseDto<Long> implements Serializable {
     private static final long serialVersionUID = 123456781022L;
     
 	private Long code;
-	
 	private Double tot_tva_invoice;
-			
 	private Double prix_invoice_tot;
-	
 	private Double prix_article_tot;
-
 	private Double discount;
-	
 	private Status status;
-	
-//	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-//		private LocalDateTime createdDate;
-	  
-//	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-//		private LocalDateTime lastModifiedDate;
 	
 	private PaymentStatus paid;
 
 	private InvoiceDetailsType type;
 	
 	private Boolean isEnabledToComment;
-		
-//	private String CreatedBy;
 	
 	private UserDto person;
 	

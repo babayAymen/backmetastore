@@ -27,6 +27,10 @@ public class PurchaseOrderLineDto extends BaseDto<Long> implements Serializable 
 	
 	private Boolean delivery;
 
+	private Double totTva;
+	
+	private Double prixArticleTot;
+	
 	private PurchaseOrderDto purchaseorder;
 	
 	  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")

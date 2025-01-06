@@ -20,6 +20,7 @@ import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.Base.Service.BaseService;
 import com.example.meta.store.werehouse.Controllers.SearchController;
+import com.example.meta.store.werehouse.Dtos.ArticleCompanyWithoutTroubleDto;
 import com.example.meta.store.werehouse.Dtos.ClientProviderRelationDto;
 import com.example.meta.store.werehouse.Dtos.CompanyDto;
 import com.example.meta.store.werehouse.Dtos.SearchHistoryDto;
@@ -209,6 +210,7 @@ public class SearchService extends BaseService<SearchHistory, Long> {
 			 histories = searchHistoryRepository.findAllByMeCompanyId(id, pageable);
 			}
 			List<SearchHistoryDto> dtos = histories.stream().map(searchHistoryMapper::mapToDto).toList();
+			
 			logger.warn(dtos.size()+" size");
 			return new PageImpl<>(dtos, pageable, histories.getTotalElements());
 		}

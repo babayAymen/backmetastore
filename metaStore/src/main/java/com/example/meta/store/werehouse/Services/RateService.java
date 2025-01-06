@@ -7,6 +7,11 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,7 +57,7 @@ public class RateService extends BaseService<Raters, Long> {
 	
 	private final Logger logger = LoggerFactory.getLogger(RateService.class);
 	
-	public void rate( String rates, User myUser, Company myCompany, MultipartFile image) throws JsonMappingException, JsonProcessingException {
+	public RatersDto rate( String rates, User myUser, Company myCompany, MultipartFile image) throws JsonMappingException, JsonProcessingException {
 		logger.warn(rates);
 		Raters ratesDto = objectMapper.readValue(rates, Raters.class);
 		Raters raters = new Raters();
@@ -76,7 +81,6 @@ public class RateService extends BaseService<Raters, Long> {
 		}
 		case COMPANY_RATE_USER: {
 			User user = userService.findById(ratesDto.getRateeUser().getId()).get();
-			logger.warn(user.getRate()+" rate "+user.getRater()+" rater");
 			raters.setRateeUser(user);
 			raters.setRaterCompany(myCompany);
 			Double rat = calculRate((double)user.getRater(), user.getRate(), ratesDto.getRateValue());
@@ -98,38 +102,35 @@ public class RateService extends BaseService<Raters, Long> {
 			throw new IllegalArgumentException("Unexpected value: " + ratesDto.getType());
 		}
 		rateresRepository.save(raters);
+		RatersDto response = ratersMapper.mapToDto(raters);
+		return response;
 		
 	}
 	
 	private double calculRate(Double rater, Double rate, Double value  ) {
 		return divideWithTwoValue(
 				sumWithTwoValue(
-				multipleWithTwoValue(
-						rater, rate) 
+				multipleWithTwoValue(rater, rate) 
 				,value
 				),
 				sumWithTwoValue(rater,1.0));
 	}
 
-	public List<RatersDto> getAllById(Long id, AccountType type) {
-		List<Raters> raters = new ArrayList<>();
+	public Page<RatersDto> getAllById(Long id, AccountType type, int page , int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC,"lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
+		Page<Raters> raters = Page.empty();
 		if(type.equals(AccountType.COMPANY)) {			
-		 raters = rateresRepository.findAllByRateeCompanyId(id);
-			logger.warn("size "+raters.size()+" size raters "+id);
+		 raters = rateresRepository.findAllByRateeCompanyId(id, pageable);
 		}else {			
-		raters = rateresRepository.findAllByRateeUserId(id);
+		raters = rateresRepository.findAllByRateeUserId(id, pageable);
 		logger.warn(" id raters from user  "+id);
 		}
-		if(raters.isEmpty()) {
-			throw new RecordNotFoundException(type.toString());
-		}
-		List<RatersDto> ratersDto = new ArrayList<>();
-		for(Raters i : raters) {
-			RatersDto dto = ratersMapper.mapToDto(i);
-			ratersDto.add(dto);
-		}
+		List<RatersDto> ratersDto = raters.stream()
+				.map(ratersMapper::mapToDto)
+				.toList();
 		logger.warn(ratersDto.size()+" size raters "+id);
-		return ratersDto;
+		return new PageImpl<>(ratersDto, pageable, raters.getTotalElements());
 	}
 
 	private Double multipleWithTwoValue(Double val1 , Double val2) {

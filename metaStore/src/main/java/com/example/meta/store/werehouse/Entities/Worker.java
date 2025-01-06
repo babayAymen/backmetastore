@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.example.meta.store.Base.Entity.BaseEntity;
 import com.example.meta.store.Base.Security.Entity.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -42,7 +43,10 @@ public class Worker extends BaseEntity<Long> implements Serializable {
 	private long totdayvacation;
 
 	private boolean statusvacation;
-
+	
+	@Column(name = "is_virtual", nullable = false)
+	private boolean isVirtual = false;
+	
 	private long remainingday;
 	
 	@OneToOne(fetch=FetchType.LAZY)

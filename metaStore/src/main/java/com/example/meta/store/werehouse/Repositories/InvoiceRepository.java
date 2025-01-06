@@ -58,7 +58,7 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 
 	Boolean existsByClientIdAndProviderId(Long myCompanyId, Long providerId);
 	
-	Page<Invoice> findAllByPersonIdAndStatus(Long userId, Status status, Pageable pageable);
+	Page<Invoice> findAllByPersonIdAndStatus(Long userId, Status status, Pageable pageable);// i thing its unused
 
 	Page<Invoice> findAllByClientIdAndStatus(Long companyId, Status status, Pageable pageable);
 
@@ -76,6 +76,9 @@ public interface InvoiceRepository extends BaseRepository<Invoice, Long> {
 	Page<Invoice> findAllByClientIdAndPaid(Long id, PaymentStatus status, Pageable pageable);
 
 	Page<Invoice> findByProviderIdAndLastModifiedBy(Long companyId, Long workerId, Pageable pageable);
+
+	@Query("SELECT i FROM Invoice i WHERE i.provider.id = :id AND  CAST(i.code AS text) LIKE %:text% ")
+	Page<Invoice> findByInvoiceContaint(Long id, Long text, Pageable pageable);
 
 
 

@@ -3,6 +3,7 @@ package com.example.meta.store.werehouse.Entities;
 import com.example.meta.store.Base.Entity.BaseEntity;
 import com.example.meta.store.werehouse.Enums.CompanyCategory;
 import com.example.meta.store.werehouse.Enums.PaymentStatus;
+import com.example.meta.store.werehouse.Enums.Status;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -23,7 +24,7 @@ public class Cash extends BaseEntity<Long> {
 
 	private Double amount;
 	
-	private PaymentStatus status;
+	private Status status;
 	@ManyToOne
 	@JoinColumn(name = "invoiceId")
 	private Invoice invoice;

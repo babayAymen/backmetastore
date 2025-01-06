@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +16,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.meta.store.Base.ErrorHandler.RecordNotFoundException;
 import com.example.meta.store.Base.Security.Config.JwtAuthenticationFilter;
+import com.example.meta.store.Base.Security.Entity.User;
+import com.example.meta.store.Base.Security.Enums.RoleEnum;
 import com.example.meta.store.Base.Security.Service.UserService;
 import com.example.meta.store.werehouse.Dtos.BankTransferDto;
 import com.example.meta.store.werehouse.Dtos.BillDto;
@@ -26,6 +30,7 @@ import com.example.meta.store.werehouse.Dtos.CashDto;
 import com.example.meta.store.werehouse.Dtos.CheckDto;
 import com.example.meta.store.werehouse.Dtos.PaymentDto;
 import com.example.meta.store.werehouse.Entities.Company;
+import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.Status;
 import com.example.meta.store.werehouse.Services.BankTransferService;
 import com.example.meta.store.werehouse.Services.BillService;
@@ -56,14 +61,25 @@ public class PaymentController {
 	private final CompanyService companyService;
 	
 	private final PaymentService paymentService;
+	private final JwtAuthenticationFilter authFilter;
+	private final WorkerService workerService;
 	
 
 	private final Logger logger = LoggerFactory.getLogger(PaymentController.class);
 	
-	@PostMapping("cash")
-	public void invoiceCashPayment(@RequestBody CashDto cashDto) {
-		Company client = companyService.getCompany();
-		cashService.invoiceCashPayment(client, cashDto);
+	@PostMapping("cash/{companyId}")
+	public PaymentDto invoiceCashPayment(@PathVariable Long companyId,@RequestBody CashDto cashDto) {
+		Company client = new Company();
+		User user = userService.getUser();
+		if(authFilter.accountType == AccountType.COMPANY) {
+			if(user.getRole() == RoleEnum.WORKER) {
+			client = workerService.findCompanyByWorkerId(user.getId()).get();
+			}
+		else {	
+			client = companyService.getCompany();
+		}
+		}
+		return cashService.invoiceCashPayment(client, cashDto);
 	}
 	
 	@PostMapping("check")
@@ -112,6 +128,11 @@ public class PaymentController {
 	public void paymentResponse(@PathVariable Status response, @PathVariable Long id) {
 		Company company = companyService.getCompany();
 		paymentService.paymentResponse(response, id, company);
+	}
+	
+	@GetMapping("get_payment_by_invoice_id/{invoiceId}")
+	public Page<PaymentDto> getPaymentHystoricByInvoiceId(@PathVariable Long invoiceId , @RequestParam int page , @RequestParam int pageSize){
+		return paymentService.getPaymentHystoricByInvoiceId(invoiceId, page , pageSize);
 	}
 	
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,18 +46,19 @@ public class RateController {
 	private final Logger logger = LoggerFactory.getLogger(RateController.class);
 	
 	@PostMapping("do_rate")
-	public void rate(@RequestParam ("ratingDto") String rating, 
+	public RatersDto rate(@RequestParam ("ratingDto") String rating, 
 			 @RequestParam(value ="image", required = false) MultipartFile image) 
 	throws Exception{
 			logger.warn(" comment and type "+ rating);
 			if(authenticationFilter.accountType == AccountType.USER) {			
 			User user = userService.getUser();
-			rateService.rate(rating,user, null,image);			
+			 return rateService.rate(rating,user, null,image);			
 			}
 			if(authenticationFilter.accountType == AccountType.COMPANY) {			
 			Company myCompany = companyService.getCompany();
-			rateService.rate(rating,null, myCompany,image);	
+			return rateService.rate(rating,null, myCompany,image);	
 			}
+			return null;
 		}
 	
 	@GetMapping("enable_to_comment_company/{companyId}")
@@ -92,8 +94,8 @@ public class RateController {
 	}
 	
 	
-	@GetMapping("get_rate/{id}/{type}")
-	public List<RatersDto> getAllRates(@PathVariable Long id, @PathVariable AccountType type){
-		return rateService.getAllById(id,type);
+	@GetMapping("get_rate/{id}")
+	public Page<RatersDto> getAllRates(@PathVariable Long id, @RequestParam AccountType type, @RequestParam int page , @RequestParam int pageSize){
+		return rateService.getAllById(id,type, page , pageSize);
 	}
 }

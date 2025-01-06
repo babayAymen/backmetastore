@@ -28,6 +28,7 @@ import com.example.meta.store.werehouse.Entities.ClientProviderRelation;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Entities.Invetation;
 import com.example.meta.store.werehouse.Entities.Invoice;
+import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.Nature;
 import com.example.meta.store.werehouse.Enums.PaymentStatus;
 import com.example.meta.store.werehouse.Enums.PrivacySetting;
@@ -108,8 +109,14 @@ public class ClientService extends BaseService<Company, Long>{
 	}
 
 	
-	public void paymentInpact(Long clientId, Long companyId, Double amount, Invoice invoice) {
-		ClientProviderRelation client = clientCompanyRRepository.findByClientIdAndProviderId(clientId, companyId).orElseThrow(() -> new RecordNotFoundException("you are not his client"));
+	public void paymentInpact(Long clientId, Long companyId, Double amount, Long invoiceId, AccountType type) {
+		ClientProviderRelation client = new ClientProviderRelation();
+		Invoice invoice = invoiceRepository.findById(invoiceId).get();
+		logger.warn("client id "+clientId+" provider id ! "+companyId);
+		if(type == AccountType.COMPANY)
+		client = clientCompanyRRepository.findByClientIdAndProviderId(clientId, companyId).orElseThrow(() -> new RecordNotFoundException("you are not his client"));
+		else
+			client = clientCompanyRRepository.findByPersonIdAndProviderId(clientId, companyId).orElseThrow(() -> new RecordNotFoundException("you are not his client"));
 		Double rest;
 		if(invoice.getRest() == 0) {
 			rest = round(invoice.getPrix_invoice_tot()-amount-client.getAdvance());
@@ -118,7 +125,7 @@ public class ClientService extends BaseService<Company, Long>{
 		}
 		if(rest > 0) {
 			invoice.setRest(rest);
-			client.setCredit(round(client.getCredit() - amount -client.getAdvance()));
+			client.setCredit(round(client.getCredit() - amount - client.getAdvance()));
 			client.setAdvance(0.0);
 			invoice.setPaid(PaymentStatus.INCOMPLETE);
 			logger.warn("rest is more than 0"+ invoice.getPaid());

@@ -69,6 +69,8 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	    List<PurchaseOrderLineDto> purchaseOrdersLineDto = new ArrayList<>();
 	    PurchaseOrder purchaseOrder = null;
 	    Long id = null;
+	    BigDecimal buye = BigDecimal.ZERO;
+	    Boolean delivery = false;
 	    Collections.sort(purchaseOrderDto, Comparator.comparing(dto -> dto.getArticle().getCompany().getId()));
 	    for (PurchaseOrderLineDto i : purchaseOrderDto) {
 	        PurchaseOrderLine purchaseOrderLine = purchaseOrderLineMapper.mapToEntity(i);
@@ -92,21 +94,29 @@ public class PurchaseOrderService extends BaseService<PurchaseOrder, Long> {
 	        }
 	        purchaseOrderLine.setPurchaseorder(purchaseOrder);
 	        purchaseOrderLine.setStatus(Status.INWAITING);
+	        BigDecimal sellingPrice = new BigDecimal(purchaseOrderLine.getArticle().getSellingPrice());
+	        BigDecimal tva = new BigDecimal(purchaseOrderLine.getArticle().getArticle().getTva());
+	        BigDecimal qte = new BigDecimal(purchaseOrderLine.getQuantity());
+	        purchaseOrderLine.setPrixArticleTot(qte.multiply(sellingPrice).doubleValue());
+	        purchaseOrderLine.setTotTva(qte.multiply(tva).doubleValue());
 	        purchaseOrderRepository.save(purchaseOrder);
 	        purchaseOrderLineRepository.save(purchaseOrderLine);
 	        PurchaseOrderLineDto dto = purchaseOrderLineMapper.mapToDto(purchaseOrderLine);
 	        purchaseOrdersLineDto.add(dto);
 	        id = purchaseOrder.getId();
-	        BigDecimal sellingPrice = new BigDecimal(purchaseOrderLine.getArticle().getSellingPrice());
-	        BigDecimal qte = new BigDecimal(purchaseOrderLine.getQuantity());
-	        BigDecimal buye = qte.multiply(sellingPrice);
-	       if(client == null) {
-	    	    BigDecimal newBalance = new BigDecimal(user.getBalance()).subtract(buye);
-	    	    user.setBalance(newBalance.setScale(2, RoundingMode.HALF_UP).doubleValue());
-	       }else {
-	    	    BigDecimal newBalance = new BigDecimal(client.getBalance()).subtract(buye);
-	    	    client.setBalance(newBalance.setScale(2, RoundingMode.HALF_UP).doubleValue());
-	       }
+	        
+	         buye = buye.add(qte.multiply(sellingPrice));
+	         delivery = i.getDelivery();
+	    }
+	    BigDecimal deliveryFees = (delivery && buye.compareTo(BigDecimal.valueOf(30)) <= 0 )
+	    		? BigDecimal.valueOf(3) 
+	    				: BigDecimal.ZERO;
+	    if(client == null) {
+	    	BigDecimal newBalance = new BigDecimal(user.getBalance()).subtract(buye).subtract(deliveryFees);
+	    	user.setBalance(newBalance.setScale(2, RoundingMode.HALF_UP).doubleValue());
+	    }else {
+	    	BigDecimal newBalance = new BigDecimal(client.getBalance()).subtract(buye).subtract(deliveryFees);
+	    	client.setBalance(newBalance.setScale(2, RoundingMode.HALF_UP).doubleValue());
 	    }
 	    return purchaseOrdersLineDto;
 	}

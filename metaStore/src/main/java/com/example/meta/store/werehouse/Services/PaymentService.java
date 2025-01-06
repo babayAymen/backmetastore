@@ -6,6 +6,11 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.ErrorHandler.NotPermissonException;
@@ -17,6 +22,7 @@ import com.example.meta.store.werehouse.Dtos.PaymentDto;
 import com.example.meta.store.werehouse.Entities.Company;
 import com.example.meta.store.werehouse.Entities.Invoice;
 import com.example.meta.store.werehouse.Entities.Payment;
+import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.PaymentMode;
 import com.example.meta.store.werehouse.Enums.Status;
 import com.example.meta.store.werehouse.Mappers.PaymentMapper;
@@ -46,8 +52,12 @@ public class PaymentService extends BaseService<Payment, Long>{
 		if(!payment.getInvoice().getProvider().equals(company)) {
 			throw new NotPermissonException("you dont have a permission");
 		}
-		if(response == Status.ACCEPTED) {			
-			clientService.paymentInpact(payment.getInvoice().getClient().getId(),payment.getInvoice().getProvider().getId(),payment.getAmount(), payment.getInvoice());
+		if(response == Status.ACCEPTED) {
+			if(payment.getInvoice().getClient() != null)
+			clientService.paymentInpact(payment.getInvoice().getClient().getId(),payment.getInvoice().getProvider().getId(),payment.getAmount(), payment.getInvoice().getId(), AccountType.COMPANY);
+			else
+				clientService.paymentInpact(payment.getInvoice().getClient().getId(),payment.getInvoice().getProvider().getId(),payment.getAmount(), payment.getInvoice().getId(), AccountType.USER);	
+			
 		}else {
 			paymentRepository.delete(payment);
 		}
@@ -97,6 +107,17 @@ public class PaymentService extends BaseService<Payment, Long>{
 		payment.setStatus(Status.ACCEPTED);
 		payment.setType(PaymentMode.CASH);
 		paymentRepository.save(payment);
+	}
+
+
+	public Page<PaymentDto> getPaymentHystoricByInvoiceId(Long invoiceId, int page, int pageSize) {
+		Sort sort = Sort.by(Sort.Direction.DESC, "lastModifiedDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
+		Page<Payment> payment = paymentRepository.findAllByInvoiceId(invoiceId , pageable);
+		List<PaymentDto> response = payment.stream()
+				.map(paymentMapper::mapToDto)
+				.toList();
+		return new PageImpl<>(response, pageable, payment.getTotalElements());
 	}
 
 

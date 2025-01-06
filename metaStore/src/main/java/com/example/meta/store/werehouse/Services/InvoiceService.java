@@ -35,6 +35,7 @@ import com.example.meta.store.werehouse.Entities.PurchaseOrderLine;
 import com.example.meta.store.werehouse.Enums.AccountType;
 import com.example.meta.store.werehouse.Enums.InvoiceDetailsType;
 import com.example.meta.store.werehouse.Enums.PaymentStatus;
+import com.example.meta.store.werehouse.Enums.SearchPaymentEnum;
 import com.example.meta.store.werehouse.Enums.Status;
 import com.example.meta.store.werehouse.Mappers.InvoiceMapper;
 import com.example.meta.store.werehouse.Repositories.CommandLineRepository;
@@ -128,7 +129,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 			}
 		}
 		else {
-			 invoices = invoiceRepository.findAllByPersonIdAndStatus(id, Status.ACCEPTED, pageable);
+			 invoices = invoiceRepository.findAllByPersonId(id, pageable);
 		}
 		List<InvoiceDto> response = invoices.stream().map(invoiceMapper::mapToDto).toList();
 		return new PageImpl<>(response, pageable, invoices.getTotalElements());
@@ -192,11 +193,11 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 //		invoice.setIsEnabledToComment(true);
 		invoice.setRest(inv.getRest());
 		invoiceRepository.save(invoice);
-		enableToCommentService.makeEnableToComment(company, invoice.getPerson(), invoice.getProvider());
+		enableToCommentService.makeEnableToComment(company, invoice.getPerson(), invoice.getClient());
+		if(invoice.getRest() != 0)
 		paymentService.addCashMode(invoice,company);
-		if(inv.getPaid() == PaymentStatus.PAID) {
-			invoice.setRest(0.0);			
-		}
+		if(inv.getPaid() == PaymentStatus.PAID)
+			invoice.setRest(0.0);
 		return invoice;
 	}
 	
@@ -229,6 +230,7 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		Invoice invoice = new Invoice();
 		invoice.setCode(lastInvoiceCode);
 		invoice.setPaid(PaymentStatus.PAID);
+		invoice.setDiscount(10.0);
 		invoice.setRest(0.0);
 		invoice.setStatus(Status.ACCEPTED);
 		invoice.setClient(purchaseOrderLine.getPurchaseorder().getClient());
@@ -320,6 +322,29 @@ public class InvoiceService extends BaseService<Invoice, Long>{
 		Pageable pageable = PageRequest.of(page, pageSize, sort);
 			Page<Invoice> invoices = invoiceRepository.findByProviderIdAndLastModifiedBy(companyId , workerId , pageable);
 			List<InvoiceDto> invoicesDto = mapToListDto(invoices.getContent());
+		return invoicesDto;
+	}
+
+	public List<InvoiceDto> searchInvoice(Long id, SearchPaymentEnum type, String text, int page, int pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		Page<Invoice> invoices = null;
+		switch(type) {
+		case CODE : {
+			Long code = Long.valueOf(text);
+			invoices = invoiceRepository.findByInvoiceContaint(id,code , pageable);
+		}
+		case CLIENT	: {
+			
+		}
+		default : 
+		}
+		List<InvoiceDto> invoicesDto = new ArrayList<>();
+		if(!invoices.isEmpty()) {
+			for(Invoice i : invoices) {
+				InvoiceDto invoiceDto = invoiceMapper.mapToDto(i);
+				invoicesDto.add(invoiceDto);
+			}
+		}
 		return invoicesDto;
 	}
 

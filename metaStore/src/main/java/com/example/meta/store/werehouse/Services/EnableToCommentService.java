@@ -1,5 +1,7 @@
 package com.example.meta.store.werehouse.Services;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.example.meta.store.Base.Security.Entity.User;
@@ -61,7 +63,7 @@ public class EnableToCommentService extends BaseService<EnableToComment, Long>{
 	}
 
 	public void makeDisableToCommentCompany(Long companyId, Long myCompanyId, Long myUserId) {
-		EnableToComment enableToComment = new EnableToComment();
+		Optional<EnableToComment> enableToComment = Optional.empty();
 		if(myCompanyId != null) {
 			 enableToComment = enableToCommentRepository.findByRaterCompanyIdAndRateeCompanyIdAndEnableClientCompany(myCompanyId, companyId, true);
 			
@@ -69,9 +71,13 @@ public class EnableToCommentService extends BaseService<EnableToComment, Long>{
 		if(myUserId != null) {
 			 enableToComment = enableToCommentRepository.findByUserIdAndRateeCompanyIdAndEnableClientCompany(myUserId, companyId, true);
 		}
-		if(enableToComment.getId() != null) {
-			enableToComment.setEnableClientCompany(false);
-			enableToCommentRepository.save(enableToComment);
+		if(enableToComment.isPresent()) {
+			if(enableToComment.get().getRateeCompany().getId() == myCompanyId) {
+				enableToComment.get().setEnableProvider(false);
+			}else {
+			enableToComment.get().setEnableClientCompany(false);
+			} 
+			enableToCommentRepository.save(enableToComment.get());
 		}
 	}
 

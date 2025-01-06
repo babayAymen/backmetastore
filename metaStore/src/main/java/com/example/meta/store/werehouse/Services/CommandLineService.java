@@ -105,10 +105,10 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 				invoice.setStatus(Status.ACCEPTED);
 			}		}
 		if(clientType == AccountType.USER) {
-			logger.warn("person id "+clientId + " provider id "+company.getId());
 			clientCompany = clientCompanyRRepository.findByPersonIdAndProviderId(clientId, company.getId()).get();
 		}
-		Double defference = minesTwoValue(totTtc, invoice.getPrix_invoice_tot()!= null ? invoice.getPrix_invoice_tot() : 0.0);
+		//Double defference = minesTwoValue(totTtc, invoice.getPrix_invoice_tot()!= null ? invoice.getPrix_invoice_tot() : 0.0);
+		Double defference = totTtc;
 		Double mvt = sumWithTwoValue(clientCompany.getMvt(), defference);
 		invoice.setStatus(Status.INWAITING);	
 		if(commandLinesDto.get(0).getInvoice().getPaid() == PaymentStatus.PAID) {
@@ -116,20 +116,19 @@ public class CommandLineService extends BaseService<CommandLine, Long> {
 			invoice.setStatus(Status.ACCEPTED);
 		}
 		if(commandLinesDto.get(0).getInvoice().getPaid() == PaymentStatus.INCOMPLETE) {
-			defference = minesTwoValue(totTtc, commandLinesDto.get(0).getInvoice().getRest());
+			defference =  commandLinesDto.get(0).getInvoice().getRest();
+//					minesTwoValue(totTtc, commandLinesDto.get(0).getInvoice().getRest());
 		}
 		Double credit = sumWithTwoValue(clientCompany.getCredit(),defference);
 		clientCompany.setCredit(credit);
 		invoice.setPrix_article_tot(totHt);
 		invoice.setTot_tva_invoice(totTva);
 		invoice.setPrix_invoice_tot(totTtc);
+		Double rest = minesTwoValue(totTtc,invoice.getRest());
+		invoice.setRest(rest);
 		invoiceService.insert(invoice);
 		inventoryService.impacteInvoice(company,commandLines);
 		clientCompany.setMvt(mvt);
-//		if (type.equals("pdf-save-clien") ) {	
-//			return invoiceService.export(company,commandLines);
-//		}
-		
 		return mapToListDto(commandLines);
 	}
 	

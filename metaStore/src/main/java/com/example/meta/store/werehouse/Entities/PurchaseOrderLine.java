@@ -47,6 +47,10 @@ public class PurchaseOrderLine extends BaseEntity<Long> implements Serializable 
 
 	private Boolean delivery;
 	
+	private Double totTva;
+	
+	private Double prixArticleTot;
+	
 	@ManyToOne()
 	@JoinColumn(name = "purchaseOrderId")
 	private PurchaseOrder purchaseorder;

@@ -20,7 +20,6 @@ import lombok.Setter;
 public class UserDto extends BaseDto<Long> implements Serializable {
 
     private static final long serialVersionUID = 1234567811L;
-	 
 	private String phone;
 	
 	private String address;
